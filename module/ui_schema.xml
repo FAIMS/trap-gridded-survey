@@ -1,0 +1,192 @@
+<?xml version="1.0"?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/2002/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:jr="http://openrosa.org/javarosa" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <h:head>
+    <h:title>Fill This In</h:title>
+    <model>
+      <instance>
+        <faims id="Fill_This_In">
+          <style>
+            <orientation>
+              <orientation/>
+            </orientation>
+            <even>
+              <layout_weight/>
+            </even>
+            <large>
+              <layout_weight/>
+            </large>
+          </style>
+          <Login>
+            <Login>
+              <User_Name/>
+            </Login>
+          </Login>
+          <Control>
+            <Main>
+              <Add_New_Site/>
+              <Number_of_Rows/>
+              <Number_of_Walkers/>
+            </Main>
+            <Search>
+              <Colgroup_0>
+                <Col_0>
+                  <Search_Term/>
+                </Col_0>
+                <Col_1>
+                  <Search_Button/>
+                </Col_1>
+              </Colgroup_0>
+              <Entity_List/>
+            </Search>
+          </Control>
+          <Site>
+            <Site>
+              <ID/>
+            </Site>
+            <Row_1/>
+            <Row_2/>
+            <Row_3/>
+            <Row_4/>
+            <Row_5/>
+            <Row_6/>
+            <Row_7/>
+            <Row_8/>
+            <Row_9/>
+            <Row_10/>
+            <Vars>
+              <Number_of_Rows/>
+              <Number_of_Walkers/>
+            </Vars>
+          </Site>
+          <logic/>
+        </faims>
+      </instance>
+      <bind type="decimal" nodeset="/faims/Control/Main/Number_of_Rows"/>
+      <bind type="decimal" nodeset="/faims/Control/Main/Number_of_Walkers"/>
+    </model>
+  </h:head>
+  <h:body>
+    <group ref="style">
+      <label/>
+      <group ref="orientation">
+        <label/>
+        <input ref="orientation">
+          <label>horizontal</label>
+        </input>
+      </group>
+      <group ref="even">
+        <label/>
+        <input ref="layout_weight">
+          <label>1</label>
+        </input>
+      </group>
+      <group ref="large">
+        <label/>
+        <input ref="layout_weight">
+          <label>3</label>
+        </input>
+      </group>
+    </group>
+    <group ref="Login">
+      <label>{Login}</label>
+      <group ref="Login" faims_scrollable="false">
+        <label>{Login}</label>
+        <select1 appearance="compact" ref="User_Name">
+          <label>{User_Name}</label>
+          <item>
+            <label>Options not loaded</label>
+            <value>0</value>
+          </item>
+        </select1>
+      </group>
+    </group>
+    <group ref="Control">
+      <label>{Control}</label>
+      <group ref="Main">
+        <label>{Main}</label>
+        <trigger ref="Add_New_Site">
+          <label>{Add_New_Site}</label>
+        </trigger>
+        <input ref="Number_of_Rows">
+          <label>{Number_of_Rows}</label>
+        </input>
+        <input ref="Number_of_Walkers">
+          <label>{Number_of_Walkers}</label>
+        </input>
+      </group>
+      <group ref="Search" faims_scrollable="false">
+        <label>{search}</label>
+        <group faims_style="orientation" ref="Colgroup_0">
+          <label/>
+          <group faims_style="even" ref="Col_0">
+            <label/>
+            <input ref="Search_Term">
+              <label>{Search_Term}</label>
+            </input>
+          </group>
+          <group faims_style="large" ref="Col_1">
+            <label/>
+            <trigger ref="Search_Button">
+              <label>{Search}</label>
+            </trigger>
+          </group>
+        </group>
+        <select1 appearance="compact" ref="Entity_List">
+          <label>{Entity_List}</label>
+          <item>
+            <label>Options not loaded</label>
+            <value>Options not loaded</value>
+          </item>
+        </select1>
+      </group>
+    </group>
+    <group ref="Site" faims_archent_type="Site">
+      <label>{Site}</label>
+      <group ref="Site">
+        <label>{Site}</label>
+        <input faims_attribute_type="measure" ref="ID" faims_attribute_name="ID">
+          <label>{ID}</label>
+        </input>
+      </group>
+      <group ref="Row_1" faims_hidden="true">
+        <label>{Row_1}</label>
+      </group>
+      <group ref="Row_2" faims_hidden="true">
+        <label>{Row_2}</label>
+      </group>
+      <group ref="Row_3" faims_hidden="true">
+        <label>{Row_3}</label>
+      </group>
+      <group ref="Row_4" faims_hidden="true">
+        <label>{Row_4}</label>
+      </group>
+      <group ref="Row_5" faims_hidden="true">
+        <label>{Row_5}</label>
+      </group>
+      <group ref="Row_6" faims_hidden="true">
+        <label>{Row_6}</label>
+      </group>
+      <group ref="Row_7" faims_hidden="true">
+        <label>{Row_7}</label>
+      </group>
+      <group ref="Row_8" faims_hidden="true">
+        <label>{Row_8}</label>
+      </group>
+      <group ref="Row_9" faims_hidden="true">
+        <label>{Row_9}</label>
+      </group>
+      <group ref="Row_10" faims_hidden="true">
+        <label>{Row_10}</label>
+      </group>
+      <group ref="Vars" faims_hidden="true">
+        <label>{Vars}</label>
+        <input faims_attribute_type="measure" ref="Number_of_Rows" faims_attribute_name="Number of Rows">
+          <label>{Number_of_Rows}</label>
+        </input>
+        <input faims_attribute_type="measure" ref="Number_of_Walkers" faims_attribute_name="Number of Walkers">
+          <label>{Number_of_Walkers}</label>
+        </input>
+      </group>
+    </group>
+  </h:body>
+</h:html>
