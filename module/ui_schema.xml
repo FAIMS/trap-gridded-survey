@@ -23,7 +23,7 @@
           </Login>
           <Control>
             <Main>
-              <Add_New_Site/>
+              <Add_New_Walker/>
               <Number_of_Rows/>
               <Number_of_Walkers/>
             </Main>
@@ -39,25 +39,61 @@
               <Entity_List/>
             </Search>
           </Control>
-          <Site>
-            <Site>
-              <ID/>
-            </Site>
-            <Row_1/>
-            <Row_2/>
-            <Row_3/>
-            <Row_4/>
-            <Row_5/>
-            <Row_6/>
-            <Row_7/>
-            <Row_8/>
-            <Row_9/>
-            <Row_10/>
+          <Walker>
+            <Walker>
+              <Grid/>
+              <Colgroup_0>
+                <Col_0>
+                  <group_tl/>
+                </Col_0>
+                <Col_1>
+                  <Up/>
+                </Col_1>
+                <Col_2>
+                  <group_tr/>
+                </Col_2>
+              </Colgroup_0>
+              <Colgroup_1>
+                <Col_0>
+                  <Left/>
+                </Col_0>
+                <Col_1>
+                  <Load/>
+                </Col_1>
+                <Col_2>
+                  <Right/>
+                </Col_2>
+              </Colgroup_1>
+              <Colgroup_2>
+                <Col_0>
+                  <group_bl/>
+                </Col_0>
+                <Col_1>
+                  <Down/>
+                </Col_1>
+                <Col_2>
+                  <group_br/>
+                </Col_2>
+              </Colgroup_2>
+              <Colgroup_3>
+                <Col_0>
+                  <Row_ID/>
+                </Col_0>
+                <Col_1>
+                  <Walker_ID/>
+                </Col_1>
+                <Col_2>
+                  <Property_1/>
+                </Col_2>
+              </Colgroup_3>
+            </Walker>
             <Vars>
               <Number_of_Rows/>
               <Number_of_Walkers/>
+              <Highlighted_Row/>
+              <Highlighted_Walker/>
             </Vars>
-          </Site>
+          </Walker>
           <logic/>
         </faims>
       </instance>
@@ -104,8 +140,8 @@
       <label>{Control}</label>
       <group ref="Main">
         <label>{Main}</label>
-        <trigger ref="Add_New_Site">
-          <label>{Add_New_Site}</label>
+        <trigger ref="Add_New_Walker">
+          <label>{Add_New_Walker}</label>
         </trigger>
         <input ref="Number_of_Rows">
           <label>{Number_of_Rows}</label>
@@ -140,51 +176,111 @@
         </select1>
       </group>
     </group>
-    <group ref="Site" faims_archent_type="Site">
-      <label>{Site}</label>
-      <group ref="Site">
-        <label>{Site}</label>
-        <input faims_attribute_type="measure" ref="ID" faims_attribute_name="ID">
-          <label>{ID}</label>
+    <group ref="Walker" faims_archent_type="Walker">
+      <label>{Walker}</label>
+      <group ref="Walker">
+        <label>{Walker}</label>
+        <input faims_web="true" ref="Grid">
+          <label/>
         </input>
-      </group>
-      <group ref="Row_1" faims_hidden="true">
-        <label>{Row_1}</label>
-      </group>
-      <group ref="Row_2" faims_hidden="true">
-        <label>{Row_2}</label>
-      </group>
-      <group ref="Row_3" faims_hidden="true">
-        <label>{Row_3}</label>
-      </group>
-      <group ref="Row_4" faims_hidden="true">
-        <label>{Row_4}</label>
-      </group>
-      <group ref="Row_5" faims_hidden="true">
-        <label>{Row_5}</label>
-      </group>
-      <group ref="Row_6" faims_hidden="true">
-        <label>{Row_6}</label>
-      </group>
-      <group ref="Row_7" faims_hidden="true">
-        <label>{Row_7}</label>
-      </group>
-      <group ref="Row_8" faims_hidden="true">
-        <label>{Row_8}</label>
-      </group>
-      <group ref="Row_9" faims_hidden="true">
-        <label>{Row_9}</label>
-      </group>
-      <group ref="Row_10" faims_hidden="true">
-        <label>{Row_10}</label>
+        <group ref="Colgroup_0" faims_style="orientation">
+          <label/>
+          <group ref="Col_0" faims_style="even">
+            <label/>
+            <group ref="group_tl">
+              <label>{group_tl}</label>
+            </group>
+          </group>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <trigger ref="Up">
+              <label>{Up}</label>
+            </trigger>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <group ref="group_tr">
+              <label>{group_tr}</label>
+            </group>
+          </group>
+        </group>
+        <group ref="Colgroup_1" faims_style="orientation">
+          <label/>
+          <group ref="Col_0" faims_style="even">
+            <label/>
+            <trigger ref="Left">
+              <label>{Left}</label>
+            </trigger>
+          </group>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <trigger ref="Load">
+              <label>{Load}</label>
+            </trigger>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <trigger ref="Right">
+              <label>{Right}</label>
+            </trigger>
+          </group>
+        </group>
+        <group ref="Colgroup_2" faims_style="orientation">
+          <label/>
+          <group ref="Col_0" faims_style="even">
+            <label/>
+            <group ref="group_bl">
+              <label>{group_bl}</label>
+            </group>
+          </group>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <trigger ref="Down">
+              <label>{Down}</label>
+            </trigger>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <group ref="group_br">
+              <label>{group_br}</label>
+            </group>
+          </group>
+        </group>
+        <group ref="Colgroup_3" faims_style="orientation">
+          <label/>
+          <group ref="Col_0" faims_style="even">
+            <label/>
+            <input faims_attribute_type="measure" ref="Row_ID" faims_attribute_name="Row ID">
+              <label>{Row_ID}</label>
+            </input>
+          </group>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <input faims_attribute_type="measure" ref="Walker_ID" faims_attribute_name="Walker ID">
+              <label>{Walker_ID}</label>
+            </input>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <input faims_attribute_type="measure" ref="Property_1" faims_attribute_name="Property 1">
+              <label>{Property_1}</label>
+            </input>
+          </group>
+        </group>
       </group>
       <group ref="Vars" faims_hidden="true">
         <label>{Vars}</label>
-        <input faims_attribute_type="measure" ref="Number_of_Rows" faims_attribute_name="Number of Rows">
+        <input ref="Number_of_Rows" faims_certainty="false" faims_annotation="false">
           <label>{Number_of_Rows}</label>
         </input>
-        <input faims_attribute_type="measure" ref="Number_of_Walkers" faims_attribute_name="Number of Walkers">
+        <input ref="Number_of_Walkers" faims_certainty="false" faims_annotation="false">
           <label>{Number_of_Walkers}</label>
+        </input>
+        <input ref="Highlighted_Row" faims_certainty="false" faims_annotation="false">
+          <label>{Highlighted_Row}</label>
+        </input>
+        <input ref="Highlighted_Walker" faims_certainty="false" faims_annotation="false">
+          <label>{Highlighted_Walker}</label>
         </input>
       </group>
     </group>

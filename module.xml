@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--@POSTPROC: ./postproc.sh -->
 <module suppressWarnings="true">
 
 <Login f="nodata">
@@ -9,143 +10,225 @@
 
 <Control f="nodata">
   <Main>
-    <Add_New_Site t="button" l="Site"/>
+    <Add_New_Walker t="button" l="Walker"/>
+    <!--TODO: Add a helper to the autogen which allows saving of these in localsettings-->
     <Number_of_Rows    b="decimal"/>
     <Number_of_Walkers b="decimal"/>
   </Main>
   <search/>
 </Control>
 
-<!--Bingo bango, it's a mango-->
-<Site>
-  <Site>
-    <ID f="id"/>
-  </Site>
-
-  <Row_1  f="hidden"/>
-  <Row_2  f="hidden"/>
-  <Row_3  f="hidden"/>
-  <Row_4  f="hidden"/>
-  <Row_5  f="hidden"/>
-  <Row_6  f="hidden"/>
-  <Row_7  f="hidden"/>
-  <Row_8  f="hidden"/>
-  <Row_9  f="hidden"/>
-  <Row_10 f="hidden"/>
+<!--Walker: Texas Ranger-->
+<Walker>
+  <Walker>
+    <Grid t="webview" f="nolabel"/>
+    <cols>
+      <group_tl t="group"/>
+      <Up       t="button"/>
+      <group_tr t="group"/>
+    </cols>
+    <cols>
+      <Left     t="button"/>
+      <Load     t="button"/>
+      <Right    t="button"/>
+    </cols>
+    <cols>
+      <group_bl t="group"/>
+      <Down     t="button"/>
+      <group_br t="group"/>
+    </cols>
+    <cols>
+      <Row_ID    f="id"/>
+      <Walker_ID f="id"/>
+      <Property_1/>
+    </cols>
+  </Walker>
 
   <Vars f="hidden">
-    <Number_of_Rows/>
-    <Number_of_Walkers/>
+    <Number_of_Rows     f="nodata"/>
+    <Number_of_Walkers  f="nodata"/>
+    <Highlighted_Row    f="nodata"/>
+    <Highlighted_Walker f="nodata"/>
   </Vars>
-</Site>
+</Walker>
 
 <logic><![CDATA[
-  getRowTabRefs() {
-    String  refNumberOfRows   = "Site/Vars/Number_of_Rows";
-    String  numberOfRows      = getFieldValue(refNumberOfRows);
-    Integer numberOfRowsAsInt = 0;
+  getGridHtml(
+      Integer numberOfRows,   Integer numberOfWalkers,
+      Integer highlightedRow, Integer highlightedWalker,
+      Integer selectedRow,    Integer selectedWalker
+  ) {
+    // In a probably vain attempt to improve performance, this code is valid
+    // HTML5.
+    String html = "";
+
+    html += "<!DOCTYPE html>";
+    html += "<html>";
+    html += "  <head>";
+    html += "    <title>Grid</title>";
+    html += "    <style>";
+    html += "      table {";
+    html += "        width: 100%;";
+    html += "        border-collapse: collapse;";
+    html += "      }";
+    html += "      td {";
+    html += "        background-color: #FFFFFF;";
+    html += "        border: 1px solid #000000;";
+    html += "      }";
+    html += "      td.highlighted {";
+    html += "        background-color: #DDDDDD !important;";
+    html += "        color:            #000000 !important;";
+    html += "      }";
+    html += "      td.selected {";
+    html += "        background-color: #000000;";
+    html += "        color:            #FFFFFF;";
+    html += "      }";
+    html += "    </style>";
+    html += "  </head>";
+    html += "  <table>";
+
+    for (i = 1; i <= numberOfRows; i++) {
+      html += "<tr>";
+      for (j = 1; j <= numberOfWalkers; j++) {
+        Boolean isHighlighted = (i == highlightedRow && j == highlightedWalker);
+        Boolean isSelected    = (i == selectedRow    && j == selectedWalker);
+
+        String  cssClass = "";
+        if (isHighlighted) cssClass += " highlighted";
+        if (isSelected)    cssClass += " selected";
+
+        String htmlRow = "";
+        htmlRow += "<td class=\"{cssClass}\">";
+        htmlRow += "Row {row}, Walker {walker}";
+        htmlRow += "</td>";
+        htmlRow  = replaceFirst(htmlRow, "{cssClass}", cssClass);
+        htmlRow  = replaceFirst(htmlRow, "{row}",      i);
+        htmlRow  = replaceFirst(htmlRow, "{walker}",   j);
+
+        html += htmlRow;
+      }
+      html += "</tr>";
+    }
+    html += "  </table>";
+    html += "</html>";
+
+    return html;
+  }
+
+  getFieldValueAsInteger(String ref) {
+    String  val          = getFieldValue(ref);
+    Integer valAsInteger = 0;
+
     try {
-      numberOfRowsAsInt = Integer.valueOf(numberOfRows);
+      valAsInteger = Integer.valueOf(val);
     } catch (Exception e) { ; }
 
-    return getRowTabRefs(numberOfRowsAsInt);
-  }
-  getRowTabRefs(Integer numberOfRows) {
-    List refs = new ArrayList();
-    for (Integer i = 1; i <= numberOfRows; i++) {
-      String ref = getRowTabRef(i);
-      refs.add(ref);
-    }
-    return refs;
-  }
-  getRowTabRef(Integer rowNumber) {
-    String fmtRefRow = "Site/Row_%s";
-    String refRow    = replaceFirst(fmtRefRow, "%s", rowNumber.toString());
-    return refRow;
+    return valAsInteger;
   }
 
-  showRowTabs() {
-    for (ref : getRowTabRefs()) {
-      showTab(ref);
-    }
+  clip(Integer x, Integer min, Integer max) {
+    if (x > max) return max;
+    if (x < min) return min;
+    return x;
   }
 
-  hideRowTabs() {
-    for (ref : getRowTabRefs(10)) cancelTab(ref, false);
+  numberOfRows() {
+    String ref = "Walker/Vars/Number_of_Rows";
+    return getFieldValueAsInteger(ref);
   }
 
-  getWalkerRefs() {
-    List allRefs = new ArrayList();
-    for (refRowTab: getRowTabRefs()) {
-      List someRefs = getWalkerRefs(refRowTab);
-      allRefs.addAll(someRefs);
-    }
-    return allRefs;
-  }
-  getWalkerRefs(String refRowTab) {
-    String  refNumberOfWalkers   = "Site/Vars/Number_of_Walkers";
-    String  numberOfWalkers      = getFieldValue(refNumberOfWalkers);
-    Integer numberOfWalkersAsInt = 0;
-    try {
-      numberOfWalkersAsInt = Integer.valueOf(numberOfWalkers);
-    } catch (Exception e) { ; }
+  highlightedRow() {
+    String  ref = "Walker/Vars/Highlighted_Row";
+    Integer val = getFieldValueAsInteger(ref);
 
-    return getWalkerRefs(refRowTab, numberOfWalkersAsInt);
-  }
-  getWalkerRefs(String refRowTab, Integer numberOfWalkers) {
-    List refs = new ArrayList();
-    for (Integer i = 1; i <= numberOfWalkers; i++) {
-      String ref = getWalkerRef(refRowTab, i);
-      refs.add(ref);
-    }
-    return refs;
-  }
-  getWalkerRef(String refRowTab, Integer walkerNumber) {
-    String walkerNumberAsString = walkerNumber.toString();
-    return getWalkerRef(refRowTab, walkerNumberAsString);
-  }
-  getWalkerRef(String refRowTab, String walkerNumber) {
-    String fmtRefWalker = refRowTab + "/Walker_%s";
-    String refWalker    = replaceFirst(fmtRefWalker, "%s", walkerNumber);
-    return refWalker;
+    return clip(val, 1, numberOfRows());
   }
 
-  showWalkerFields() {
-    for (ref : getWalkerRefs()) {
-     showWalkerField(ref);
-    }
-  }
-  showWalkerField(String refWalker) {
-    String o = "orientation";
-    String e = "even";
+  highlightedRow(Integer val) {
+    val = clip(val, 1, numberOfRows());
 
-    createContainer(refWalker       , o);
-    createContainer(refWalker + "_l", e, refWalker);
-    createContainer(refWalker + "_r", e, refWalker);
-
-    // TODO: Number the refs properly
-    createView(getTab(refWalker) + "_lt", createViewDef().createTextField(), refWalker + "_l");
-    createView(getTab(refWalker) + "_lt", createViewDef().createTextField(), refWalker + "_r");
+    String ref = "Walker/Vars/Highlighted_Row";
+    setFieldValue(ref, val.toString());
   }
 
+  selectedRow() {
+    String ref = "Walker/Walker/Row_ID";
+    return getFieldValueAsInteger(ref);
+  }
 
-  onCreateSite() {
+  numberOfWalkers() {
+    String ref = "Walker/Vars/Number_of_Walkers";
+    return getFieldValueAsInteger(ref);
+  }
+
+  highlightedWalker() {
+    String  ref = "Walker/Vars/Highlighted_Walker";
+    Integer val = getFieldValueAsInteger(ref);
+
+    return clip(val, 1, numberOfWalkers());
+  }
+
+  highlightedWalker(Integer val) {
+    val = clip(val, 1, numberOfWalkers());
+
+    String ref = "Walker/Vars/Highlighted_Walker";
+    setFieldValue(ref, val.toString());
+  }
+
+  selectedWalker() {
+    String ref = "Walker/Walker/Walker_ID";
+    return getFieldValueAsInteger(ref);
+  }
+
+  moveWalker(Integer delta) {
+    highlightedWalker(highlightedWalker() + delta);
+  }
+
+  moveRow(Integer delta) {
+    highlightedRow(highlightedRow() + delta);
+  }
+
+  redrawGrid() {
+    String ref  = "Walker/Walker/Grid";
+    String html = getGridHtml(
+        numberOfRows(),   numberOfWalkers(),
+        highlightedRow(), highlightedWalker(),
+        selectedRow(),    selectedWalker()
+    );
+    populateWebViewHtml(ref, html);
+  }
+
+  gridUp()    { moveRow   (-1); redrawGrid(); }
+  gridDown()  { moveRow   (+1); redrawGrid(); }
+  gridLeft()  { moveWalker(-1); redrawGrid(); }
+  gridRight() { moveWalker(+1); redrawGrid(); }
+
+  onCreateWalker() {
     copyFieldValue(
       "Control/Main/Number_of_Rows",
-      "Site/Vars/Number_of_Rows"
+      "Walker/Vars/Number_of_Rows",
+      false
     );
     copyFieldValue(
       "Control/Main/Number_of_Walkers",
-      "Site/Vars/Number_of_Walkers"
+      "Walker/Vars/Number_of_Walkers",
+      false
     );
   }
 
-  addOnEvent("Site", "show", "onShowSite()");
-  onShowSite() {
-    hideRowTabs();
-    showRowTabs();
-    showWalkerFields();
+  // TODO: Make loading/creating work properly. We have to handle two cases:
+  //   1) A Walker entity has not been created yet.
+  //   2) A Walker entity has already been created.
+  showStuff() {
+    showTabGroup("Walker");
   }
+
+  addOnEvent("Walker/Walker",       "show",  "redrawGrid()");
+  addOnEvent("Walker/Walker/Up",    "click", "gridUp    ()");
+  addOnEvent("Walker/Walker/Down",  "click", "gridDown  ()");
+  addOnEvent("Walker/Walker/Left",  "click", "gridLeft  ()");
+  addOnEvent("Walker/Walker/Right", "click", "gridRight ()");
+  addOnEvent("Walker/Walker/Load",  "click", "showStuff ()");
 ]]></logic>
 
 </module>
