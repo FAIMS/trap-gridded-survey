@@ -10,17 +10,32 @@
 
 <Control f="nodata">
   <Main>
-    <Add_New_Walker t="button" l="Walker"/>
+    <Add_New_Survey_Unit t="button" l="Survey_Unit"/>
     <!--TODO: Add a helper to the autogen which allows saving of these in localsettings-->
     <Number_of_Rows    b="decimal"/>
     <Number_of_Walkers b="decimal"/>
   </Main>
   <search/>
+  <Vars>
+    <Highlighted_Row/>
+    <Highlighted_Walker/>
+  </Vars>
 </Control>
 
-<!--Walker: Texas Ranger-->
-<Walker>
-  <Walker>
+<Survey_Unit>
+  <Survey_Unit f="noscroll">
+    <Survey_Unit_ID f="id"/>
+    <Add_New_Walker_Unit lc="Walker_Unit" t="button"/>
+    <Walker_Units        ec="Walker_Unit"/>
+  </Survey_Unit>
+  <Vars>
+    <Number_of_Rows/>
+    <Number_of_Walkers/>
+  </Vars>
+</Survey_Unit>
+
+<Walker_Unit>
+  <Walker_Unit>
     <Grid t="webview" f="nolabel"/>
     <cols>
       <group_tl t="group"/>
@@ -38,19 +53,12 @@
       <group_br t="group"/>
     </cols>
     <cols>
-      <Row_ID    f="id"/>
-      <Walker_ID f="id"/>
+      <Row_ID    f="id" b="decimal"/>
+      <Walker_ID f="id" b="decimal"/>
       <Property_1/>
     </cols>
-  </Walker>
-
-  <Vars f="hidden">
-    <Number_of_Rows     f="nodata"/>
-    <Number_of_Walkers  f="nodata"/>
-    <Highlighted_Row    f="nodata"/>
-    <Highlighted_Walker f="nodata"/>
-  </Vars>
-</Walker>
+  </Walker_Unit>
+</Walker_Unit>
 
 <logic><![CDATA[
   getGridHtml(
@@ -133,12 +141,12 @@
   }
 
   numberOfRows() {
-    String ref = "Walker/Vars/Number_of_Rows";
+  String ref = "Control/Main/Number_of_Rows";
     return getFieldValueAsInteger(ref);
   }
 
   highlightedRow() {
-    String  ref = "Walker/Vars/Highlighted_Row";
+    String  ref = "Control/Vars/Highlighted_Row";
     Integer val = getFieldValueAsInteger(ref);
 
     return clip(val, 1, numberOfRows());
@@ -147,22 +155,22 @@
   highlightedRow(Integer val) {
     val = clip(val, 1, numberOfRows());
 
-    String ref = "Walker/Vars/Highlighted_Row";
+    String ref = "Control/Vars/Highlighted_Row";
     setFieldValue(ref, val.toString());
   }
 
   selectedRow() {
-    String ref = "Walker/Walker/Row_ID";
+    String ref = "Walker_Unit/Walker_Unit/Row_ID";
     return getFieldValueAsInteger(ref);
   }
 
   numberOfWalkers() {
-    String ref = "Walker/Vars/Number_of_Walkers";
+    String ref = "Control/Main/Number_of_Walkers";
     return getFieldValueAsInteger(ref);
   }
 
   highlightedWalker() {
-    String  ref = "Walker/Vars/Highlighted_Walker";
+    String  ref = "Control/Vars/Highlighted_Walker";
     Integer val = getFieldValueAsInteger(ref);
 
     return clip(val, 1, numberOfWalkers());
@@ -171,12 +179,12 @@
   highlightedWalker(Integer val) {
     val = clip(val, 1, numberOfWalkers());
 
-    String ref = "Walker/Vars/Highlighted_Walker";
+    String ref = "Control/Vars/Highlighted_Walker";
     setFieldValue(ref, val.toString());
   }
 
   selectedWalker() {
-    String ref = "Walker/Walker/Walker_ID";
+    String ref = "Walker_Unit/Walker_Unit/Walker_ID";
     return getFieldValueAsInteger(ref);
   }
 
@@ -189,7 +197,7 @@
   }
 
   redrawGrid() {
-    String ref  = "Walker/Walker/Grid";
+    String ref  = "Walker_Unit/Walker_Unit/Grid";
     String html = getGridHtml(
         numberOfRows(),   numberOfWalkers(),
         highlightedRow(), highlightedWalker(),
@@ -203,32 +211,120 @@
   gridLeft()  { moveWalker(-1); redrawGrid(); }
   gridRight() { moveWalker(+1); redrawGrid(); }
 
-  onCreateWalker() {
+  onCreateSurveyUnit() {
     copyFieldValue(
       "Control/Main/Number_of_Rows",
-      "Walker/Vars/Number_of_Rows",
+      "Survey_Unit/Vars/Number_of_Rows",
       false
     );
     copyFieldValue(
       "Control/Main/Number_of_Walkers",
-      "Walker/Vars/Number_of_Walkers",
+      "Survey_Unit/Vars/Number_of_Walkers",
       false
     );
   }
 
-  // TODO: Make loading/creating work properly. We have to handle two cases:
-  //   1) A Walker entity has not been created yet.
-  //   2) A Walker entity has already been created.
-  showStuff() {
-    showTabGroup("Walker");
+  onCreateWalkerUnit() {
+    setFieldValue(
+      "Walker_Unit/Walker_Unit/Row_ID",
+      highlightedRow().toString()
+    );
+    setFieldValue(
+      "Walker_Unit/Walker_Unit/Walker_ID",
+      highlightedWalker().toString()
+    );
   }
 
-  addOnEvent("Walker/Walker",       "show",  "redrawGrid()");
-  addOnEvent("Walker/Walker/Up",    "click", "gridUp    ()");
-  addOnEvent("Walker/Walker/Down",  "click", "gridDown  ()");
-  addOnEvent("Walker/Walker/Left",  "click", "gridLeft  ()");
-  addOnEvent("Walker/Walker/Right", "click", "gridRight ()");
-  addOnEvent("Walker/Walker/Load",  "click", "showStuff ()");
+  onLoadWalkerUnit() {
+    String childUuid = getUuid(parentTabgroup__);
+
+    String q = "";
+    q += " SELECT attributename, measure";
+    q += "   FROM latestnondeletedaentvalue";
+    q += "   JOIN attributekey USING (attributeid)";
+    q += "   JOIN parentchild ON (uuid = childuuid)";
+    q += "  WHERE attributename IN ('Number of Rows', 'Number of Walkers')";
+    q += "    AND childuuid = '{childUuid}'";
+    q  = replaceFirst(q, "{childUuid}", childUuid);
+
+    FetchCallback updateGridDimsVars = new FetchCallback() {
+      onFetch(result) {
+        updateGridDimsVars(result);
+      }
+    };
+
+    fetchAll(q, updateGridDimsVars);
+  }
+
+  updateGridDimsVars(result) {
+    String refRows    = "Control/Main/Number_of_Rows";
+    String refWalkers = "Control/Main/Number_of_Walkers";
+
+    String attrNameRows    = getAttributeName(refRows);
+    String attrNameWalkers = getAttributeName(refWalkers);
+
+    if (result == null) return;
+    for (row : result) {
+      String attrName = row.get(0);
+      String attrVal  = row.get(1);
+
+      if (attrName.equals(attrNameRows   )) setFieldValue(refRows,    attrVal);
+      if (attrName.equals(attrNameWalkers)) setFieldValue(refWalkers, attrVal);
+    }
+  }
+
+  loadWalkerUnit() {
+    String tabgroup   = "Walker_Unit";
+    String parentUuid = getUuid(parentTabgroup__);
+    String rowId      = highlightedRow()   .toString();
+    String walkerId   = highlightedWalker().toString();
+
+    // TODO: I think something's wrong with this query.
+    // Finds the Walker Unit with a given Row ID and Walker ID which is the
+    // child of a Survey Unit with a given UUID.
+    String q = "";
+    q += " SELECT uuid";
+    q += "   FROM latestnondeletedaentvalue";
+    q += "   JOIN attributekey using (attributeid)";
+    q += "  WHERE measure = '{walkerId}'";
+    q += "    AND attributename = 'Walker ID'";
+    q += "    AND uuid IN (";
+    q += "                 SELECT uuid";
+    q += "                   FROM latestnondeletedaentvalue";
+    q += "                   JOIN attributekey USING (attributeid)";
+    q += "                   JOIN parentchild ON (uuid = childuuid)";
+    q += "                  WHERE measure = '{rowId}'";
+    q += "                    AND attributename = 'Row ID'";
+    q += "                    AND parentuuid = '{parentUuid}'";
+    q += "        );";
+    q  = replaceFirst(q, "{rowId}",      rowId);
+    q  = replaceFirst(q, "{walkerId}",   walkerId);
+    q  = replaceFirst(q, "{parentUuid}", parentUuid);
+
+    FetchCallback loadWalkerUnit = new FetchCallback() {
+      onFetch(result) {
+        cancelTabGroup(tabgroup, false);
+
+        if (result == null || result.size() == 0) {
+          showWarning("no " + parentTabgroup__, q);
+          newWalkerUnit();
+        } else {
+          showWarning("yes " + parentTabgroup__, q);
+          String uuid = result.get(0).get(0);
+          loadWalkerUnitFrom(uuid);
+        }
+      }
+    };
+
+    fetchAll(q, loadWalkerUnit);
+  }
+
+  addOnEvent("Walker_Unit/Walker_Unit",       "show",  "redrawGrid    ()");
+  addOnEvent("Walker_Unit/Walker_Unit/Up",    "click", "gridUp        ()");
+  addOnEvent("Walker_Unit/Walker_Unit/Down",  "click", "gridDown      ()");
+  addOnEvent("Walker_Unit/Walker_Unit/Left",  "click", "gridLeft      ()");
+  addOnEvent("Walker_Unit/Walker_Unit/Right", "click", "gridRight     ()");
+  addOnEvent("Walker_Unit/Walker_Unit/Load",  "click", "loadWalkerUnit()");
 ]]></logic>
 
 </module>
