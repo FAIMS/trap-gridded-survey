@@ -11,12 +11,11 @@
 <Control f="nodata">
   <Main>
     <Add_New_Survey_Unit t="button" l="Survey_Unit"/>
-    <!--TODO: Add a helper to the autogen which allows saving of these in localsettings-->
     <Number_of_Rows    b="decimal"/>
     <Number_of_Walkers b="decimal"/>
   </Main>
   <search/>
-  <Vars>
+  <Vars f="hidden">
     <Highlighted_Row/>
     <Highlighted_Walker/>
   </Vars>
@@ -28,12 +27,13 @@
     <Add_New_Walker_Unit lc="Walker_Unit" t="button"/>
     <Walker_Units        ec="Walker_Unit"/>
   </Survey_Unit>
-  <Vars>
+  <Vars f="hidden">
     <Number_of_Rows/>
     <Number_of_Walkers/>
   </Vars>
 </Survey_Unit>
 
+<!--TODO: Disable searching for these-->
 <Walker_Unit>
   <Walker_Unit>
     <Grid t="webview" f="nolabel"/>
@@ -53,9 +53,22 @@
       <group_br t="group"/>
     </cols>
     <cols>
-      <Row_ID    f="id" b="decimal"/>
-      <Walker_ID f="id" b="decimal"/>
-      <Property_1/>
+      <Row_ID    b="decimal" f="id readonly"/>
+      <Walker_ID b="decimal" f="id readonly"/>
+    </cols>
+    <cols>
+      <Ancient_Count b="decimal"/>
+      <Modern_Count  b="decimal"/>
+    </cols>
+    <cols>
+      <A_C_Count     b="decimal">
+        A/C Count
+      </A_C_Count>
+      <HM_Count   b="decimal"/>
+    </cols>
+    <cols>
+      <Daub_Count b="decimal"/>
+      <Other      b="decimal"/>
     </cols>
   </Walker_Unit>
 </Walker_Unit>
@@ -96,7 +109,7 @@
     html += "  <table>";
 
     for (i = 1; i <= numberOfRows; i++) {
-      html += "<tr>";
+      html += "    <tr>";
       for (j = 1; j <= numberOfWalkers; j++) {
         Boolean isHighlighted = (i == highlightedRow && j == highlightedWalker);
         Boolean isSelected    = (i == selectedRow    && j == selectedWalker);
@@ -106,16 +119,16 @@
         if (isSelected)    cssClass += " selected";
 
         String htmlRow = "";
-        htmlRow += "<td class=\"{cssClass}\">";
-        htmlRow += "Row {row}, Walker {walker}";
-        htmlRow += "</td>";
+        htmlRow += "      <td class=\"{cssClass}\">";
+        htmlRow += "        Row {row}, Walker {walker}";
+        htmlRow += "      </td>";
         htmlRow  = replaceFirst(htmlRow, "{cssClass}", cssClass);
         htmlRow  = replaceFirst(htmlRow, "{row}",      i);
         htmlRow  = replaceFirst(htmlRow, "{walker}",   j);
 
         html += htmlRow;
       }
-      html += "</tr>";
+      html += "    </tr>";
     }
     html += "  </table>";
     html += "</html>";
@@ -233,6 +246,7 @@
       "Walker_Unit/Walker_Unit/Walker_ID",
       highlightedWalker().toString()
     );
+    redrawGrid();
   }
 
   onLoadWalkerUnit() {
@@ -250,6 +264,7 @@
     FetchCallback updateGridDimsVars = new FetchCallback() {
       onFetch(result) {
         updateGridDimsVars(result);
+        redrawGrid();
       }
     };
 
@@ -273,15 +288,22 @@
     }
   }
 
+  // TODO: Loading is broken; The list of child entities in the parent doesn't
+  // get refreshed after making a new Walker Unit via a loaded one.
+  // A mutex is required to avoid users double-clicking the load button.
+  import java.util.concurrent.Semaphore;
+  MUTEX_LOAD_WALKER_UNIT = new Semaphore(1);
+
   loadWalkerUnit() {
+    if (!MUTEX_LOAD_WALKER_UNIT.tryAcquire()) {
+      return;
+    }
+
     String tabgroup   = "Walker_Unit";
     String parentUuid = getUuid(parentTabgroup__);
     String rowId      = highlightedRow()   .toString();
     String walkerId   = highlightedWalker().toString();
 
-    // TODO: I think something's wrong with this query.
-    // Finds the Walker Unit with a given Row ID and Walker ID which is the
-    // child of a Survey Unit with a given UUID.
     String q = "";
     q += " SELECT uuid";
     q += "   FROM latestnondeletedaentvalue";
@@ -304,13 +326,14 @@
     FetchCallback loadWalkerUnit = new FetchCallback() {
       onFetch(result) {
         cancelTabGroup(tabgroup, false);
+        MUTEX_LOAD_WALKER_UNIT.release();
 
         if (result == null || result.size() == 0) {
-          showWarning("no " + parentTabgroup__, q);
+          parentTabgroup = "Survey_Unit";
           newWalkerUnit();
         } else {
-          showWarning("yes " + parentTabgroup__, q);
           String uuid = result.get(0).get(0);
+          parentTabgroup = "Survey_Unit";
           loadWalkerUnitFrom(uuid);
         }
       }
@@ -325,6 +348,9 @@
   addOnEvent("Walker_Unit/Walker_Unit/Left",  "click", "gridLeft      ()");
   addOnEvent("Walker_Unit/Walker_Unit/Right", "click", "gridRight     ()");
   addOnEvent("Walker_Unit/Walker_Unit/Load",  "click", "loadWalkerUnit()");
+
+  persistOverSessions("Control/Main/Number_of_Rows");
+  persistOverSessions("Control/Main/Number_of_Walkers");
 ]]></logic>
 
 </module>

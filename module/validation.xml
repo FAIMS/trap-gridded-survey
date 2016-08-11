@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
 <ValidationSchema>
-  <ArchaeologicalElement name="Walker"/>
+  <ArchaeologicalElement name="Survey_Unit"/>
+  <ArchaeologicalElement name="Walker_Unit"/>
 </ValidationSchema>
