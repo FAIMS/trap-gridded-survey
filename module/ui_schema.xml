@@ -57,6 +57,7 @@
           </Survey_Unit>
           <Walker_Unit>
             <Walker_Unit>
+              <Survey_Unit_ID/>
               <Grid/>
               <Colgroup_0>
                 <Col_0>
@@ -221,7 +222,7 @@
           </item>
         </select1>
       </group>
-      <group ref="Vars" faims_hidden="true">
+      <group ref="Vars">
         <label>{Vars}</label>
         <input ref="Highlighted_Row">
           <label>{Highlighted_Row}</label>
@@ -249,7 +250,7 @@
           </item>
         </select1>
       </group>
-      <group ref="Vars" faims_hidden="true">
+      <group ref="Vars">
         <label>{Vars}</label>
         <input faims_attribute_type="measure" ref="Number_of_Rows" faims_attribute_name="Number of Rows">
           <label>{Number_of_Rows}</label>
@@ -263,6 +264,9 @@
       <label>{Walker_Unit}</label>
       <group ref="Walker_Unit">
         <label>{Walker_Unit}</label>
+        <input faims_web="true" ref="Survey_Unit_ID">
+          <label>{Survey_Unit_ID}</label>
+        </input>
         <input faims_web="true" ref="Grid">
           <label/>
         </input>

@@ -1540,9 +1540,9 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
 /******************************************************************************/
 
   getGridHtml(
-      Integer numberOfRows,   Integer numberOfWalkers,
-      Integer highlightedRow, Integer highlightedWalker,
-      Integer selectedRow,    Integer selectedWalker
+      int numberOfRows,   int numberOfWalkers,
+      int highlightedRow, int highlightedWalker,
+      int selectedRow,    int selectedWalker
   ) {
     // In a probably vain attempt to improve performance, this code is valid
     // HTML5.
@@ -1555,27 +1555,29 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
     html += "    <style>";
     html += "      table {";
     html += "        width: 100%;";
-    html += "        border-collapse: collapse;";
+    html += "        border-collapse: separate;";
+    html += "        border-spacing:  0px;";
     html += "      }";
     html += "      td {";
-    html += "        background-color: #FFFFFF;";
+    html += "        padding: 3px;";
     html += "        border: 1px solid #000000;";
     html += "      }";
     html += "      td.highlighted {";
-    html += "        background-color: #DDDDDD !important;";
-    html += "        color:            #000000 !important;";
+    html += "        padding: 0px;";
+    html += "        border:  3px double #000000;";
+    html += "        background-color: #CCCCCC;";
     html += "      }";
     html += "      td.selected {";
-    html += "        background-color: #000000;";
+    html += "        background-color: #00AA00;";
     html += "        color:            #FFFFFF;";
     html += "      }";
     html += "    </style>";
     html += "  </head>";
     html += "  <table>";
 
-    for (i = 1; i <= numberOfRows; i++) {
+    for (int i = numberOfRows; i >= 1; i--) {
       html += "    <tr>";
-      for (j = 1; j <= numberOfWalkers; j++) {
+      for (int j = 1; j <= numberOfWalkers; j++) {
         Boolean isHighlighted = (i == highlightedRow && j == highlightedWalker);
         Boolean isSelected    = (i == selectedRow    && j == selectedWalker);
 
@@ -1601,18 +1603,18 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
     return html;
   }
 
-  getFieldValueAsInteger(String ref) {
+  getFieldValueAsInt(String ref) {
     String  val          = getFieldValue(ref);
-    Integer valAsInteger = 0;
+    int valAsInteger = 0;
 
     try {
       valAsInteger = Integer.valueOf(val);
     } catch (Exception e) { ; }
 
-    return valAsInteger;
+    return valAsInteger.intValue();
   }
 
-  clip(Integer x, Integer min, Integer max) {
+  clip(int x, int min, int max) {
     if (x > max) return max;
     if (x < min) return min;
     return x;
@@ -1620,57 +1622,57 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
 
   numberOfRows() {
   String ref = "Control/Main/Number_of_Rows";
-    return getFieldValueAsInteger(ref);
+    return getFieldValueAsInt(ref);
   }
 
   highlightedRow() {
-    String  ref = "Control/Vars/Highlighted_Row";
-    Integer val = getFieldValueAsInteger(ref);
+    String ref = "Control/Vars/Highlighted_Row";
+    int    val = getFieldValueAsInt(ref);
 
     return clip(val, 1, numberOfRows());
   }
 
-  highlightedRow(Integer val) {
+  highlightedRow(int val) {
     val = clip(val, 1, numberOfRows());
 
     String ref = "Control/Vars/Highlighted_Row";
-    setFieldValue(ref, val.toString());
+    setFieldValue(ref, String.valueOf(val));
   }
 
   selectedRow() {
     String ref = "Walker_Unit/Walker_Unit/Row_ID";
-    return getFieldValueAsInteger(ref);
+    return getFieldValueAsInt(ref);
   }
 
   numberOfWalkers() {
     String ref = "Control/Main/Number_of_Walkers";
-    return getFieldValueAsInteger(ref);
+    return getFieldValueAsInt(ref);
   }
 
   highlightedWalker() {
-    String  ref = "Control/Vars/Highlighted_Walker";
-    Integer val = getFieldValueAsInteger(ref);
+    String ref = "Control/Vars/Highlighted_Walker";
+    int    val = getFieldValueAsInt(ref);
 
     return clip(val, 1, numberOfWalkers());
   }
 
-  highlightedWalker(Integer val) {
+  highlightedWalker(int val) {
     val = clip(val, 1, numberOfWalkers());
 
     String ref = "Control/Vars/Highlighted_Walker";
-    setFieldValue(ref, val.toString());
+    setFieldValue(ref, String.valueOf(val));
   }
 
   selectedWalker() {
     String ref = "Walker_Unit/Walker_Unit/Walker_ID";
-    return getFieldValueAsInteger(ref);
+    return getFieldValueAsInt(ref);
   }
 
-  moveWalker(Integer delta) {
+  moveWalker(int delta) {
     highlightedWalker(highlightedWalker() + delta);
   }
 
-  moveRow(Integer delta) {
+  moveRow(int delta) {
     highlightedRow(highlightedRow() + delta);
   }
 
@@ -1705,23 +1707,25 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
   onCreateWalkerUnit() {
     setFieldValue(
       "Walker_Unit/Walker_Unit/Row_ID",
-      highlightedRow().toString()
+      String.valueOf(highlightedRow())
     );
     setFieldValue(
       "Walker_Unit/Walker_Unit/Walker_ID",
-      highlightedWalker().toString()
+      String.valueOf(highlightedWalker())
     );
     redrawGrid();
   }
 
   onLoadWalkerUnit() {
-    String childUuid = getUuid(parentTabgroup__);
+    String tabgroup   = "Walker_Unit";
+    String childUuid  = getUuid(tabgroup        );
+    // String parentUuid = getUuid(parentTabgroup__);
 
     String q = "";
     q += " SELECT attributename, measure";
     q += "   FROM latestnondeletedaentvalue";
     q += "   JOIN attributekey USING (attributeid)";
-    q += "   JOIN parentchild ON (uuid = childuuid)";
+    q += "   JOIN parentchild ON (uuid = parentuuid)";
     q += "  WHERE attributename IN ('Number of Rows', 'Number of Walkers')";
     q += "    AND childuuid = '{childUuid}'";
     q  = replaceFirst(q, "{childUuid}", childUuid);
@@ -1734,6 +1738,7 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
     };
 
     fetchAll(q, updateGridDimsVars);
+    updateWalkerUnitParentVars(childUuid);
   }
 
   updateGridDimsVars(result) {
@@ -1753,8 +1758,41 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
     }
   }
 
-  // TODO: Loading is broken; The list of child entities in the parent doesn't
-  // get refreshed after making a new Walker Unit via a loaded one.
+  updateWalkerUnitParentVars(String childUuid) {
+    updateWalkerUnitParentVars(childUuid, "");
+  }
+
+  updateWalkerUnitParentVars(String childUuid, String callback) {
+    String q = "";
+    q += " SELECT parentuuid";
+    q += "   FROM parentchild";
+    q += "  WHERE childuuid='{childUuid}'";
+    q += "    AND parentparticipatesverb='Parent Of'";
+    q  = replaceFirst(q, "{childUuid}", childUuid);
+
+    FetchCallback updateWalkerUnitParentVars = new FetchCallback() {
+      onFetch(result) {
+        parentTabgroup   = "Survey_Unit";
+        parentTabgroup__ = "Survey_Unit";
+
+        if (result        == null) { execute(callback); return; }
+        if (result.size() == 0   ) { execute(callback); return; }
+
+        String parentUuid = result.get(0).get(0);
+        setUuid(parentTabgroup, parentUuid);
+
+        execute(callback);
+      }
+    };
+
+    fetchAll(q, updateWalkerUnitParentVars);
+  }
+
+  // TODO: Loading *might* be broken; The list of child entities in the parent
+  // doesn't get refreshed after making a new Walker Unit via a loaded one.
+  // TODO: Loading might cause other child entities to be saved with incorrect
+  // relationships
+
   // A mutex is required to avoid users double-clicking the load button.
   import java.util.concurrent.Semaphore;
   MUTEX_LOAD_WALKER_UNIT = new Semaphore(1);
@@ -1765,9 +1803,10 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
     }
 
     String tabgroup   = "Walker_Unit";
+    String childUuid  = getUuid(tabgroup);
     String parentUuid = getUuid(parentTabgroup__);
-    String rowId      = highlightedRow()   .toString();
-    String walkerId   = highlightedWalker().toString();
+    String rowId      = String.valueOf(highlightedRow()   );
+    String walkerId   = String.valueOf(highlightedWalker());
 
     String q = "";
     q += " SELECT uuid";
@@ -1790,24 +1829,21 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
 
     FetchCallback loadWalkerUnit = new FetchCallback() {
       onFetch(result) {
-        cancelTabGroup(tabgroup, false);
-        MUTEX_LOAD_WALKER_UNIT.release();
-
         if (result == null || result.size() == 0) {
-          parentTabgroup = "Survey_Unit";
           newWalkerUnit();
         } else {
           String uuid = result.get(0).get(0);
-          parentTabgroup = "Survey_Unit";
           loadWalkerUnitFrom(uuid);
         }
+        saveTabGroup("Walker_Unit");
+
+        MUTEX_LOAD_WALKER_UNIT.release();
       }
     };
 
     fetchAll(q, loadWalkerUnit);
   }
 
-  addOnEvent("Walker_Unit/Walker_Unit",       "show",  "redrawGrid    ()");
   addOnEvent("Walker_Unit/Walker_Unit/Up",    "click", "gridUp        ()");
   addOnEvent("Walker_Unit/Walker_Unit/Down",  "click", "gridDown      ()");
   addOnEvent("Walker_Unit/Walker_Unit/Left",  "click", "gridLeft      ()");
