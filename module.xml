@@ -33,14 +33,20 @@
   </Vars>
 </Survey_Unit>
 
+<!--TODO: Add features to autogen:-->
+  <!--- on navigate away event-->
+  <!--- getDisplayedTab()-->
+  <!--- getDisplayedTabGroup()-->
+  <!--- isDisplayed(String ref)-->
 <Walker_Unit>
   <Walker_Unit>
     <Survey_Unit_ID t="webview"/>
     <Grid           t="webview" f="nolabel"/>
+    <!--D-Pad-->
     <cols>
-      <group_tl t="group"/>
-      <Up       t="button"/>
-      <group_tr t="group"/>
+      <Add_Row    t="button"/>
+      <Up         t="button"/>
+      <Delete_Row t="button"/>
     </cols>
     <cols>
       <Left     t="button"/>
@@ -52,24 +58,55 @@
       <Down     t="button"/>
       <group_br t="group"/>
     </cols>
+    <!--Buttons-->
+    <N_A t="checkbox">
+      <opts>
+        <opt>N/A</opt>
+      </opts>
+    </N_A>
+    <Null_Record t="button"/>
+    <Zero_Row    t="button"/>
+    <!--Main recording fields-->
     <cols>
       <Row_ID    b="decimal" f="id readonly"/>
       <Walker_ID b="decimal" f="id readonly"/>
     </cols>
     <cols>
-      <Ancient_Count b="decimal"/>
-      <Modern_Count  b="decimal"/>
+      <col>
+        <Ancient_Count b="decimal"/>
+        <Modern_Count  b="decimal"/>
+        <A_C_Count     b="decimal">
+          A/C Count
+        </A_C_Count>
+        <Daub_Count b="decimal"/>
+      </col>
+      <col>
+        <HM_Count     b="decimal"/>
+        <Lithic_Count b="decimal"/>
+        <Glass_Count  b="decimal"/>
+        <Other        b="decimal"/>
+      </col>
     </cols>
-    <cols>
-      <A_C_Count     b="decimal">
-        A/C Count
-      </A_C_Count>
-      <HM_Count   b="decimal"/>
-    </cols>
-    <cols>
-      <Daub_Count b="decimal"/>
-      <Other      b="decimal"/>
-    </cols>
+    <Notes/>
+    <!--Buttons?-->
+    <Chronology t="checkbox">
+      <opts>
+        <opt>Prehistoric</opt>
+        <opt>Classical</opt>
+        <opt>Medieval</opt>
+        <opt>Ottoman</opt>
+      </opts>
+    </Chronology>
+    <Fragment t="checkbox">
+      <opts>
+        <opt>Fragment</opt>
+      </opts>
+    </Fragment>
+    <Wear t="checkbox">
+      <opts>
+        <opt>Wear</opt>
+      </opts>
+    </Wear>
   </Walker_Unit>
 </Walker_Unit>
 
