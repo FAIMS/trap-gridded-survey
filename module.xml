@@ -35,6 +35,9 @@
   </Vars>
 </Survey_Unit>
 
+<!--TODO: We need to zero out new records. *and save* (not do the ignore autosaving thing)-->
+<!--      This will require additions to the DOM.-->
+
 <!--TODO: Disable duplication of these-->
 <Walker_Unit>
   <Walker_Unit>
@@ -45,7 +48,7 @@
     <cols>
       <Next_Row   t="button"/> <!--TODO-->
       <Up         t="button"/>
-      <Add_Row    t="button"/> <!--TODO-->
+      <Add_Row    t="button"/>
     </cols>
     <cols>
       <Left       t="button"/>
@@ -55,7 +58,7 @@
     <cols>
       <group_bl   t="group"/>
       <Down       t="button"/>
-      <Delete_Row t="button"/> <!--TODO-->
+      <Delete_Row t="button"/>
     </cols>
     <!--Buttons-->
     <N_A t="checkbox">
@@ -83,7 +86,7 @@
         <HM_Count     b="decimal"/>
         <Lithic_Count b="decimal"/>
         <Glass_Count  b="decimal"/>
-        <Other        b="decimal"/>
+        <Other_Count b="decimal"/>
       </col>
     </cols>
     <Notes/>
@@ -110,6 +113,8 @@
 </Walker_Unit>
 
 <logic><![CDATA[
+  import java.util.concurrent.Semaphore;
+
   getGridHtml(
       int numberOfRows,   int numberOfWalkers,
       int highlightedRow, int highlightedWalker,
@@ -196,19 +201,59 @@
     return getFieldValueAsInt(ref);
   }
 
-  // TODO: Implement me
+  // A mutex is required for `numberOfRows(int)` to handle users double-clicking
+  // the 'Add Row' and 'Delete Row' buttons.
+  MUTEX_WALKER_UNIT_ROWS = new Semaphore(1);
+
+  /* It is assumed that this function is only ever called while "Walker_Unit" is
+   * displayed.
+   */
   numberOfRows(int val) {
+    if (val < 1) val = 1; // `val` cannot be lower than 1.
+
     String refRowsControl    = "Control/Vars/Number_of_Rows";
     String refRowsSurveyUnit = "Survey_Unit/Vars/Number_of_Rows";
+    String parentTabGroup    = getTabGroupRef(refRowsSurveyUnit);
+    String parentUuid        = getUuid       (parentTabGroup);
+    String parentArchEntType = getArchEntType(parentTabGroup);
     String attrName          = getAttributeName(refRowsSurveyUnit);
+    String numberOfRows      = String.valueOf(val);
+    List   geometry          = null;
+    List   attributes        = createAttributeList();
 
-    // 1. Update 'Number of Rows' using saveArchEnt
-    // 2. If getPreviousTabGroup() == "Survey_Unit", call setFieldValue
-    return;
+    if (!getDisplayedTabGroup().equals("Walker_Unit"))
+      return;
+
+    if (!MUTEX_WALKER_UNIT_ROWS.tryAcquire()) {
+      return;
+    }
+
+    // 1. If getPreviousTabGroup() == parentTabGroup, the user will visit it
+    //    when they hit the back button. In this case, the value saved in the db
+    //    must be made consistent with the one in the UI.
+    if (getPreviousTabGroup().equals(parentTabGroup)) {
+      setFieldValue(refRowsSurveyUnit, numberOfRows);
+    }
+
+    // 2. Also update the value in `refRowsControl`, which is used as a global
+    //   variable.
+    setFieldValue(refRowsControl, numberOfRows);
+
+    // 3. Update 'Number of Rows' using saveArchEnt
+    SaveCallback release = new SaveCallback() {
+      onSave(uuid, newRecord) {
+        MUTEX_WALKER_UNIT_ROWS.release();
+      }
+    };
+
+    Object a = createEntityAttribute(attrName, null, null, numberOfRows, null);
+    attributes.add(a);
+
+    saveArchEnt(parentUuid, parentArchEntType, geometry, attributes, release);
   }
 
-  addRow()    { numberOfRows(numberOfRows() + 1); }
-  deleteRow() { numberOfRows(numberOfRows() - 1); }
+  addRow   () { numberOfRows(numberOfRows() + 1); redrawGrid(); }
+  deleteRow() { numberOfRows(numberOfRows() - 1); redrawGrid(); }
 
   highlightedRow() {
     String ref = "Control/Vars/Highlighted_Row";
@@ -276,9 +321,9 @@
     populateWebViewHtml(ref, html);
   }
 
-  gridUp()    { moveRow   (+1); redrawGrid(); }
-  gridDown()  { moveRow   (-1); redrawGrid(); }
-  gridLeft()  { moveWalker(-1); redrawGrid(); }
+  gridUp   () { moveRow   (+1); redrawGrid(); }
+  gridDown () { moveRow   (-1); redrawGrid(); }
+  gridLeft () { moveWalker(-1); redrawGrid(); }
   gridRight() { moveWalker(+1); redrawGrid(); }
 
   onCreateSurveyUnit() {
@@ -315,6 +360,7 @@
       String.valueOf(highlightedWalker())
     );
     redrawGrid();
+    zeroIfBlank();
   }
 
   onLoadWalkerUnit() {
@@ -393,9 +439,9 @@
   // TODO: Loading might cause other child entities to be saved with incorrect
   // relationships
 
-  // A mutex is required to avoid users double-clicking the load button.
-  import java.util.concurrent.Semaphore;
-  MUTEX_LOAD_WALKER_UNIT = new Semaphore(1);
+  // A mutex is required for `loadWalkerUnit` to handle users double-clicking
+  // the load button.
+  MUTEX_WALKER_UNIT_LOAD = new Semaphore(1);
 
   /* This function is intended to be called from the "Walker_Unit" tab group. It
    * is not intended to be called from the parent of the "Walker_Unit" tab
@@ -418,7 +464,7 @@
     }
 
     // We are still waiting for a previous `loadWalkerUnit` to complete
-    if (!MUTEX_LOAD_WALKER_UNIT.tryAcquire()) {
+    if (!MUTEX_WALKER_UNIT_LOAD.tryAcquire()) {
       return;
     }
 
@@ -443,19 +489,24 @@
 
     FetchCallback loadWalkerUnit = new FetchCallback() {
       onFetch(result) {
-        // 1. Leaving "Walker_Unit" calls `initHighlighted`, so we must store
-        // (and later restore) the highlighted cell.
+        // 1. An "blur" event will not be triggered by the following steps. We
+        //    must zero-out all blank fields manually.
+        zeroIfBlank();
+
+        // 2. Leaving "Walker_Unit" calls `initHighlighted`, so we must store
+        //    (and later restore) the highlighted cell.
         int highlightedRow    = highlightedRow   ();
         int highlightedWalker = highlightedWalker();
 
-        // 2. Leave "Walker_Unit".
-        cancelTabGroup(tabgroup, false);
+        // 3. Leave "Walker_Unit".
+        if (getDisplayedTabGroup().equals(tabgroup))
+          cancelTabGroup(tabgroup, false);
 
-        // 3. Restore the highlighted cell.
+        // 4. Restore the highlighted cell.
         highlightedRow   (highlightedRow   );
         highlightedWalker(highlightedWalker);
 
-        // 4. Re-enter "Walker_Unit" with the desired record loaded.
+        // 5. Re-enter "Walker_Unit" with the desired record loaded.
         if (result == null || result.size() == 0) {
           parentTabgroup = "Survey_Unit";
           newWalkerUnit();
@@ -464,8 +515,8 @@
           loadWalkerUnitFrom(uuid);
         }
 
-        // 5. The `loadWalkerUnit` is effectively finished.
-        MUTEX_LOAD_WALKER_UNIT.release();
+        // 6. The `loadWalkerUnit` is effectively finished.
+        MUTEX_WALKER_UNIT_LOAD.release();
       }
     };
 
@@ -484,13 +535,71 @@
     loadWalkerUnit();
   }
 
-  addOnEvent("Walker_Unit/Walker_Unit/Add_Row", "click", "addRow         ()");
-  addOnEvent("Walker_Unit/Walker_Unit/Up",      "click", "gridUp         ()");
-  addOnEvent("Walker_Unit/Walker_Unit/Down",    "click", "gridDown       ()");
-  addOnEvent("Walker_Unit/Walker_Unit/Left",    "click", "gridLeft       ()");
-  addOnEvent("Walker_Unit/Walker_Unit/Right",   "click", "gridRight      ()");
-  addOnEvent("Walker_Unit/Walker_Unit/Load",    "click", "loadWalkerUnit ()");
-  addOnEvent("Walker_Unit",                     "leave", "initHighlighted()");
+  getZeroableRefs() {
+    List   elemNames = new ArrayList(); // names of zeroable elements
+    List   refs      = new ArrayList(); // references of zeroable elements
+    String fmtRef    = "Walker_Unit/Walker_Unit/%s";
+
+    // 1. Write the element names
+    elemNames.add("Ancient_Count");
+    elemNames.add("Modern_Count");
+    elemNames.add("A_C_Count");
+    elemNames.add("Daub_Count");
+    elemNames.add("HM_Count");
+    elemNames.add("Lithic_Count");
+    elemNames.add("Glass_Count");
+    elemNames.add("Other_Count");
+
+    // 2. Format the element names into refs
+    for (e : elemNames) {
+      String ref = replaceFirst(fmtRef, e);
+      refs.add(ref);
+    }
+
+    return refs;
+  }
+
+  zeroIfBlank() {
+    for (ref : getZeroableRefs()) {
+      zeroIfBlank(ref);
+    }
+  }
+
+  zeroIfBlank(String ref) {
+    String blank = "";
+    String zero  = "0";
+    String val   = getFieldValue(ref);
+    if (blank.equals(val)) {
+      setFieldValue(ref, zero);
+    }
+  }
+
+  blankIfZero(String ref) {
+    String blank = "";
+    String zero  = "0";
+    String val   = getFieldValue(ref);
+    if (zero.equals(val)) {
+      setFieldValue(ref, blank);
+    }
+  }
+
+  for (ref : getZeroableRefs()) {
+    String focus = "blankIfZero(\"%s\")"; focus = replaceFirst(focus, ref);
+    String blur  = "zeroIfBlank(\"%s\")"; blur  = replaceFirst(blur,  ref);
+
+    addOnEvent(ref, "focus", focus);
+    addOnEvent(ref, "blur",  blur );
+  }
+
+  addOnEvent("Walker_Unit/Walker_Unit/Add_Row",    "click", "addRow         ()");
+  addOnEvent("Walker_Unit/Walker_Unit/Delete_Row", "click", "deleteRow      ()");
+
+  addOnEvent("Walker_Unit/Walker_Unit/Up",         "click", "gridUp         ()");
+  addOnEvent("Walker_Unit/Walker_Unit/Down",       "click", "gridDown       ()");
+  addOnEvent("Walker_Unit/Walker_Unit/Left",       "click", "gridLeft       ()");
+  addOnEvent("Walker_Unit/Walker_Unit/Right",      "click", "gridRight      ()");
+  addOnEvent("Walker_Unit/Walker_Unit/Load",       "click", "loadWalkerUnit ()");
+  addOnEvent("Walker_Unit",                        "leave", "initHighlighted()");
 
   persistOverSessions("Control/Main/Number_of_Rows");
   persistOverSessions("Control/Main/Number_of_Walkers");
