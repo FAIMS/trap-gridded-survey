@@ -195,55 +195,268 @@ newTab(String tab, Boolean resolveTabGroups) {
 }
 
 /******************************************************************************/
+/*                           DOCUMENT OBJECT MODEL                            */
+/******************************************************************************/
+String PREVIOUSLY_DISPLAYED_TAB_GROUP = "";
+String CURRENTLY_DISPLAYED_TAB_GROUP  = "";
+
+getTabGroups() {
+  List tabGroups = new ArrayList();
+  tabGroups.add("Login");
+  tabGroups.add("Control");
+  tabGroups.add("Survey_Unit");
+  tabGroups.add("Walker_Unit");
+
+  return tabGroups;
+}
+
+updateDisplayedTabGroup(String tabGroup) {
+  PREVIOUSLY_DISPLAYED_TAB_GROUP = CURRENTLY_DISPLAYED_TAB_GROUP;
+  CURRENTLY_DISPLAYED_TAB_GROUP  = tabGroup;
+}
+
+getPreviousTabGroup() {
+  return getPreviouslyDisplayedTabGroup();
+}
+
+getPreviouslyDisplayedTabGroup() {
+  return PREVIOUSLY_DISPLAYED_TAB_GROUP;
+}
+
+getDisplayedTabGroup() {
+  return CURRENTLY_DISPLAYED_TAB_GROUP;
+}
+
+isDisplayed(String ref) {
+  return getDisplayedTabGroup().equals(ref);
+}
+
+getTabGroupRef(String fullRef) {
+  Boolean lastPartOnly = false;
+  return getTabGroupRef(fullRef, lastPartOnly);
+}
+
+getTabGroupRef(String fullRef, Boolean lastPartOnly) {
+  if (isNull(fullRef)) {
+    return null;
+  }
+
+  String[] parts = fullRef.split("/");
+
+  if (parts.length < 1) return null;
+  return parts[0];
+}
+
+getTabRef(String fullRef) {
+  Boolean lastPartOnly = false;
+  return getTabRef(fullRef, lastPartOnly);
+}
+
+getTabRef(String fullRef, Boolean lastPartOnly) {
+  if (isNull(fullRef)) {
+    return null;
+  }
+
+  String[] parts = fullRef.split("/");
+
+  if (parts.length < 2) return null;
+  if (lastPartOnly) return                  parts[1];
+  else              return parts[0] + "/" + parts[1];
+}
+
+getLastRefPart(String ref) {
+  if (isNull(fullRef)) {
+    return null;
+  }
+
+  String[] parts = fullRef.split("/");
+  return parts[parts.length-1];
+}
+
+getGuiElementRef(String fullRef) {
+  Boolean lastPartOnly = true;
+  return getGuiElementRef(fullRef, lastPartOnly);
+}
+
+getGuiElementRef(String fullRef, Boolean lastPartOnly) {
+  if (isNull(fullRef)) {
+    return null;
+  }
+
+  String[] parts = fullRef.split("/");
+
+  if (parts.length < 3) return null;
+  if (lastPartOnly) return parts[2];
+  else              return fullRef;
+}
+
+getArch16nKey(String ref) {
+  String lastRefPart = getLastRefPart(ref);
+
+  if (isNull(lastRefPart)) return null;
+  else                     return "{" + lastRefPart + "}";
+}
+
+guessArch16nVal(String ref) {
+  String arch16nKey = getArch16nKey(ref);
+
+  if (isNull(getArch16nKey)) return "";
+  arch16nKey = arch16nKey.replaceAll("_", " ");
+  arch16nKey = arch16nKey.replaceAll("^\\{", "");
+  arch16nKey = arch16nKey.replaceAll("\\}$", "");
+  return arch16nKey;
+}
+
+getAttributeName(String ref) {
+  String guiElementRef = getGuiElementRef(ref);
+  if (isNull(guiElementRef)) {
+    return null;
+  }
+
+  String attributeName = guiElementRef.replaceAll("_", " ");
+  return attributeName;
+}
+
+getArchEntType(String ref) {
+  String tabGroupRef = getTabGroupRef(ref);
+  if (isNull(tabGroupRef)) {
+    return null;
+  }
+
+  String archEntType = tabGroupRef.replaceAll("_", " ");
+  return archEntType;
+}
+
+/******************************************************************************/
 /*                            BINDING ACCUMULATOR                             */
 /*                                                                            */
-/* Allows onEvent bindings for the same element to accumulate over multiple   */
-/* onEvent calls instead of having later calls override earlier ones.         */
+/* The binding accumulator allows onEvent bindings for the same element to    */
+/* accumulate over multiple onEvent calls instead of having later calls       */
+/* override earlier ones.                                                     */
+/*                                                                            */
+/* It also adds support for a several additional events:                      */
+/*   - "blur" --- This is merely an interface to make code for adding "blur"  */
+/*         events more consistent.                                            */
+/*   - "create" --- Triggered after a record is first created.                */
+/*   - "fetch" --- Triggered after a record is fetched and displayed in a     */
+/*         given tab group.                                                   */
+/*   - "focus" --- This is merely an interface to make code for adding        */
+/*         "focus" events more consistent.                                    */
+/*   - "leave" --- Triggered after a given tab group is navigated away        */
+/*         from. Note that this event cannot be triggered when the FAIMS app  */
+/*         is exited.                                                         */
 /******************************************************************************/
-Map events = new HashMap();
-String SEP = Character.toString ((char) 0); // Beanshell is stupid and won't let me write "\0"
+String SEP = Character.toString ((char) 0); // Beanshell won't let me write "\0"
+Map    EVENTS        = new HashMap(); // (ref, event type) -> callback statement
+Set    CUSTOM_EVENTS = new HashSet(); // Events not handled by `onEvent`
+CUSTOM_EVENTS.add("blur");
+CUSTOM_EVENTS.add("create");
+CUSTOM_EVENTS.add("fetch");
+CUSTOM_EVENTS.add("focus");
+CUSTOM_EVENTS.add("leave");
+
+getKey(String ref, String event) {
+  return ref + SEP + event;
+}
 
 /* Returns the set of statements bound to an element at `ref` and occuring on
  * `event`.
  */
 getStatements(String ref, String event) {
-  String    key = ref + SEP + event;
-  ArrayList val = (ArrayList) events.get(key);
-  if (val == null) {
-    val = new ArrayList();
-    events.put(key, val);
-  }
-  return val;
+  String    key = getKey(ref, event);
+  ArrayList val = (ArrayList) EVENTS.get(key);
+
+  if (val == null) return new ArrayList();
+  else             return val;
 }
 
-addOnEvent(String ref, String event, String statement) {
-  // Calling `remove()` first ensures statement occurs once in the list, at the end.
-  while(getStatements(ref, event).remove(statement));
-  getStatements(ref, event).add(statement);
+addStatement(String ref, String event, String statement) {
+  // In the case that a statement already exists for a given (`ref`, `event`)
+  // pair, writing `val.add(statement);` will be enough to add the extra
+  // statement. This is because `getStatements` returns a reference to a list.
+  // In the case just described, the list is stored in the `EVENTS` map.
+  // However, sometimes `getStatements` returns empty lists which are not stored
+  // in that map. In this case, calling `EVENTS.put` is required.
+
+  String    key = getKey(ref, event);
+  ArrayList val = getStatements(ref, event);
+  val.add(statement);
+  EVENTS.put(key, val);
+}
+
+getStatementsString(String ref, String event) {
+  ArrayList stmts = getStatements(ref, event);
+  String stmtsStr = "";
+  for (String s : stmts) {
+    stmtsStr += s;
+    stmtsStr += "; ";
+  }
+  return stmtsStr;
 }
 
 delOnEvent(String ref, String event, String statement) {
   while(getStatements(ref, event).remove(statement));
 }
 
-bindOnEvent(String ref, String event) {
-  ArrayList stmts = getStatements(ref, event);
-  String stmtsExpr = "";
-  for (String s : stmts) {
-    stmtsExpr += s;
-    stmtsExpr += "; ";
-  }
+addOnEvent(String ref, String event, String statement) {
+  // Calling `delOnEvent()` first ensures statement occurs once in the list, at
+  // the end.
+  delOnEvent  (ref, event, statement);
+  addStatement(ref, event, statement);
+}
 
-  onEvent(ref, event, stmtsExpr);
+bindOnEvent(String ref, String event) {
+  String stmtsStr     = getStatementsString(ref, event);
+  String focusStmtStr = getStatementsString(ref, "focus");
+  String blurStmtStr  = getStatementsString(ref, "blur" );
+
+  if (!CUSTOM_EVENTS.contains(event)) {
+    onEvent(ref, event, stmtsStr);
+  } else if (event.equals("focus")) {
+    onFocus(ref, focusStmtStr, blurStmtStr);
+  } else if (event.equals("blur" )) {
+    onFocus(ref, focusStmtStr, blurStmtStr);
+  }
 }
 
 bindOnEvents() {
-  for (String key : events.keySet()) {
+  for (String key : EVENTS.keySet()) {
     refevent = key.split(SEP);
     ref   = refevent[0];
     event = refevent[1];
     bindOnEvent(ref, event);
   }
+}
+
+onLeaveTabGroup() {
+  onLeaveTabGroup(getPreviouslyDisplayedTabGroup());
+}
+
+/* Execute the "leave" event for the tab group at `ref` if a callback for it
+ * exists.
+ */
+onLeaveTabGroup(String ref) {
+  String event    = "leave";
+  String stmtsStr = getStatementsString(ref, event);
+  execute(stmtsStr);
+}
+
+/* Establishes `onEvent` bindings necessary to make the "leave" event work. The
+ * "leave" event is really triggered upon "show" of another tab.
+ */
+for (tg : getTabGroups()) {
+  String ref      = tg;
+  String event    = "show";
+  String callback;
+
+  // Update (previously) displayed tab group
+  callback = "updateDisplayedTabGroup(\"%s\")";
+  callback = replaceFirst(callback, tg);
+  addOnEvent(tg, event, callback);
+
+  // Trigger on leave tab group event
+  callback = "onLeaveTabGroup()";
+  addOnEvent(tg, event, callback);
 }
 
 /******************************************************************************/
@@ -633,6 +846,10 @@ makeVocab(String type, String path, String attrib, List vocabExclusions, String 
       }
     });
 }
+makeVocab("CheckBoxGroup", "Walker_Unit/Walker_Unit/N_A", "N A");
+makeVocab("CheckBoxGroup", "Walker_Unit/Walker_Unit/Chronology", "Chronology");
+makeVocab("CheckBoxGroup", "Walker_Unit/Walker_Unit/Fragment", "Fragment");
+makeVocab("CheckBoxGroup", "Walker_Unit/Walker_Unit/Wear", "Wear");
 
 
 /******************************************************************************/
@@ -1062,21 +1279,46 @@ loadEntityFrom(String entityID) {
 newSurveyUnit(){
   String tabgroup = "Survey_Unit";
 
+  String autoNumSource = "";
+  autoNumSource = getFieldValue("Control/Main/Next_Survey_Unit_ID");
+  if (isNull(autoNumSource)) {
+    showWarning("{Alert}","{A_next_ID_has_not_been_entered_please_provide_one}");
+    return;
+  }
 
   setUuid(tabgroup, null);
   newTabGroup(tabgroup);
   populateAuthorAndTimestamp(tabgroup);
   populateEntityListsInTabGroup(tabgroup);
+  String autoNumDest = "";
+  autoNumDest = "Survey_Unit/Survey_Unit/Survey_Unit_ID";
+  incAutoNum(autoNumDest);
+  onCreateSurveyUnit__();
+
+  // Deprecated. Maintains backwards compatibility.
   onCreateSurveyUnit();
 }
 
-onCreateSurveyUnit(){
-  return;
+// Deprecated. Maintains backwards compatibility.
+onCreateSurveyUnit(){ return; }
+
+onCreateSurveyUnit__(){
+  String ref      = "Survey_Unit";
+  String event    = "create";
+  String stmtsStr = getStatementsString(ref, event);
+  execute(stmtsStr);
 }
 
+
+// Deprecated. Maintains backwards compatibility.
+onFetchSurveyUnit(){ return; }
+
 // Triggered after an existing record is loaded.
-onLoadSurveyUnit(){
-  return;
+onFetchSurveyUnit__(){
+  String ref      = "Survey_Unit";
+  String event    = "fetch";
+  String stmtsStr = getStatementsString(ref, event);
+  execute(stmtsStr);
 }
 
 duplicateSurveyUnit(){
@@ -1085,6 +1327,9 @@ duplicateSurveyUnit(){
 
   disableAutoSave(tabgroup);
 
+  String autoNumDest = "";
+  autoNumDest = "Survey_Unit/Survey_Unit/Survey_Unit_ID";
+  incAutoNum(autoNumDest);
 
   clearGpsInTabGroup(tabgroup);
 
@@ -1148,16 +1393,32 @@ newWalkerUnit(){
   newTabGroup(tabgroup);
   populateAuthorAndTimestamp(tabgroup);
   populateEntityListsInTabGroup(tabgroup);
+  onCreateWalkerUnit__();
+
+  // Deprecated. Maintains backwards compatibility.
   onCreateWalkerUnit();
 }
 
-onCreateWalkerUnit(){
-  return;
+// Deprecated. Maintains backwards compatibility.
+onCreateWalkerUnit(){ return; }
+
+onCreateWalkerUnit__(){
+  String ref      = "Walker_Unit";
+  String event    = "create";
+  String stmtsStr = getStatementsString(ref, event);
+  execute(stmtsStr);
 }
 
+
+// Deprecated. Maintains backwards compatibility.
+onFetchWalkerUnit(){ return; }
+
 // Triggered after an existing record is loaded.
-onLoadWalkerUnit(){
-  return;
+onFetchWalkerUnit__(){
+  String ref      = "Walker_Unit";
+  String event    = "fetch";
+  String stmtsStr = getStatementsString(ref, event);
+  execute(stmtsStr);
 }
 
 duplicateWalkerUnit(){
@@ -1282,7 +1543,7 @@ loadSurveyUnitFrom(String uuid) {
   FetchCallback cb = new FetchCallback() {
     onFetch(result) {
       populateEntityListsInTabGroup(tabgroup);
-      onLoadSurveyUnit();
+      onFetchSurveyUnit__();
     }
   };
 
@@ -1297,7 +1558,7 @@ loadWalkerUnitFrom(String uuid) {
   FetchCallback cb = new FetchCallback() {
     onFetch(result) {
       populateEntityListsInTabGroup(tabgroup);
-      onLoadWalkerUnit();
+      onFetchWalkerUnit__();
     }
   };
 
@@ -1328,92 +1589,78 @@ clearGpsInTab(String tabRef) {
 }
 
 /******************************************************************************/
-/*                           DOCUMENT OBJECT MODEL                            */
+/*                       AUTONUMBERING HELPER FUNCTIONS                       */
 /******************************************************************************/
-getTabGroupRef(String fullRef) {
-  Boolean lastPartOnly = false;
-  return getTabGroupRef(fullRef, lastPartOnly);
-}
+/*
+ * If value of field specified by `ref` is null, sets the field to `defaultVal`,
+ * otherwise increments its value.
+ *
+ * Returns the value the field was updated to.
+ */
+incField(String ref, Integer defaultVal) {
+  String val = getFieldValue(ref);
 
-getTabGroupRef(String fullRef, Boolean lastPartOnly) {
-  if (isNull(fullRef)) {
-    return null;
+  if (isNull(val)) {
+    setFieldValue(ref, defaultVal);
+    return defaultVal;
   }
 
-  String[] parts = fullRef.split("/");
+  Integer inc = Integer.parseInt(val) + 1;
+  setFieldValue(ref, inc);
+  insertIntoLocalSettings(ref, inc.toString());
 
-  if (parts.length < 1) return null;
-  return parts[0];
+  return inc;
 }
 
-getTabRef(String fullRef) {
-  Boolean lastPartOnly = false;
-  return getTabRef(fullRef, lastPartOnly);
+/* Increments the field at `ref` or returns null if it does not contain a
+ * number.
+ */
+incField(String ref) {
+  return incField(ref, 1);
 }
 
-getTabRef(String fullRef, Boolean lastPartOnly) {
-  if (isNull(fullRef)) {
-    return null;
+addOnEvent("Control", "show", "onShowAutonum()");
+
+getStartingIdPaths() {
+  List l = new ArrayList();
+  l.add("Control/Main/Next_Survey_Unit_ID");
+
+  return l;
+}
+
+onShowAutonum() {
+  List l = getStartingIdPaths();
+
+  for (ref : l) {
+    loadStartingId(ref);
   }
-
-  String[] parts = fullRef.split("/");
-
-  if (parts.length < 2) return null;
-  if (lastPartOnly) return                  parts[1];
-  else              return parts[0] + "/" + parts[1];
 }
 
-getLastRefPart(String ref) {
-  if (isNull(fullRef)) {
-    return null;
-  }
-
-  String[] parts = fullRef.split("/");
-  return parts[parts.length-1];
+loadStartingId(String ref) {
+  String idQ = "SELECT value FROM localSettings WHERE key = '" + ref + "';";
+  fetchOne(idQ, new FetchCallback() {
+    onFetch(result) {
+      if (isNull(result)) setFieldValue(ref, "1"          );
+      else                setFieldValue(ref, result.get(0));
+    }
+  });
 }
 
-getGuiElementRef(String fullRef) {
-  Boolean lastPartOnly = true;
-  return getGuiElementRef(fullRef, lastPartOnly);
+/*
+ * Sets bindings to save autonum'd fields whenever they're blurred.
+ */
+for (ref : getStartingIdPaths()) {
+  onFocus(ref, null, "insertIntoLocalSettings(\"" + ref + "\", getFieldValue(\"" + ref + "\"));");
 }
 
-getGuiElementRef(String fullRef, Boolean lastPartOnly) {
-  if (isNull(fullRef)) {
-    return null;
-  }
+incAutoNum(String destPath) {
+  Map destToSource = new HashMap();
+  destToSource.put("Survey_Unit/Survey_Unit/Survey_Unit_ID", "Control/Main/Next_Survey_Unit_ID");
 
-  String[] parts = fullRef.split("/");
-
-  if (parts.length < 3) return null;
-  if (lastPartOnly) return parts[2];
-  else              return fullRef;
-}
-
-getArch16nKey(String ref) {
-  String lastRefPart = getLastRefPart(ref);
-
-  if (isNull(lastRefPart)) return null;
-  else                     return "{" + lastRefPart + "}";
-}
-
-guessArch16nVal(String ref) {
-  String arch16nKey = getArch16nKey(ref);
-
-  if (isNull(getArch16nKey)) return "";
-  arch16nKey = arch16nKey.replaceAll("_", " ");
-  arch16nKey = arch16nKey.replaceAll("^\\{", "");
-  arch16nKey = arch16nKey.replaceAll("\\}$", "");
-  return arch16nKey;
-}
-
-getAttributeName(String ref) {
-  String guiElementRef = getGuiElementRef(ref);
-  if (isNull(guiElementRef)) {
-    return null;
-  }
-
-  String attributeName = guiElementRef.replaceAll("_", " ");
-  return attributeName;
+  String sourcePath = destToSource.get(destPath);
+  String destVal    = getFieldValue(sourcePath);
+  setFieldValue(destPath, destVal);
+  incField(sourcePath);
 }
 
 /******************************************************************************/
@@ -1539,6 +1786,45 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
 /*                             HANDWRITTEN LOGIC                              */
 /******************************************************************************/
 
+/************************* SURVEY UNIT ID POPULATION **************************/
+  setWebViewToIdentifier(String ref, String tabGroup) {
+    String uuid = getUuid(tabGroup);
+
+    if (isNull(uuid)) {
+      populateWebViewHtml(ref, "&nbsp;");
+      return;
+    }
+
+    String q = "";
+    q += "SELECT uuid, response ";
+    q += "  FROM latestnondeletedarchentformattedidentifiers ";
+    q += " WHERE uuid = '%s' ";
+    q  = replaceFirst(q, uuid);
+
+    cb = new FetchCallback() {
+      onFetch(result) {
+        identifier  = result.get(1);
+
+        populateWebViewHtml(ref, identifier);
+      }
+    };
+
+    fetchOne(q, cb);
+  }
+
+  updateSurveyUnitId() {
+    String parentTabGroup = "Survey_Unit";
+    String ref            = "Walker_Unit/Walker_Unit/Survey_Unit_ID";
+    setWebViewToIdentifier(ref, parentTabGroup);
+  }
+
+  // TODO: This doesn't work with search
+  addOnEvent("Walker_Unit", "create", "updateSurveyUnitId()");
+  addOnEvent("Walker_Unit", "fetch",  "updateSurveyUnitId()");
+
+/************************************ GRID ************************************/
+  import java.util.concurrent.Semaphore;
+
   getGridHtml(
       int numberOfRows,   int numberOfWalkers,
       int highlightedRow, int highlightedWalker,
@@ -1604,7 +1890,7 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
   }
 
   getFieldValueAsInt(String ref) {
-    String  val          = getFieldValue(ref);
+    String  val      = getFieldValue(ref);
     int valAsInteger = 0;
 
     try {
@@ -1621,8 +1907,71 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
   }
 
   numberOfRows() {
-  String ref = "Control/Main/Number_of_Rows";
+    String ref = "Control/Vars/Number_of_Rows";
     return getFieldValueAsInt(ref);
+  }
+
+  // A mutex is required for `numberOfRows(int)` to handle users double-clicking
+  // the 'Add Row' and 'Delete Row' buttons.
+  MUTEX_WALKER_UNIT_ROWS = new Semaphore(1);
+
+  /* It is assumed that this function is only ever called while "Walker_Unit" is
+   * displayed.
+   */
+  numberOfRows(int val) {
+    numberOfRows(val, "");
+  }
+
+  numberOfRows(int val, String callback) {
+    if (val < 1) val = 1; // `val` cannot be lower than 1.
+
+    String refRowsControl    = "Control/Vars/Number_of_Rows";
+    String refRowsSurveyUnit = "Survey_Unit/Vars/Number_of_Rows";
+    String parentTabGroup    = getTabGroupRef(refRowsSurveyUnit);
+    String parentUuid        = getUuid       (parentTabGroup);
+    String parentArchEntType = getArchEntType(parentTabGroup);
+    String attrName          = getAttributeName(refRowsSurveyUnit);
+    String numberOfRows      = String.valueOf(val);
+    List   geometry          = null;
+    List   attributes        = createAttributeList();
+
+    if (!getDisplayedTabGroup().equals("Walker_Unit"))
+      return;
+
+    if (!MUTEX_WALKER_UNIT_ROWS.tryAcquire()) {
+      return;
+    }
+
+    // 1. If getPreviousTabGroup() == parentTabGroup, the user will visit it
+    //    when they hit the back button. In this case, the value saved in the db
+    //    must be made consistent with the one in the UI.
+    if (getPreviousTabGroup().equals(parentTabGroup)) {
+      setFieldValue(refRowsSurveyUnit, numberOfRows);
+    }
+
+    // 2. Also update the value in `refRowsControl`, which is used as a global
+    //   variable.
+    setFieldValue(refRowsControl, numberOfRows);
+
+    // 3. Update 'Number of Rows' using saveArchEnt
+    SaveCallback release = new SaveCallback() {
+      onSave(uuid, newRecord) {
+        execute(callback);
+        MUTEX_WALKER_UNIT_ROWS.release();
+      }
+    };
+
+    Object a = createEntityAttribute(attrName, null, null, numberOfRows, null);
+    attributes.add(a);
+
+    saveArchEnt(parentUuid, parentArchEntType, geometry, attributes, release);
+
+    // 4. If the cursor (i.e. `highlightedRow()`) has changed, the entity under-
+    //    neath it should be loaded.
+    if (selectedRow() > highlightedRow()) {
+      highlightedWalker(selectedWalker());
+      loadWalkerUnit();
+    }
   }
 
   highlightedRow() {
@@ -1640,12 +1989,12 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
   }
 
   selectedRow() {
-    String ref = "Walker_Unit/Walker_Unit/Row_ID";
+    String ref = "Walker_Unit/Vars/Row_ID";
     return getFieldValueAsInt(ref);
   }
 
   numberOfWalkers() {
-    String ref = "Control/Main/Number_of_Walkers";
+    String ref = "Control/Vars/Number_of_Walkers";
     return getFieldValueAsInt(ref);
   }
 
@@ -1664,7 +2013,7 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
   }
 
   selectedWalker() {
-    String ref = "Walker_Unit/Walker_Unit/Walker_ID";
+    String ref = "Walker_Unit/Vars/Walker_ID";
     return getFieldValueAsInt(ref);
   }
 
@@ -1674,6 +2023,11 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
 
   moveRow(int delta) {
     highlightedRow(highlightedRow() + delta);
+  }
+
+  initHighlighted() {
+    highlightedRow   (1);
+    highlightedWalker(1);
   }
 
   redrawGrid() {
@@ -1686,12 +2040,137 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
     populateWebViewHtml(ref, html);
   }
 
-  gridUp()    { moveRow   (-1); redrawGrid(); }
-  gridDown()  { moveRow   (+1); redrawGrid(); }
-  gridLeft()  { moveWalker(-1); redrawGrid(); }
+  zeroRow() {
+    String rowId          = String.valueOf(highlightedRow());
+    String tabgroup       = "Walker_Unit";
+    String parentTabGroup = "Survey_Unit";
+    String parentUuid     = getUuid(parentTabGroup);
+
+    String q = "";
+    q += " SELECT measure AS savedWalkerIds";
+    q += "   FROM latestnondeletedaentvalue";
+    q += "   JOIN attributekey USING (attributeid)";
+    q += "  WHERE attributename = 'Walker ID'";
+    q += "    AND uuid IN (";
+    q += "         SELECT uuid";
+    q += "           FROM latestnondeletedaentvalue";
+    q += "           JOIN attributekey USING (attributeid)";
+    q += "           JOIN parentchild ON (uuid = childuuid)";
+    q += "          WHERE measure = '{rowId}'";
+    q += "            AND attributename = 'Row ID'";
+    q += "            AND parentuuid = '{parentUuid}'";
+    q += "        )";
+    q  = replaceFirst(q, "{rowId}",      rowId);
+    q  = replaceFirst(q, "{parentUuid}", parentUuid);
+
+    FetchCallback zeroRow = new FetchCallback() {
+      onFetch(result) {
+        zeroRow(result);
+      }
+    };
+
+    fetchAll(q, zeroRow);
+  }
+
+  zeroRow(result) {
+    List   savedWalkerIds = new ArrayList();
+    List     allWalkerIds = new ArrayList();
+    List unsavedWalkerIds = new ArrayList();
+
+    // Populate `savedWalkerIds`
+    for (qRow : result) {
+      String savedWalkerId = qRow.get(0);
+      savedWalkerIds.add(savedWalkerId);
+    }
+
+    // Populate `allWalkerIds`
+    for (int i = 1; i <= numberOfWalkers(); i++) {
+      String unsavedWalkerId = String.valueOf(i);
+      unsavedWalkerIds.add(unsavedWalkerId);
+    }
+
+    // Compute `unsavedWalkerIds`
+    allWalkerIds.removeAll(savedWalkerIds);
+    unsavedWalkerIds = allWalkerIds;
+
+    // Create "Walker Unit" records which were previously unsaved
+    String       parentUuid = getUuid("Survey_Unit");
+    String       uuid       = null;
+    String       entityType = "Walker Unit";
+    List         geometry   = null;
+    List         attributes = createAttributeList();
+    SaveCallback relate     = new SaveCallback() {
+      onSave(uuid, newRecord) {
+        saveEntitiesToHierRel(
+          "Survey Unit - Walker Unit",
+          parentUuid,
+          uuid,
+          "Parent Of",
+          "Child Of",
+          ""
+        );
+      }
+    };
+    saveArchEnt(uuid, entityType, geometry, attributes, relate);
+  }
+
+  nextRow() {
+    if (highlightedRow() == numberOfRows()) {
+      numberOfRows(numberOfRows() + 1, "nextRow()");
+    } else {
+      moveWalker(-999);
+      moveRow(+1);
+      loadWalkerUnit();
+    }
+  }
+
+  nextWalkerUnit () {
+    if (highlightedWalker() == numberOfWalkers()) {
+      nextRow();
+    } else {
+      moveWalker(+1);
+      loadWalkerUnit();
+    }
+  }
+
+  gridUp   () { moveRow   (+1); redrawGrid(); }
+  gridDown () { moveRow   (-1); redrawGrid(); }
+  gridLeft () { moveWalker(-1); redrawGrid(); }
   gridRight() { moveWalker(+1); redrawGrid(); }
 
-  onCreateSurveyUnit() {
+  addRow   () { numberOfRows(numberOfRows() + 1); redrawGrid(); }
+  deleteRow() { numberOfRows(numberOfRows() - 1); redrawGrid(); }
+
+  MUTEX_WALKER_ZERO_ROW = new Semaphore(1);
+  zeroRowAndNext() {
+    if (MUTEX_WALKER_ZERO_ROW.drainPermits() == 0) {
+      return;
+    }
+
+    dialog = showBusy("Confirming Zero Entries", "Please wait...");
+    zeroRow();
+    nextRow();
+  }
+
+  zeroRowAndNextComplete() {
+    if (dialog != null) {
+      dialog.dismiss();
+    }
+    MUTEX_WALKER_ZERO_ROW.release();
+  }
+
+  inheritSurveyUnitFields() {
+    copyFieldValue(
+      "Control/Main/Number_of_Rows",
+      "Control/Vars/Number_of_Rows",
+      false
+    );
+    copyFieldValue(
+      "Control/Main/Number_of_Walkers",
+      "Control/Vars/Number_of_Walkers",
+      false
+    );
+
     copyFieldValue(
       "Control/Main/Number_of_Rows",
       "Survey_Unit/Vars/Number_of_Rows",
@@ -1702,24 +2181,46 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
       "Survey_Unit/Vars/Number_of_Walkers",
       false
     );
+    copyFieldValue(
+      "Control/Main/Row_Interval",
+      "Survey_Unit/Vars/Row_Interval",
+      false
+    );
+    copyFieldValue(
+      "Control/Main/Walker_Interval",
+      "Survey_Unit/Vars/Walker_Interval",
+      false
+    );
   }
 
-  onCreateWalkerUnit() {
+  onCreateSurveyUnit() {
+    inheritSurveyUnitFields();
+  }
+
+  inheritWalkerUnitFields() {
     setFieldValue(
-      "Walker_Unit/Walker_Unit/Row_ID",
+      "Walker_Unit/Vars/Row_ID",
       String.valueOf(highlightedRow())
     );
     setFieldValue(
-      "Walker_Unit/Walker_Unit/Walker_ID",
+      "Walker_Unit/Vars/Walker_ID",
       String.valueOf(highlightedWalker())
     );
-    redrawGrid();
   }
 
-  onLoadWalkerUnit() {
+  onCreateWalkerUnit() {
+    inheritWalkerUnitFields();
+    redrawGrid();
+    zeroIfBlank();
+  }
+
+  /* Fetches the 'Number of Rows' and 'Number of Walkers' attributes stored in
+   * the parent and loads them into the global vars. Here we have used fields
+   * as globals.
+   */
+  updateGridDimsVars() {
     String tabgroup   = "Walker_Unit";
-    String childUuid  = getUuid(tabgroup        );
-    // String parentUuid = getUuid(parentTabgroup__);
+    String childUuid  = getUuid(tabgroup);
 
     String q = "";
     q += " SELECT attributename, measure";
@@ -1742,8 +2243,8 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
   }
 
   updateGridDimsVars(result) {
-    String refRows    = "Control/Main/Number_of_Rows";
-    String refWalkers = "Control/Main/Number_of_Walkers";
+    String refRows    = "Control/Vars/Number_of_Rows";
+    String refWalkers = "Control/Vars/Number_of_Walkers";
 
     String attrNameRows    = getAttributeName(refRows);
     String attrNameWalkers = getAttributeName(refWalkers);
@@ -1788,25 +2289,40 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
     fetchAll(q, updateWalkerUnitParentVars);
   }
 
+  // TODO: Figure out how to get this to work with search.
   // TODO: Loading *might* be broken; The list of child entities in the parent
   // doesn't get refreshed after making a new Walker Unit via a loaded one.
   // TODO: Loading might cause other child entities to be saved with incorrect
   // relationships
 
-  // A mutex is required to avoid users double-clicking the load button.
-  import java.util.concurrent.Semaphore;
-  MUTEX_LOAD_WALKER_UNIT = new Semaphore(1);
+  // A mutex is required for `loadWalkerUnit` to handle users double-clicking
+  // the load button.
+  MUTEX_WALKER_UNIT_LOAD = new Semaphore(1);
 
+  /* This function is intended to be called from the "Walker_Unit" tab group. It
+   * is not intended to be called from the *parent of* the "Walker_Unit" tab
+   * group.
+   */
   loadWalkerUnit() {
-    if (!MUTEX_LOAD_WALKER_UNIT.tryAcquire()) {
-      return;
-    }
-
     String tabgroup   = "Walker_Unit";
     String childUuid  = getUuid(tabgroup);
     String parentUuid = getUuid(parentTabgroup__);
-    String rowId      = String.valueOf(highlightedRow()   );
+    String rowId      = String.valueOf(highlightedRow   ());
     String walkerId   = String.valueOf(highlightedWalker());
+
+    // The selected walker unit is already loaded
+    if (
+        getDisplayedTabGroup().equals(tabgroup) &&
+        highlightedRow   () == selectedRow   () &&
+        highlightedWalker() == selectedWalker()
+    ) {
+      return;
+    }
+
+    // We are still waiting for a previous `loadWalkerUnit` to complete
+    if (!MUTEX_WALKER_UNIT_LOAD.tryAcquire()) {
+      return;
+    }
 
     String q = "";
     q += " SELECT uuid";
@@ -1829,26 +2345,126 @@ addOnEvent("Survey_Unit/Survey_Unit/Walker_Units", "click", "loadEntity()");
 
     FetchCallback loadWalkerUnit = new FetchCallback() {
       onFetch(result) {
+        // 1. An "blur" event will not be triggered by the following steps. We
+        //    must zero-out all blank fields manually.
+        zeroIfBlank();
+
+        // 2. Leaving "Walker_Unit" calls `initHighlighted`, so we must store
+        //    (and later restore) the highlighted cell.
+        int highlightedRow    = highlightedRow   ();
+        int highlightedWalker = highlightedWalker();
+
+        // 3. Leave "Walker_Unit".
+        if (getDisplayedTabGroup().equals(tabgroup))
+          cancelTabGroup(tabgroup, false);
+
+        // 4. Restore the highlighted cell.
+        highlightedRow   (highlightedRow   );
+        highlightedWalker(highlightedWalker);
+
+        // 5. Re-enter "Walker_Unit" with the desired record loaded.
         if (result == null || result.size() == 0) {
+          parentTabgroup = "Survey_Unit";
           newWalkerUnit();
         } else {
           String uuid = result.get(0).get(0);
           loadWalkerUnitFrom(uuid);
         }
-        saveTabGroup("Walker_Unit");
 
-        MUTEX_LOAD_WALKER_UNIT.release();
+        // 6. The `loadWalkerUnit` is effectively finished.
+        MUTEX_WALKER_UNIT_LOAD.release();
       }
     };
 
     fetchAll(q, loadWalkerUnit);
   }
 
-  addOnEvent("Walker_Unit/Walker_Unit/Up",    "click", "gridUp        ()");
-  addOnEvent("Walker_Unit/Walker_Unit/Down",  "click", "gridDown      ()");
-  addOnEvent("Walker_Unit/Walker_Unit/Left",  "click", "gridLeft      ()");
-  addOnEvent("Walker_Unit/Walker_Unit/Right", "click", "gridRight     ()");
-  addOnEvent("Walker_Unit/Walker_Unit/Load",  "click", "loadWalkerUnit()");
+  // Overrides autogen's definition
+  onClickSurveyUnitAddNewWalkerUnit () {
+    String tabgroup = "Survey_Unit";
+    if (isNull(getUuid(tabgroup))){
+      showToast("{You_must_save_this_tabgroup_first}");
+      return;
+    }
+    parentTabgroup   = tabgroup;
+    parentTabgroup__ = tabgroup;
+    loadWalkerUnit();
+  }
+
+  getZeroableRefs() {
+    List   elemNames = new ArrayList(); // names of zeroable elements
+    List   refs      = new ArrayList(); // references of zeroable elements
+    String fmtRef    = "Walker_Unit/Walker_Unit/%s";
+
+    // 1. Write the element names
+    elemNames.add("Ancient");
+    elemNames.add("Modern");
+    elemNames.add("A_C");
+    elemNames.add("Daub");
+    elemNames.add("HM");
+    elemNames.add("Lithic");
+    elemNames.add("Glass");
+    elemNames.add("Other");
+
+    // 2. Format the element names into refs
+    for (e : elemNames) {
+      String ref = replaceFirst(fmtRef, e);
+      refs.add(ref);
+    }
+
+    return refs;
+  }
+
+  zeroIfBlank() {
+    for (ref : getZeroableRefs()) {
+      zeroIfBlank(ref);
+    }
+  }
+
+  zeroIfBlank(String ref) {
+    String blank = "";
+    String zero  = "0";
+    String val   = getFieldValue(ref);
+    if (blank.equals(val)) {
+      setFieldValue(ref, zero);
+    }
+  }
+
+  blankIfZero(String ref) {
+    String blank = "";
+    String zero  = "0";
+    String val   = getFieldValue(ref);
+    if (zero.equals(val)) {
+      setFieldValue(ref, blank);
+    }
+  }
+
+  for (ref : getZeroableRefs()) {
+    String focus = "blankIfZero(\"%s\")"; focus = replaceFirst(focus, ref);
+    String blur  = "zeroIfBlank(\"%s\")"; blur  = replaceFirst(blur,  ref);
+
+    addOnEvent(ref, "focus", focus);
+    addOnEvent(ref, "blur",  blur );
+  }
+
+  addOnEvent("Walker_Unit/Walker_Unit/Zero_Row_And_Next_1", "click", "zeroRowAndNext()");
+  addOnEvent("Walker_Unit/Walker_Unit/Zero_Row_And_Next_2", "click", "zeroRowAndNext()");
+  addOnEvent("Walker_Unit",                                 "show",  "zeroRowAndNextComplete()");
+  addOnEvent("Walker_Unit/Walker_Unit/Next_Walker_Unit_1",    "click", "nextWalkerUnit()");
+  addOnEvent("Walker_Unit/Walker_Unit/Next_Walker_Unit_2",    "click", "nextWalkerUnit()");
+
+  addOnEvent("Walker_Unit/Walker_Unit/Delete_Row", "click",  "deleteRow      ()");
+  addOnEvent("Walker_Unit/Walker_Unit/Up",         "click",  "gridUp         ()");
+  addOnEvent("Walker_Unit/Walker_Unit/Down",       "click",  "gridDown       ()");
+  addOnEvent("Walker_Unit/Walker_Unit/Left",       "click",  "gridLeft       ()");
+  addOnEvent("Walker_Unit/Walker_Unit/Right",      "click",  "gridRight      ()");
+  addOnEvent("Walker_Unit/Walker_Unit/Load",       "click",  "loadWalkerUnit ()");
+  addOnEvent("Walker_Unit",                        "create", "onCreateWalkerUnit()");
+  addOnEvent("Walker_Unit",                        "fetch",  "updateGridDimsVars()");
+  addOnEvent("Walker_Unit",                        "show",   "redrawGrid()");
+  addOnEvent("Walker_Unit",                        "leave",  "initHighlighted()");
+
+  addOnEvent("Survey_Unit",                        "create", "onCreateSurveyUnit()");
 
   persistOverSessions("Control/Main/Number_of_Rows");
   persistOverSessions("Control/Main/Number_of_Walkers");

@@ -24,8 +24,11 @@
           <Control>
             <Main>
               <Add_New_Survey_Unit/>
+              <Next_Survey_Unit_ID/>
               <Number_of_Rows/>
               <Number_of_Walkers/>
+              <Row_Interval/>
+              <Walker_Interval/>
             </Main>
             <Search>
               <Colgroup_0>
@@ -42,6 +45,8 @@
             <Vars>
               <Highlighted_Row/>
               <Highlighted_Walker/>
+              <Number_of_Rows/>
+              <Number_of_Walkers/>
             </Vars>
           </Control>
           <Survey_Unit>
@@ -53,6 +58,8 @@
             <Vars>
               <Number_of_Rows/>
               <Number_of_Walkers/>
+              <Row_Interval/>
+              <Walker_Interval/>
             </Vars>
           </Survey_Unit>
           <Walker_Unit>
@@ -61,13 +68,13 @@
               <Grid/>
               <Colgroup_0>
                 <Col_0>
-                  <group_tl/>
+                  <Delete_Row/>
                 </Col_0>
                 <Col_1>
                   <Up/>
                 </Col_1>
                 <Col_2>
-                  <group_tr/>
+                  <Zero_Row_And_Next_1/>
                 </Col_2>
               </Colgroup_0>
               <Colgroup_1>
@@ -83,62 +90,97 @@
               </Colgroup_1>
               <Colgroup_2>
                 <Col_0>
-                  <group_bl/>
+                  <N_A/>
                 </Col_0>
                 <Col_1>
                   <Down/>
                 </Col_1>
                 <Col_2>
-                  <group_br/>
+                  <Next_Walker_Unit_1/>
                 </Col_2>
               </Colgroup_2>
               <Colgroup_3>
                 <Col_0>
-                  <Row_ID/>
+                  <Ancient/>
                 </Col_0>
                 <Col_1>
-                  <Walker_ID/>
+                  <Ancient_M_2/>
                 </Col_1>
+                <Col_2>
+                  <HM/>
+                </Col_2>
               </Colgroup_3>
               <Colgroup_4>
                 <Col_0>
-                  <Ancient_Count/>
+                  <Modern/>
                 </Col_0>
                 <Col_1>
-                  <Modern_Count/>
+                  <Modern_M_2/>
                 </Col_1>
+                <Col_2>
+                  <Lithic/>
+                </Col_2>
               </Colgroup_4>
               <Colgroup_5>
                 <Col_0>
-                  <A_C_Count/>
+                  <A_C/>
                 </Col_0>
                 <Col_1>
-                  <HM_Count/>
+                  <A_C_M_2/>
                 </Col_1>
+                <Col_2>
+                  <Glass/>
+                </Col_2>
               </Colgroup_5>
               <Colgroup_6>
                 <Col_0>
-                  <Daub_Count/>
+                  <Daub/>
                 </Col_0>
                 <Col_1>
-                  <Other/>
+                  <Daub_M_2/>
                 </Col_1>
+                <Col_2>
+                  <Other/>
+                </Col_2>
               </Colgroup_6>
+              <Notes/>
+              <Colgroup_7>
+                <Col_0>
+                  <Zero_Row_And_Next_2/>
+                </Col_0>
+                <Col_1>
+                  <Next_Walker_Unit_2/>
+                </Col_1>
+              </Colgroup_7>
+              <Chronology/>
+              <Fragment/>
+              <Wear/>
+              <Next_Survey_Unit/>
             </Walker_Unit>
+            <Vars>
+              <Row_ID/>
+              <Walker_ID/>
+            </Vars>
           </Walker_Unit>
           <logic/>
         </faims>
       </instance>
+      <bind type="decimal" nodeset="/faims/Control/Main/Next_Survey_Unit_ID"/>
       <bind type="decimal" nodeset="/faims/Control/Main/Number_of_Rows"/>
       <bind type="decimal" nodeset="/faims/Control/Main/Number_of_Walkers"/>
-      <bind type="decimal" nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_3/Col_0/Row_ID"/>
-      <bind type="decimal" nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_3/Col_1/Walker_ID"/>
-      <bind type="decimal" nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_4/Col_0/Ancient_Count"/>
-      <bind type="decimal" nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_4/Col_1/Modern_Count"/>
-      <bind type="decimal" nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_5/Col_0/A_C_Count"/>
-      <bind type="decimal" nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_5/Col_1/HM_Count"/>
-      <bind type="decimal" nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_6/Col_0/Daub_Count"/>
-      <bind type="decimal" nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_6/Col_1/Other"/>
+      <bind type="decimal" nodeset="/faims/Control/Main/Row_Interval"/>
+      <bind type="decimal" nodeset="/faims/Control/Main/Walker_Interval"/>
+      <bind type="decimal" nodeset="/faims/Survey_Unit/Survey_Unit/Survey_Unit_ID"/>
+      <bind type="decimal" nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_3/Col_0/Ancient"/>
+      <bind type="decimal" nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_3/Col_2/HM"/>
+      <bind type="decimal" nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_4/Col_0/Modern"/>
+      <bind type="decimal" nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_4/Col_2/Lithic"/>
+      <bind type="decimal" nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_5/Col_0/A_C"/>
+      <bind type="decimal" nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_5/Col_2/Glass"/>
+      <bind type="decimal" nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_6/Col_0/Daub"/>
+      <bind type="decimal" nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_6/Col_2/Other"/>
+      <bind type="decimal" nodeset="/faims/Walker_Unit/Vars/Row_ID"/>
+      <bind type="decimal" nodeset="/faims/Walker_Unit/Vars/Walker_ID"/>
     </model>
   </h:head>
   <h:body>
@@ -183,11 +225,20 @@
         <trigger ref="Add_New_Survey_Unit">
           <label>{Add_New_Survey_Unit}</label>
         </trigger>
+        <input ref="Next_Survey_Unit_ID" faims_style_class="required">
+          <label>{Next_Survey_Unit_ID}</label>
+        </input>
         <input ref="Number_of_Rows">
-          <label>{Number_of_Rows}</label>
+          <label>{Starting_Number_of_Rows}</label>
         </input>
         <input ref="Number_of_Walkers">
           <label>{Number_of_Walkers}</label>
+        </input>
+        <input ref="Row_Interval">
+          <label>{Row_Interval}</label>
+        </input>
+        <input ref="Walker_Interval">
+          <label>{Walker_Interval}</label>
         </input>
       </group>
       <group ref="Search" faims_scrollable="false">
@@ -230,6 +281,12 @@
         <input ref="Highlighted_Walker">
           <label>{Highlighted_Walker}</label>
         </input>
+        <input ref="Number_of_Rows">
+          <label>{Number_of_Rows}</label>
+        </input>
+        <input ref="Number_of_Walkers">
+          <label>{Number_of_Walkers}</label>
+        </input>
       </group>
     </group>
     <group ref="Survey_Unit" faims_archent_type="Survey Unit">
@@ -258,6 +315,12 @@
         <input faims_attribute_type="measure" ref="Number_of_Walkers" faims_attribute_name="Number of Walkers">
           <label>{Number_of_Walkers}</label>
         </input>
+        <input faims_attribute_type="measure" ref="Row_Interval" faims_attribute_name="Row Interval">
+          <label>{Row_Interval}</label>
+        </input>
+        <input faims_attribute_type="measure" ref="Walker_Interval" faims_attribute_name="Walker Interval">
+          <label>{Walker_Interval}</label>
+        </input>
       </group>
     </group>
     <group ref="Walker_Unit" faims_archent_type="Walker Unit">
@@ -274,9 +337,9 @@
           <label/>
           <group ref="Col_0" faims_style="even">
             <label/>
-            <group ref="group_tl">
-              <label>{group_tl}</label>
-            </group>
+            <trigger ref="Delete_Row">
+              <label>{Delete_Row}</label>
+            </trigger>
           </group>
           <group ref="Col_1" faims_style="even">
             <label/>
@@ -286,9 +349,9 @@
           </group>
           <group ref="Col_2" faims_style="even">
             <label/>
-            <group ref="group_tr">
-              <label>{group_tr}</label>
-            </group>
+            <trigger ref="Zero_Row_And_Next_1">
+              <label>{Next_Row}</label>
+            </trigger>
           </group>
         </group>
         <group ref="Colgroup_1" faims_style="orientation">
@@ -316,9 +379,13 @@
           <label/>
           <group ref="Col_0" faims_style="even">
             <label/>
-            <group ref="group_bl">
-              <label>{group_bl}</label>
-            </group>
+            <select faims_attribute_type="vocab" ref="N_A" faims_attribute_name="N A">
+              <label>{N_A}</label>
+              <item>
+                <label>Options not loaded</label>
+                <value>0</value>
+              </item>
+            </select>
           </group>
           <group ref="Col_1" faims_style="even">
             <label/>
@@ -328,23 +395,29 @@
           </group>
           <group ref="Col_2" faims_style="even">
             <label/>
-            <group ref="group_br">
-              <label>{group_br}</label>
-            </group>
+            <trigger ref="Next_Walker_Unit_1">
+              <label>{Next_Cell}</label>
+            </trigger>
           </group>
         </group>
         <group ref="Colgroup_3" faims_style="orientation">
           <label/>
           <group ref="Col_0" faims_style="even">
             <label/>
-            <input faims_attribute_type="measure" ref="Row_ID" faims_attribute_name="Row ID" faims_read_only="true">
-              <label>{Row_ID}</label>
+            <input faims_attribute_type="measure" ref="Ancient" faims_attribute_name="Ancient">
+              <label>{Ancient}</label>
             </input>
           </group>
           <group ref="Col_1" faims_style="even">
             <label/>
-            <input faims_attribute_type="measure" ref="Walker_ID" faims_attribute_name="Walker ID" faims_read_only="true">
-              <label>{Walker_ID}</label>
+            <trigger ref="Ancient_M_2">
+              <label>{Add_Ancient_m_}</label>
+            </trigger>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <input faims_attribute_type="measure" ref="HM" faims_attribute_name="HM">
+              <label>{HM}</label>
             </input>
           </group>
         </group>
@@ -352,14 +425,20 @@
           <label/>
           <group ref="Col_0" faims_style="even">
             <label/>
-            <input faims_attribute_type="measure" ref="Ancient_Count" faims_attribute_name="Ancient Count">
-              <label>{Ancient_Count}</label>
+            <input faims_attribute_type="measure" ref="Modern" faims_attribute_name="Modern">
+              <label>{Modern}</label>
             </input>
           </group>
           <group ref="Col_1" faims_style="even">
             <label/>
-            <input faims_attribute_type="measure" ref="Modern_Count" faims_attribute_name="Modern Count">
-              <label>{Modern_Count}</label>
+            <trigger ref="Modern_M_2">
+              <label>{Add_Modern_m_}</label>
+            </trigger>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <input faims_attribute_type="measure" ref="Lithic" faims_attribute_name="Lithic">
+              <label>{Lithic}</label>
             </input>
           </group>
         </group>
@@ -367,14 +446,20 @@
           <label/>
           <group ref="Col_0" faims_style="even">
             <label/>
-            <input faims_attribute_type="measure" ref="A_C_Count" faims_attribute_name="A C Count">
+            <input faims_attribute_type="measure" ref="A_C" faims_attribute_name="A C">
               <label>{A_C_Count}</label>
             </input>
           </group>
           <group ref="Col_1" faims_style="even">
             <label/>
-            <input faims_attribute_type="measure" ref="HM_Count" faims_attribute_name="HM Count">
-              <label>{HM_Count}</label>
+            <trigger ref="A_C_M_2">
+              <label>{Add_A_C_m_}</label>
+            </trigger>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <input faims_attribute_type="measure" ref="Glass" faims_attribute_name="Glass">
+              <label>{Glass}</label>
             </input>
           </group>
         </group>
@@ -382,17 +467,74 @@
           <label/>
           <group ref="Col_0" faims_style="even">
             <label/>
-            <input faims_attribute_type="measure" ref="Daub_Count" faims_attribute_name="Daub Count">
-              <label>{Daub_Count}</label>
+            <input faims_attribute_type="measure" ref="Daub" faims_attribute_name="Daub">
+              <label>{Daub}</label>
             </input>
           </group>
           <group ref="Col_1" faims_style="even">
+            <label/>
+            <group ref="Daub_M_2">
+              <label>{Daub_M_2}</label>
+            </group>
+          </group>
+          <group ref="Col_2" faims_style="even">
             <label/>
             <input faims_attribute_type="measure" ref="Other" faims_attribute_name="Other">
               <label>{Other}</label>
             </input>
           </group>
         </group>
+        <input faims_attribute_type="measure" ref="Notes" faims_attribute_name="Notes">
+          <label>{Notes}</label>
+        </input>
+        <group ref="Colgroup_7" faims_style="orientation">
+          <label/>
+          <group ref="Col_0" faims_style="even">
+            <label/>
+            <trigger ref="Zero_Row_And_Next_2">
+              <label>{Next_Row}</label>
+            </trigger>
+          </group>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <trigger ref="Next_Walker_Unit_2">
+              <label>{Next_Cell}</label>
+            </trigger>
+          </group>
+        </group>
+        <select faims_attribute_type="vocab" ref="Chronology" faims_attribute_name="Chronology">
+          <label>{Chronology}</label>
+          <item>
+            <label>Options not loaded</label>
+            <value>0</value>
+          </item>
+        </select>
+        <select faims_attribute_type="vocab" ref="Fragment" faims_attribute_name="Fragment">
+          <label>{Fragment}</label>
+          <item>
+            <label>Options not loaded</label>
+            <value>0</value>
+          </item>
+        </select>
+        <select faims_attribute_type="vocab" ref="Wear" faims_attribute_name="Wear">
+          <label>{Wear}</label>
+          <item>
+            <label>Options not loaded</label>
+            <value>0</value>
+          </item>
+        </select>
+        <trigger ref="Next_Survey_Unit">
+          <label>{Next_Survey_Unit}</label>
+        </trigger>
+      </group>
+      <group ref="Vars">
+        <label>{Vars}</label>
+        <input faims_attribute_type="measure" ref="Row_ID" faims_attribute_name="Row ID" faims_read_only="true">
+          <label>{Row_ID}</label>
+        </input>
+        <input faims_attribute_type="measure" ref="Walker_ID" faims_attribute_name="Walker ID" faims_read_only="true">
+          <label>{Walker_ID}</label>
+        </input>
       </group>
     </group>
   </h:body>
