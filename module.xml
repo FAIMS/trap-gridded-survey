@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--@PREPROC:  ./preproc.sh -->
 <!--@POSTPROC: ./postproc.sh -->
 <module suppressWarnings="true">
 
@@ -20,10 +21,14 @@
       <!--TODO: Validate. User cannot proceed unless filled in.-->
     </Number_of_Walkers>
     <Row_Interval      b="decimal">
+      Row Interval (m)
       <!--TODO: Validate. User cannot proceed unless filled in.-->
+      <!--TODO: This must be inherited by the Survey Unit-->
     </Row_Interval>
     <Walker_Interval      b="decimal">
+      Walker Interval (m)
       <!--TODO: Validate. User cannot proceed unless filled in.-->
+      <!--TODO: This must be inherited by the Survey Unit-->
     </Walker_Interval>
   </Main>
   <search/>
@@ -32,6 +37,8 @@
     <Highlighted_Walker/>
     <Number_of_Rows/>
     <Number_of_Walkers/>
+    <Row_Interval/>
+    <Walker_Interval/>
   </Vars>
 </Control>
 
@@ -49,14 +56,10 @@
   </Vars>
 </Survey_Unit>
 
-<!--TODO: We need to zero out new records. *and save* (not do the ignore autosaving thing)-->
-<!--      This will require additions to the DOM.-->
-
-<!--TODO: Disable duplication of these-->
 <Walker_Unit>
   <Walker_Unit>
     <!--TODO: This takes a lot of time to update.-->
-    <Survey_Unit_ID t="webview"/>
+    <Survey_Unit_ID t="webview" f="nolabel"/>
     <Grid           t="webview" f="nolabel"/>
     <!--D-Pad-->
     <cols>
@@ -87,40 +90,45 @@
     <!--Primary recording fields-->
     <cols>
       <Ancient b="decimal"/>
-      <Ancient_M_2 t="button">
-        Add Ancient m&#178;
-        <!--TODO:-->
-      </Ancient_M_2>
+      <Add_Ancient_M_2 t="button">
+        Anc. m&#178;
+      </Add_Ancient_M_2>
       <HM     b="decimal"/>
+      <Add_HM_M_2 t="button">
+        HM m&#178;
+      </Add_HM_M_2>
     </cols>
     <cols>
       <Modern  b="decimal"/>
-      <Modern_M_2  t="button">
-        Add Modern m&#178;
-        <!--TODO:-->
-      </Modern_M_2>
+      <Add_Modern_M_2  t="button">
+        Mod. m&#178;
+      </Add_Modern_M_2>
       <Lithic b="decimal"/>
+      <Add_Lithic_M_2 t="button">
+        Lit. m&#178;
+      </Add_Lithic_M_2>
     </cols>
     <cols>
       <A_C     b="decimal">
-        A/C Count
+        A/C
       </A_C>
-      <A_C_M_2     t="button">
-        Add A/C m&#178;
-        <!--TODO:-->
-      </A_C_M_2>
+      <Add_A_C_M_2     t="button">
+        A/C m&#178;
+      </Add_A_C_M_2>
       <Glass  b="decimal"/>
+      <Add_Glass_M_2     t="button">
+        Gla. m&#178;
+      </Add_Glass_M_2>
     </cols>
     <cols>
-      <col>
-        <Daub b="decimal"/>
-      </col>
-      <col>
-        <Daub_M_2 t="group"/>
-      </col>
-      <col>
-        <Other  b="decimal"/>
-      </col>
+      <Daub b="decimal"/>
+      <Add_Daub_M_2 t="button">
+        Dau. m&#178;
+      </Add_Daub_M_2>
+      <Other  b="decimal"/>
+      <Add_Other_M_2 t="button">
+        Oth. m&#178;
+      </Add_Other_M_2>
     </cols>
     <Notes/>
     <!--Buttons-->
@@ -162,688 +170,13 @@
 </Walker_Unit>
 
 <logic><![CDATA[
-/************************* SURVEY UNIT ID POPULATION **************************/
-  setWebViewToIdentifier(String ref, String tabGroup) {
-    String uuid = getUuid(tabGroup);
-
-    if (isNull(uuid)) {
-      populateWebViewHtml(ref, "&nbsp;");
-      return;
-    }
-
-    String q = "";
-    q += "SELECT uuid, response ";
-    q += "  FROM latestnondeletedarchentformattedidentifiers ";
-    q += " WHERE uuid = '%s' ";
-    q  = replaceFirst(q, uuid);
-
-    cb = new FetchCallback() {
-      onFetch(result) {
-        identifier  = result.get(1);
-
-        populateWebViewHtml(ref, identifier);
-      }
-    };
-
-    fetchOne(q, cb);
-  }
-
-  updateSurveyUnitId() {
-    String parentTabGroup = "Survey_Unit";
-    String ref            = "Walker_Unit/Walker_Unit/Survey_Unit_ID";
-    setWebViewToIdentifier(ref, parentTabGroup);
-  }
-
-  // TODO: This doesn't work with search
-  addOnEvent("Walker_Unit", "create", "updateSurveyUnitId()");
-  addOnEvent("Walker_Unit", "fetch",  "updateSurveyUnitId()");
-
-/************************************ GRID ************************************/
-  import java.util.concurrent.Semaphore;
-
-  getGridHtml(
-      int numberOfRows,   int numberOfWalkers,
-      int highlightedRow, int highlightedWalker,
-      int selectedRow,    int selectedWalker
-  ) {
-    // In a probably vain attempt to improve performance, this code is valid
-    // HTML5.
-    String html = "";
-
-    html += "<!DOCTYPE html>";
-    html += "<html>";
-    html += "  <head>";
-    html += "    <title>Grid</title>";
-    html += "    <style>";
-    html += "      table {";
-    html += "        width: 100%;";
-    html += "        border-collapse: separate;";
-    html += "        border-spacing:  0px;";
-    html += "      }";
-    html += "      td {";
-    html += "        padding: 3px;";
-    html += "        border: 1px solid #000000;";
-    html += "      }";
-    html += "      td.highlighted {";
-    html += "        padding: 0px;";
-    html += "        border:  3px double #000000;";
-    html += "        background-color: #CCCCCC;";
-    html += "      }";
-    html += "      td.selected {";
-    html += "        background-color: #00AA00;";
-    html += "        color:            #FFFFFF;";
-    html += "      }";
-    html += "    </style>";
-    html += "  </head>";
-    html += "  <table>";
-
-    for (int i = numberOfRows; i >= 1; i--) {
-      html += "    <tr>";
-      for (int j = 1; j <= numberOfWalkers; j++) {
-        Boolean isHighlighted = (i == highlightedRow && j == highlightedWalker);
-        Boolean isSelected    = (i == selectedRow    && j == selectedWalker);
-
-        String  cssClass = "";
-        if (isHighlighted) cssClass += " highlighted";
-        if (isSelected)    cssClass += " selected";
-
-        String htmlRow = "";
-        htmlRow += "      <td class=\"{cssClass}\">";
-        htmlRow += "        Row {row}, Walker {walker}";
-        htmlRow += "      </td>";
-        htmlRow  = replaceFirst(htmlRow, "{cssClass}", cssClass);
-        htmlRow  = replaceFirst(htmlRow, "{row}",      i);
-        htmlRow  = replaceFirst(htmlRow, "{walker}",   j);
-
-        html += htmlRow;
-      }
-      html += "    </tr>";
-    }
-    html += "  </table>";
-    html += "</html>";
-
-    return html;
-  }
-
-  getFieldValueAsInt(String ref) {
-    String  val      = getFieldValue(ref);
-    int valAsInteger = 0;
-
-    try {
-      valAsInteger = Integer.valueOf(val);
-    } catch (Exception e) { ; }
-
-    return valAsInteger.intValue();
-  }
-
-  clip(int x, int min, int max) {
-    if (x > max) return max;
-    if (x < min) return min;
-    return x;
-  }
-
-  numberOfRows() {
-    String ref = "Control/Vars/Number_of_Rows";
-    return getFieldValueAsInt(ref);
-  }
-
-  // A mutex is required for `numberOfRows(int)` to handle users double-clicking
-  // the 'Add Row' and 'Delete Row' buttons.
-  MUTEX_WALKER_UNIT_ROWS = new Semaphore(1);
-
-  /* It is assumed that this function is only ever called while "Walker_Unit" is
-   * displayed.
-   */
-  numberOfRows(int val) {
-    numberOfRows(val, "");
-  }
-
-  numberOfRows(int val, String callback) {
-    if (val < 1) val = 1; // `val` cannot be lower than 1.
-
-    String refRowsControl    = "Control/Vars/Number_of_Rows";
-    String refRowsSurveyUnit = "Survey_Unit/Vars/Number_of_Rows";
-    String parentTabGroup    = getTabGroupRef(refRowsSurveyUnit);
-    String parentUuid        = getUuid       (parentTabGroup);
-    String parentArchEntType = getArchEntType(parentTabGroup);
-    String attrName          = getAttributeName(refRowsSurveyUnit);
-    String numberOfRows      = String.valueOf(val);
-    List   geometry          = null;
-    List   attributes        = createAttributeList();
-
-    if (!getDisplayedTabGroup().equals("Walker_Unit"))
-      return;
-
-    if (!MUTEX_WALKER_UNIT_ROWS.tryAcquire()) {
-      return;
-    }
-
-    // 1. If getPreviousTabGroup() == parentTabGroup, the user will visit it
-    //    when they hit the back button. In this case, the value saved in the db
-    //    must be made consistent with the one in the UI.
-    if (getPreviousTabGroup().equals(parentTabGroup)) {
-      setFieldValue(refRowsSurveyUnit, numberOfRows);
-    }
-
-    // 2. Also update the value in `refRowsControl`, which is used as a global
-    //   variable.
-    setFieldValue(refRowsControl, numberOfRows);
-
-    // 3. Update 'Number of Rows' using saveArchEnt
-    SaveCallback release = new SaveCallback() {
-      onSave(uuid, newRecord) {
-        execute(callback);
-        MUTEX_WALKER_UNIT_ROWS.release();
-      }
-    };
-
-    Object a = createEntityAttribute(attrName, null, null, numberOfRows, null);
-    attributes.add(a);
-
-    saveArchEnt(parentUuid, parentArchEntType, geometry, attributes, release);
-
-    // 4. If the cursor (i.e. `highlightedRow()`) has changed, the entity under-
-    //    neath it should be loaded.
-    if (selectedRow() > highlightedRow()) {
-      highlightedWalker(selectedWalker());
-      loadWalkerUnit();
-    }
-  }
-
-  highlightedRow() {
-    String ref = "Control/Vars/Highlighted_Row";
-    int    val = getFieldValueAsInt(ref);
-
-    return clip(val, 1, numberOfRows());
-  }
-
-  highlightedRow(int val) {
-    val = clip(val, 1, numberOfRows());
-
-    String ref = "Control/Vars/Highlighted_Row";
-    setFieldValue(ref, String.valueOf(val));
-  }
-
-  selectedRow() {
-    String ref = "Walker_Unit/Vars/Row_ID";
-    return getFieldValueAsInt(ref);
-  }
-
-  numberOfWalkers() {
-    String ref = "Control/Vars/Number_of_Walkers";
-    return getFieldValueAsInt(ref);
-  }
-
-  highlightedWalker() {
-    String ref = "Control/Vars/Highlighted_Walker";
-    int    val = getFieldValueAsInt(ref);
-
-    return clip(val, 1, numberOfWalkers());
-  }
-
-  highlightedWalker(int val) {
-    val = clip(val, 1, numberOfWalkers());
-
-    String ref = "Control/Vars/Highlighted_Walker";
-    setFieldValue(ref, String.valueOf(val));
-  }
-
-  selectedWalker() {
-    String ref = "Walker_Unit/Vars/Walker_ID";
-    return getFieldValueAsInt(ref);
-  }
-
-  moveWalker(int delta) {
-    highlightedWalker(highlightedWalker() + delta);
-  }
-
-  moveRow(int delta) {
-    highlightedRow(highlightedRow() + delta);
-  }
-
-  initHighlighted() {
-    highlightedRow   (1);
-    highlightedWalker(1);
-  }
-
-  redrawGrid() {
-    String ref  = "Walker_Unit/Walker_Unit/Grid";
-    String html = getGridHtml(
-        numberOfRows(),   numberOfWalkers(),
-        highlightedRow(), highlightedWalker(),
-        selectedRow(),    selectedWalker()
-    );
-    populateWebViewHtml(ref, html);
-  }
-
-  zeroRow() {
-    String rowId          = String.valueOf(highlightedRow());
-    String tabgroup       = "Walker_Unit";
-    String parentTabGroup = "Survey_Unit";
-    String parentUuid     = getUuid(parentTabGroup);
-
-    String q = "";
-    q += " SELECT measure AS savedWalkerIds";
-    q += "   FROM latestnondeletedaentvalue";
-    q += "   JOIN attributekey USING (attributeid)";
-    q += "  WHERE attributename = 'Walker ID'";
-    q += "    AND uuid IN (";
-    q += "         SELECT uuid";
-    q += "           FROM latestnondeletedaentvalue";
-    q += "           JOIN attributekey USING (attributeid)";
-    q += "           JOIN parentchild ON (uuid = childuuid)";
-    q += "          WHERE measure = '{rowId}'";
-    q += "            AND attributename = 'Row ID'";
-    q += "            AND parentuuid = '{parentUuid}'";
-    q += "        )";
-    q  = replaceFirst(q, "{rowId}",      rowId);
-    q  = replaceFirst(q, "{parentUuid}", parentUuid);
-
-    FetchCallback zeroRow = new FetchCallback() {
-      onFetch(result) {
-        zeroRow(result);
-      }
-    };
-
-    fetchAll(q, zeroRow);
-  }
-
-  zeroRow(result) {
-    List   savedWalkerIds = new ArrayList();
-    List     allWalkerIds = new ArrayList();
-    List unsavedWalkerIds = new ArrayList();
-
-    // Populate `savedWalkerIds`
-    for (qRow : result) {
-      String savedWalkerId = qRow.get(0);
-      savedWalkerIds.add(savedWalkerId);
-    }
-
-    // Populate `allWalkerIds`
-    for (int i = 1; i <= numberOfWalkers(); i++) {
-      String unsavedWalkerId = String.valueOf(i);
-      unsavedWalkerIds.add(unsavedWalkerId);
-    }
-
-    // Compute `unsavedWalkerIds`
-    allWalkerIds.removeAll(savedWalkerIds);
-    unsavedWalkerIds = allWalkerIds;
-
-    // Create "Walker Unit" records which were previously unsaved
-    String       parentUuid = getUuid("Survey_Unit");
-    String       uuid       = null;
-    String       entityType = "Walker Unit";
-    List         geometry   = null;
-    List         attributes = createAttributeList();
-    SaveCallback relate     = new SaveCallback() {
-      onSave(uuid, newRecord) {
-        saveEntitiesToHierRel(
-          "Survey Unit - Walker Unit",
-          parentUuid,
-          uuid,
-          "Parent Of",
-          "Child Of",
-          ""
-        );
-      }
-    };
-    saveArchEnt(uuid, entityType, geometry, attributes, relate);
-  }
-
-  nextRow() {
-    if (highlightedRow() == numberOfRows()) {
-      numberOfRows(numberOfRows() + 1, "nextRow()");
-    } else {
-      moveWalker(-999);
-      moveRow(+1);
-      loadWalkerUnit();
-    }
-  }
-
-  nextWalkerUnit () {
-    if (highlightedWalker() == numberOfWalkers()) {
-      nextRow();
-    } else {
-      moveWalker(+1);
-      loadWalkerUnit();
-    }
-  }
-
-  gridUp   () { moveRow   (+1); redrawGrid(); }
-  gridDown () { moveRow   (-1); redrawGrid(); }
-  gridLeft () { moveWalker(-1); redrawGrid(); }
-  gridRight() { moveWalker(+1); redrawGrid(); }
-
-  addRow   () { numberOfRows(numberOfRows() + 1); redrawGrid(); }
-  deleteRow() { numberOfRows(numberOfRows() - 1); redrawGrid(); }
-
-  MUTEX_WALKER_ZERO_ROW = new Semaphore(1);
-  zeroRowAndNext() {
-    if (MUTEX_WALKER_ZERO_ROW.drainPermits() == 0) {
-      return;
-    }
-
-    dialog = showBusy("Confirming Zero Entries", "Please wait...");
-    zeroRow();
-    nextRow();
-  }
-
-  zeroRowAndNextComplete() {
-    if (dialog != null) {
-      dialog.dismiss();
-    }
-    MUTEX_WALKER_ZERO_ROW.release();
-  }
-
-  inheritSurveyUnitFields() {
-    copyFieldValue(
-      "Control/Main/Number_of_Rows",
-      "Control/Vars/Number_of_Rows",
-      false
-    );
-    copyFieldValue(
-      "Control/Main/Number_of_Walkers",
-      "Control/Vars/Number_of_Walkers",
-      false
-    );
-
-    copyFieldValue(
-      "Control/Main/Number_of_Rows",
-      "Survey_Unit/Vars/Number_of_Rows",
-      false
-    );
-    copyFieldValue(
-      "Control/Main/Number_of_Walkers",
-      "Survey_Unit/Vars/Number_of_Walkers",
-      false
-    );
-    copyFieldValue(
-      "Control/Main/Row_Interval",
-      "Survey_Unit/Vars/Row_Interval",
-      false
-    );
-    copyFieldValue(
-      "Control/Main/Walker_Interval",
-      "Survey_Unit/Vars/Walker_Interval",
-      false
-    );
-  }
-
-  onCreateSurveyUnit() {
-    inheritSurveyUnitFields();
-  }
-
-  inheritWalkerUnitFields() {
-    setFieldValue(
-      "Walker_Unit/Vars/Row_ID",
-      String.valueOf(highlightedRow())
-    );
-    setFieldValue(
-      "Walker_Unit/Vars/Walker_ID",
-      String.valueOf(highlightedWalker())
-    );
-  }
-
-  onCreateWalkerUnit() {
-    inheritWalkerUnitFields();
-    redrawGrid();
-    zeroIfBlank();
-  }
-
-  /* Fetches the 'Number of Rows' and 'Number of Walkers' attributes stored in
-   * the parent and loads them into the global vars. Here we have used fields
-   * as globals.
-   */
-  updateGridDimsVars() {
-    String tabgroup   = "Walker_Unit";
-    String childUuid  = getUuid(tabgroup);
-
-    String q = "";
-    q += " SELECT attributename, measure";
-    q += "   FROM latestnondeletedaentvalue";
-    q += "   JOIN attributekey USING (attributeid)";
-    q += "   JOIN parentchild ON (uuid = parentuuid)";
-    q += "  WHERE attributename IN ('Number of Rows', 'Number of Walkers')";
-    q += "    AND childuuid = '{childUuid}'";
-    q  = replaceFirst(q, "{childUuid}", childUuid);
-
-    FetchCallback updateGridDimsVars = new FetchCallback() {
-      onFetch(result) {
-        updateGridDimsVars(result);
-        redrawGrid();
-      }
-    };
-
-    fetchAll(q, updateGridDimsVars);
-    updateWalkerUnitParentVars(childUuid);
-  }
-
-  updateGridDimsVars(result) {
-    String refRows    = "Control/Vars/Number_of_Rows";
-    String refWalkers = "Control/Vars/Number_of_Walkers";
-
-    String attrNameRows    = getAttributeName(refRows);
-    String attrNameWalkers = getAttributeName(refWalkers);
-
-    if (result == null) return;
-    for (row : result) {
-      String attrName = row.get(0);
-      String attrVal  = row.get(1);
-
-      if (attrName.equals(attrNameRows   )) setFieldValue(refRows,    attrVal);
-      if (attrName.equals(attrNameWalkers)) setFieldValue(refWalkers, attrVal);
-    }
-  }
-
-  updateWalkerUnitParentVars(String childUuid) {
-    updateWalkerUnitParentVars(childUuid, "");
-  }
-
-  updateWalkerUnitParentVars(String childUuid, String callback) {
-    String q = "";
-    q += " SELECT parentuuid";
-    q += "   FROM parentchild";
-    q += "  WHERE childuuid='{childUuid}'";
-    q += "    AND parentparticipatesverb='Parent Of'";
-    q  = replaceFirst(q, "{childUuid}", childUuid);
-
-    FetchCallback updateWalkerUnitParentVars = new FetchCallback() {
-      onFetch(result) {
-        parentTabgroup   = "Survey_Unit";
-        parentTabgroup__ = "Survey_Unit";
-
-        if (result        == null) { execute(callback); return; }
-        if (result.size() == 0   ) { execute(callback); return; }
-
-        String parentUuid = result.get(0).get(0);
-        setUuid(parentTabgroup, parentUuid);
-
-        execute(callback);
-      }
-    };
-
-    fetchAll(q, updateWalkerUnitParentVars);
-  }
-
-  // TODO: Figure out how to get this to work with search.
-  // TODO: Loading *might* be broken; The list of child entities in the parent
-  // doesn't get refreshed after making a new Walker Unit via a loaded one.
-  // TODO: Loading might cause other child entities to be saved with incorrect
-  // relationships
-
-  // A mutex is required for `loadWalkerUnit` to handle users double-clicking
-  // the load button.
-  MUTEX_WALKER_UNIT_LOAD = new Semaphore(1);
-
-  /* This function is intended to be called from the "Walker_Unit" tab group. It
-   * is not intended to be called from the *parent of* the "Walker_Unit" tab
-   * group.
-   */
-  loadWalkerUnit() {
-    String tabgroup   = "Walker_Unit";
-    String childUuid  = getUuid(tabgroup);
-    String parentUuid = getUuid(parentTabgroup__);
-    String rowId      = String.valueOf(highlightedRow   ());
-    String walkerId   = String.valueOf(highlightedWalker());
-
-    // The selected walker unit is already loaded
-    if (
-        getDisplayedTabGroup().equals(tabgroup) &&
-        highlightedRow   () == selectedRow   () &&
-        highlightedWalker() == selectedWalker()
-    ) {
-      return;
-    }
-
-    // We are still waiting for a previous `loadWalkerUnit` to complete
-    if (!MUTEX_WALKER_UNIT_LOAD.tryAcquire()) {
-      return;
-    }
-
-    String q = "";
-    q += " SELECT uuid";
-    q += "   FROM latestnondeletedaentvalue";
-    q += "   JOIN attributekey using (attributeid)";
-    q += "  WHERE measure = '{walkerId}'";
-    q += "    AND attributename = 'Walker ID'";
-    q += "    AND uuid IN (";
-    q += "                 SELECT uuid";
-    q += "                   FROM latestnondeletedaentvalue";
-    q += "                   JOIN attributekey USING (attributeid)";
-    q += "                   JOIN parentchild ON (uuid = childuuid)";
-    q += "                  WHERE measure = '{rowId}'";
-    q += "                    AND attributename = 'Row ID'";
-    q += "                    AND parentuuid = '{parentUuid}'";
-    q += "        );";
-    q  = replaceFirst(q, "{rowId}",      rowId);
-    q  = replaceFirst(q, "{walkerId}",   walkerId);
-    q  = replaceFirst(q, "{parentUuid}", parentUuid);
-
-    FetchCallback loadWalkerUnit = new FetchCallback() {
-      onFetch(result) {
-        // 1. An "blur" event will not be triggered by the following steps. We
-        //    must zero-out all blank fields manually.
-        zeroIfBlank();
-
-        // 2. Leaving "Walker_Unit" calls `initHighlighted`, so we must store
-        //    (and later restore) the highlighted cell.
-        int highlightedRow    = highlightedRow   ();
-        int highlightedWalker = highlightedWalker();
-
-        // 3. Leave "Walker_Unit".
-        if (getDisplayedTabGroup().equals(tabgroup))
-          cancelTabGroup(tabgroup, false);
-
-        // 4. Restore the highlighted cell.
-        highlightedRow   (highlightedRow   );
-        highlightedWalker(highlightedWalker);
-
-        // 5. Re-enter "Walker_Unit" with the desired record loaded.
-        if (result == null || result.size() == 0) {
-          parentTabgroup = "Survey_Unit";
-          newWalkerUnit();
-        } else {
-          String uuid = result.get(0).get(0);
-          loadWalkerUnitFrom(uuid);
-        }
-
-        // 6. The `loadWalkerUnit` is effectively finished.
-        MUTEX_WALKER_UNIT_LOAD.release();
-      }
-    };
-
-    fetchAll(q, loadWalkerUnit);
-  }
-
-  // Overrides autogen's definition
-  onClickSurveyUnitAddNewWalkerUnit () {
-    String tabgroup = "Survey_Unit";
-    if (isNull(getUuid(tabgroup))){
-      showToast("{You_must_save_this_tabgroup_first}");
-      return;
-    }
-    parentTabgroup   = tabgroup;
-    parentTabgroup__ = tabgroup;
-    loadWalkerUnit();
-  }
-
-  getZeroableRefs() {
-    List   elemNames = new ArrayList(); // names of zeroable elements
-    List   refs      = new ArrayList(); // references of zeroable elements
-    String fmtRef    = "Walker_Unit/Walker_Unit/%s";
-
-    // 1. Write the element names
-    elemNames.add("Ancient");
-    elemNames.add("Modern");
-    elemNames.add("A_C");
-    elemNames.add("Daub");
-    elemNames.add("HM");
-    elemNames.add("Lithic");
-    elemNames.add("Glass");
-    elemNames.add("Other");
-
-    // 2. Format the element names into refs
-    for (e : elemNames) {
-      String ref = replaceFirst(fmtRef, e);
-      refs.add(ref);
-    }
-
-    return refs;
-  }
-
-  zeroIfBlank() {
-    for (ref : getZeroableRefs()) {
-      zeroIfBlank(ref);
-    }
-  }
-
-  zeroIfBlank(String ref) {
-    String blank = "";
-    String zero  = "0";
-    String val   = getFieldValue(ref);
-    if (blank.equals(val)) {
-      setFieldValue(ref, zero);
-    }
-  }
-
-  blankIfZero(String ref) {
-    String blank = "";
-    String zero  = "0";
-    String val   = getFieldValue(ref);
-    if (zero.equals(val)) {
-      setFieldValue(ref, blank);
-    }
-  }
-
-  for (ref : getZeroableRefs()) {
-    String focus = "blankIfZero(\"%s\")"; focus = replaceFirst(focus, ref);
-    String blur  = "zeroIfBlank(\"%s\")"; blur  = replaceFirst(blur,  ref);
-
-    addOnEvent(ref, "focus", focus);
-    addOnEvent(ref, "blur",  blur );
-  }
-
-  addOnEvent("Walker_Unit/Walker_Unit/Zero_Row_And_Next_1", "click", "zeroRowAndNext()");
-  addOnEvent("Walker_Unit/Walker_Unit/Zero_Row_And_Next_2", "click", "zeroRowAndNext()");
-  addOnEvent("Walker_Unit",                                 "show",  "zeroRowAndNextComplete()");
-  addOnEvent("Walker_Unit/Walker_Unit/Next_Walker_Unit_1",    "click", "nextWalkerUnit()");
-  addOnEvent("Walker_Unit/Walker_Unit/Next_Walker_Unit_2",    "click", "nextWalkerUnit()");
-
-  addOnEvent("Walker_Unit/Walker_Unit/Delete_Row", "click",  "deleteRow      ()");
-  addOnEvent("Walker_Unit/Walker_Unit/Up",         "click",  "gridUp         ()");
-  addOnEvent("Walker_Unit/Walker_Unit/Down",       "click",  "gridDown       ()");
-  addOnEvent("Walker_Unit/Walker_Unit/Left",       "click",  "gridLeft       ()");
-  addOnEvent("Walker_Unit/Walker_Unit/Right",      "click",  "gridRight      ()");
-  addOnEvent("Walker_Unit/Walker_Unit/Load",       "click",  "loadWalkerUnit ()");
-  addOnEvent("Walker_Unit",                        "create", "onCreateWalkerUnit()");
-  addOnEvent("Walker_Unit",                        "fetch",  "updateGridDimsVars()");
-  addOnEvent("Walker_Unit",                        "show",   "redrawGrid()");
-  addOnEvent("Walker_Unit",                        "leave",  "initHighlighted()");
-
-  addOnEvent("Survey_Unit",                        "create", "onCreateSurveyUnit()");
-
-  persistOverSessions("Control/Main/Number_of_Rows");
-  persistOverSessions("Control/Main/Number_of_Walkers");
+  <!--@SOURCE: logic/header.bsh-->
+  <!--@SOURCE: logic/util.bsh-->
+
+  <!--@SOURCE: logic/grid.bsh-->
+  <!--@SOURCE: logic/navigation-drawer.bsh-->
+  <!--@SOURCE: logic/persistence.bsh-->
+  <!--@SOURCE: logic/survey-unit-id-population.bsh-->
 ]]></logic>
 
 </module>

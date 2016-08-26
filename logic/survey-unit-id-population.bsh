@@ -1,0 +1,36 @@
+/************************* SURVEY UNIT ID POPULATION **************************/
+setWebViewToIdentifier(String ref, String tabGroup) {
+  String uuid = getUuid(tabGroup);
+
+  if (isNull(uuid)) {
+    populateWebViewHtml(ref, "&nbsp;");
+    return;
+  }
+
+  String q = "";
+  q += "SELECT uuid, response ";
+  q += "  FROM latestnondeletedarchentformattedidentifiers ";
+  q += " WHERE uuid = '%s' ";
+  q  = replaceFirst(q, uuid);
+
+  cb = new FetchCallback() {
+    onFetch(result) {
+      String identifier = result.get(1);
+      identifier = "<b>Survey Unit ID</b>: " + identifier;
+
+      populateWebViewHtml(ref, identifier);
+    }
+  };
+
+  fetchOne(q, cb);
+}
+
+updateSurveyUnitId() {
+  String parentTabGroup = "Survey_Unit";
+  String ref            = "Walker_Unit/Walker_Unit/Survey_Unit_ID";
+  setWebViewToIdentifier(ref, parentTabGroup);
+}
+
+// TODO: This doesn't work with search
+addOnEvent("Walker_Unit", "create", "updateSurveyUnitId()");
+addOnEvent("Walker_Unit", "fetch",  "updateSurveyUnitId()");

@@ -1,0 +1,45 @@
+/************************************ UTIL ************************************/
+isValidInt(String val) {
+  try {
+    Integer.valueOf(val);
+    return true;
+  } catch (Exception e) {
+    return false;
+  }
+}
+
+stringToFloat(String val) {
+  Float valAsFloat = 0;
+
+  try {
+    valAsFloat = Float.valueOf(val);
+  } catch (Exception e) { ; }
+
+  return valAsFloat.floatValue();
+}
+
+stringToInt(String val) {
+  Integer valAsInteger = 0;
+
+  try {
+    valAsInteger = Integer.valueOf(val);
+  } catch (Exception e) { ; }
+
+  return valAsInteger.intValue();
+}
+
+getFieldValueAsInt(String ref) {
+  String val = getFieldValue(ref);
+  return stringToInt(val);
+}
+
+getFieldValueAsFloat(String ref) {
+  String val = getFieldValue(ref);
+  return stringToFloat(val);
+}
+
+clip(int x, int min, int max) {
+  if (x > max) return max;
+  if (x < min) return min;
+  return x;
+}
