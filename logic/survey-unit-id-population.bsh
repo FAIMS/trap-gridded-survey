@@ -31,6 +31,5 @@ updateSurveyUnitId() {
   setWebViewToIdentifier(ref, parentTabGroup);
 }
 
-// TODO: This doesn't work with search
 addOnEvent("Walker_Unit", "create", "updateSurveyUnitId()");
 addOnEvent("Walker_Unit", "fetch",  "updateSurveyUnitId()");

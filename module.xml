@@ -15,19 +15,15 @@
     <autonum/>
     <Number_of_Rows    b="decimal">
       Starting Number of Rows
-      <!--TODO: Validate. User cannot proceed unless filled in.-->
     </Number_of_Rows>
     <Number_of_Walkers b="decimal">
-      <!--TODO: Validate. User cannot proceed unless filled in.-->
     </Number_of_Walkers>
     <Row_Interval      b="decimal">
       Row Interval (m)
-      <!--TODO: Validate. User cannot proceed unless filled in.-->
       <!--TODO: This must be inherited by the Survey Unit-->
     </Row_Interval>
     <Walker_Interval      b="decimal">
       Walker Interval (m)
-      <!--TODO: Validate. User cannot proceed unless filled in.-->
       <!--TODO: This must be inherited by the Survey Unit-->
     </Walker_Interval>
   </Main>
@@ -58,7 +54,6 @@
 
 <Walker_Unit>
   <Walker_Unit>
-    <!--TODO: This takes a lot of time to update.-->
     <Survey_Unit_ID t="webview" f="nolabel"/>
     <Grid           t="webview" f="nolabel"/>
     <!--D-Pad-->
@@ -160,7 +155,7 @@
       </opts>
     </Wear>
     <Next_Survey_Unit t="button">
-      <!--TODO: Implment me-->
+      <!--TODO: Implement me-->
     </Next_Survey_Unit>
   </Walker_Unit>
   <Vars>
@@ -173,10 +168,12 @@
   <!--@SOURCE: logic/header.bsh-->
   <!--@SOURCE: logic/util.bsh-->
 
+  <!--@SOURCE: logic/density.bsh-->
   <!--@SOURCE: logic/grid.bsh-->
   <!--@SOURCE: logic/navigation-drawer.bsh-->
   <!--@SOURCE: logic/persistence.bsh-->
   <!--@SOURCE: logic/survey-unit-id-population.bsh-->
+  <!--@SOURCE: logic/validation.bsh-->
 ]]></logic>
 
 </module>

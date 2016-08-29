@@ -83,7 +83,6 @@ updateGridCache(Object result) {
   }
 }
 
-// TODO Only refresh cache when absolutely needed
 redrawGrid() {
   redrawGrid(false);
 }
@@ -91,8 +90,10 @@ redrawGrid() {
 redrawGrid(Boolean doRefreshCache) {
   if (doRefreshCache) {
     updateGridCache("redrawGrid()");
+    //showWarning("", "Updating");
     return;
   }
+  //showWarning("", "Redrawing");
 
   String refGridWebView = "Walker_Unit/Walker_Unit/Grid";
   // In a probably vain attempt to improve performance, this code is valid
@@ -211,15 +212,16 @@ numberOfRows(int val) {
 numberOfRows(int val, String callback) {
   if (val < 1) val = 1; // `val` cannot be lower than 1.
 
-  String refRowsControl    = "Control/Vars/Number_of_Rows";
-  String refRowsSurveyUnit = "Survey_Unit/Vars/Number_of_Rows";
-  String parentTabGroup    = getTabGroupRef(refRowsSurveyUnit);
-  String parentUuid        = getUuid       (parentTabGroup);
-  String parentArchEntType = getArchEntType(parentTabGroup);
-  String attrName          = getAttributeName(refRowsSurveyUnit);
-  String numberOfRows      = String.valueOf(val);
-  List   geometry          = null;
-  List   attributes        = createAttributeList();
+  String  refRowsControl    = "Control/Vars/Number_of_Rows";
+  String  refRowsSurveyUnit = "Survey_Unit/Vars/Number_of_Rows";
+  String  parentTabGroup    = getTabGroupRef(refRowsSurveyUnit);
+  String  parentUuid        = getUuid       (parentTabGroup);
+  String  parentArchEntType = getArchEntType(parentTabGroup);
+  String  attrName          = getAttributeName(refRowsSurveyUnit);
+  String  numberOfRows      = String.valueOf(val);
+  List    geometry          = null;
+  List    attributes        = createAttributeList();
+  Boolean doLoadWalkerUnit  = selectedRow() > val;
 
   if (!getDisplayedTabGroup().equals("Walker_Unit"))
     return;
@@ -242,7 +244,10 @@ numberOfRows(int val, String callback) {
   // 3. Update 'Number of Rows' using saveArchEnt
   SaveCallback release = new SaveCallback() {
     onSave(uuid, newRecord) {
-      execute(callback);
+      if (!doLoadWalkerUnit) {
+        // Only execute callback if we don't be doing step 4.
+        execute(callback);
+      }
       MUTEX_WALKER_UNIT_ROWS.release();
     }
   };
@@ -254,9 +259,9 @@ numberOfRows(int val, String callback) {
 
   // 4. If the cursor (i.e. `highlightedRow()`) has changed, the entity under-
   //    neath it should be loaded.
-  if (selectedRow() > highlightedRow()) {
+  if (doLoadWalkerUnit) {
     highlightedWalker(selectedWalker());
-    loadWalkerUnit();
+    loadWalkerUnit(callback);
   }
 }
 
@@ -372,10 +377,6 @@ zeroRow(result) {
   allWalkerIds.removeAll(savedWalkerIds);
   unsavedWalkerIds = allWalkerIds;
 
-  showWarning("saved",   "" +   savedWalkerIds);
-  showWarning("unsaved", "" + unsavedWalkerIds);
-  //showWarning("all",     "" +     allWalkerIds);
-
   // Create "Walker Unit" records which were previously unsaved
   rowId = String.valueOf(selectedRow());
   for (String walkerId : unsavedWalkerIds) {
@@ -407,7 +408,7 @@ nextRow() {
     highlightedWalker(1);
     highlightedRow   (1+selectedRow());
 
-    loadWalkerUnit();
+    loadWalkerUnit("redrawGrid()");
   }
 }
 
@@ -420,13 +421,13 @@ nextWalkerUnit () {
   }
 }
 
-gridUp   () { moveRow   (+1); redrawGrid(true); }
-gridDown () { moveRow   (-1); redrawGrid(true); }
-gridLeft () { moveWalker(-1); redrawGrid(true); }
-gridRight() { moveWalker(+1); redrawGrid(true); }
+gridUp   () { moveRow   (+1); redrawGrid(); }
+gridDown () { moveRow   (-1); redrawGrid(); }
+gridLeft () { moveWalker(-1); redrawGrid(); }
+gridRight() { moveWalker(+1); redrawGrid(); }
 
-addRow   () { numberOfRows(numberOfRows() + 1); redrawGrid(true); }
-deleteRow() { numberOfRows(numberOfRows() - 1); redrawGrid(true); }
+addRow   () { numberOfRows(numberOfRows() + 1, "redrawGrid(true)"); }
+deleteRow() { numberOfRows(numberOfRows() - 1, "redrawGrid(true)"); }
 
 zeroRowAndNext() {
   if (MUTEX_WALKER_ZERO_ROW.drainPermits() == 0) {
@@ -438,6 +439,8 @@ zeroRowAndNext() {
   nextRow();
 }
 
+/* Intended to be called when `zeroRowAndNext()` is finished executing.
+ */
 zeroRowAndNextComplete() {
   if (dialog != null) {
     dialog.dismiss();
@@ -506,7 +509,7 @@ inheritWalkerUnitFields() {
 
 onCreateWalkerUnit() {
   inheritWalkerUnitFields();
-  redrawGrid(true);
+  redrawGrid();
   zeroIfBlank();
 }
 
@@ -515,6 +518,10 @@ onCreateWalkerUnit() {
  * as globals.
  */
 updateGridDimsVars() {
+  updateGridDimsVars("redrawGrid(true)");
+}
+
+updateGridDimsVars(String callback) {
   String tabgroup   = "Walker_Unit";
   String childUuid  = getUuid(tabgroup);
 
@@ -530,7 +537,7 @@ updateGridDimsVars() {
   FetchCallback updateGridDimsVars = new FetchCallback() {
     onFetch(result) {
       updateGridDimsVars(result);
-      redrawGrid(true);
+      execute(callback);
     }
   };
 
@@ -538,7 +545,7 @@ updateGridDimsVars() {
   updateWalkerUnitParentVars(childUuid);
 }
 
-updateGridDimsVars(result) {
+updateGridDimsVars(Object result) {
   String refRows    = "Control/Vars/Number_of_Rows";
   String refWalkers = "Control/Vars/Number_of_Walkers";
 
@@ -585,17 +592,14 @@ updateWalkerUnitParentVars(String childUuid, String callback) {
   fetchAll(q, updateWalkerUnitParentVars);
 }
 
-// TODO: Figure out how to get this to work with search.
-// TODO: Loading *might* be broken; The list of child entities in the parent
-// doesn't get refreshed after making a new Walker Unit via a loaded one.
-// TODO: Loading might cause other child entities to be saved with incorrect
-// relationships
-
-/* This function is intended to be called from the "Walker_Unit" tab group. It
- * is not intended to be called from the *parent of* the "Walker_Unit" tab
- * group.
+/* This function is intended to be called from eitherthe "Walker_Unit" or 
+ * "Survey_Unit" tab group.
  */
 loadWalkerUnit() {
+  loadWalkerUnit("");
+}
+
+loadWalkerUnit(String callback) {
   String tabgroup   = "Walker_Unit";
   String childUuid  = getUuid(tabgroup);
   String parentUuid = getUuid(parentTabgroup__);
@@ -663,12 +667,39 @@ loadWalkerUnit() {
         loadWalkerUnitFrom(uuid);
       }
 
-      // 6. The `loadWalkerUnit` is effectively finished.
+      // 6. Gotta do that callback
+      execute(callback);
+
+      // 7. The `loadWalkerUnit` is effectively finished.
       MUTEX_WALKER_UNIT_LOAD.release();
     }
   };
 
   fetchAll(q, loadWalkerUnit);
+}
+
+// Overrides autogen's definition
+loadWalkerUnitFrom(String uuid) {
+  if (!isDisplayed("Survey_Unit")) {
+    // TODO: This needs a nicer message
+    String head = "Load From somewhere else";
+    String body = "Load From somewhere else";
+    showWarning(head, body);
+    return;
+  }
+
+  String tabgroup = "Walker_Unit";
+  setUuid(tabgroup, uuid);
+  if (isNull(uuid)) return;
+
+  FetchCallback cb = new FetchCallback() {
+    onFetch(result) {
+      populateEntityListsInTabGroup(tabgroup);
+      onFetchWalkerUnit__();
+    }
+  };
+
+  showTabGroup(tabgroup, uuid, cb);
 }
 
 // Overrides autogen's definition
@@ -754,53 +785,6 @@ rowInterval() {
   return getFieldValueAsFloat(ref);
 }
 
-densityToCount(int density) {
-  return density * rowInterval();
-}
-
-calculateCount(String refDest) {
-  String density  = getLastTextAlertInput();
-  int    iDensity = stringToInt(density);
-
-  if (!isValidInt(density) || iDensity < 0) {
-    String head = "Not Valid";
-    String body = "The provided input is not a positive integer.";
-    showWarning(head, body);
-    return;
-  }
-
-  int count = densityToCount(iDensity);
-  setFieldValue(refDest, String.valueOf(count));
-}
-
-addDensityAsCount(String refDest) {
-  String head = "Density Required";
-  String body = "Please enter a density measurement in square metres.";
-
-  String okCallback = "";
-  okCallback = "calculateCount(\"%s\")";
-  okCallback = replaceFirst(okCallback, refDest);
-
-  String cancelCallback = "";
-
-  showTextAlert(head, body, okCallback, cancelCallback);
-}
-
-addAncientM2() {
-  String refDest  = "Walker_Unit/Walker_Unit/Ancient";
-  addDensityAsCount(refDest);
-}
-
-addModernM2() {
-  String refDest  = "Walker_Unit/Walker_Unit/Modern";
-  addDensityAsCount(refDest);
-}
-
-addACM2() {
-  String refDest  = "Walker_Unit/Walker_Unit/A_C";
-  addDensityAsCount(refDest);
-}
-
 for (ref : getZeroableRefs()) {
   String focus = "blankIfZero(\"%s\")"; focus = replaceFirst(focus, ref);
   String blur  = "zeroIfBlank(\"%s\")"; blur  = replaceFirst(blur,  ref);
@@ -827,11 +811,7 @@ addOnEvent("Walker_Unit/Walker_Unit/Load",       "click",  "loadWalkerUnit ()");
 
 addOnEvent("Walker_Unit",                        "create", "onCreateWalkerUnit()");
 addOnEvent("Walker_Unit",                        "fetch",  "updateGridDimsVars()");
-addOnEvent("Walker_Unit",                        "show",   "redrawGrid(true)");
+addOnEvent("Walker_Unit",                        "save",   "redrawGrid(true)");
 addOnEvent("Walker_Unit",                        "leave",  "initHighlighted()");
 
 addOnEvent("Survey_Unit",                        "create", "onCreateSurveyUnit()");
-
-addOnEvent("Walker_Unit/Walker_Unit/Add_Ancient_M_2", "click", "addAncientM2()");
-addOnEvent("Walker_Unit/Walker_Unit/Add_Modern_M_2",  "click", "addModernM2()");
-addOnEvent("Walker_Unit/Walker_Unit/Add_A_C_M_2",     "click", "addACM2()");

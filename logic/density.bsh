@@ -1,0 +1,82 @@
+/********************************** DENSITY ***********************************/
+densityToCount(int density) {
+  return density * rowInterval();
+}
+
+calculateCount(String refDest) {
+  String density  = getLastTextAlertInput();
+  int    iDensity = stringToInt(density);
+
+  if (!isValidInt(density) || iDensity < 0) {
+    String head = "Not Valid";
+    String body = "The provided input is not a positive integer.";
+    showWarning(head, body);
+    return;
+  }
+
+  int count = densityToCount(iDensity);
+  setFieldValue(refDest, String.valueOf(count));
+}
+
+addDensityAsCount(String refDest) {
+  String head = "Density Required";
+  String body = "Please enter a density measurement in square metres.";
+
+  String okCallback = "";
+  okCallback = "calculateCount(\"%s\")";
+  okCallback = replaceFirst(okCallback, refDest);
+
+  String cancelCallback = "";
+
+  showTextAlert(head, body, okCallback, cancelCallback);
+}
+
+addAncientM2() {
+  String refDest = "Walker_Unit/Walker_Unit/Ancient";
+  addDensityAsCount(refDest);
+}
+
+addModernM2() {
+  String refDest = "Walker_Unit/Walker_Unit/Modern";
+  addDensityAsCount(refDest);
+}
+
+addAcM2() {
+  String refDest = "Walker_Unit/Walker_Unit/A_C";
+  addDensityAsCount(refDest);
+}
+
+addDaubM2() {
+  String refDest = "Walker_Unit/Walker_Unit/Daub";
+  addDensityAsCount(refDest);
+}
+
+addHmM2() {
+  String refDest = "Walker_Unit/Walker_Unit/HM";
+  addDensityAsCount(refDest);
+}
+
+addLithicM2() {
+  String refDest = "Walker_Unit/Walker_Unit/Lithic";
+  addDensityAsCount(refDest);
+}
+
+addGlassM2() {
+  String refDest = "Walker_Unit/Walker_Unit/Glass";
+  addDensityAsCount(refDest);
+}
+
+addOtherM2() {
+  String refDest = "Walker_Unit/Walker_Unit/Other";
+  addDensityAsCount(refDest);
+}
+
+addOnEvent("Walker_Unit/Walker_Unit/Add_Ancient_M_2", "click", "addAncientM2()");
+addOnEvent("Walker_Unit/Walker_Unit/Add_Modern_M_2",  "click", "addModernM2()");
+addOnEvent("Walker_Unit/Walker_Unit/Add_A_C_M_2",     "click", "addAcM2()");
+addOnEvent("Walker_Unit/Walker_Unit/Add_Daub_M_2",    "click", "addDaubM2()");
+
+addOnEvent("Walker_Unit/Walker_Unit/Add_HM_M_2",      "click", "addHmM2()");
+addOnEvent("Walker_Unit/Walker_Unit/Add_Lithic_M_2",  "click", "addLithicM2()");
+addOnEvent("Walker_Unit/Walker_Unit/Add_Glass_M_2",   "click", "addGlassM2()");
+addOnEvent("Walker_Unit/Walker_Unit/Add_Other_M_2",   "click", "addOtherM2()");
