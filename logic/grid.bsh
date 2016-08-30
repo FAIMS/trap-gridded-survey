@@ -1,4 +1,6 @@
 /************************************ GRID ************************************/
+/* Functions and variables related to the grid interface.                     */
+/******************************************************************************/
 // A mutex is required for `numberOfRows(int)` to handle users double-clicking
 // the 'Add Row' and 'Delete Row' buttons.
 MUTEX_WALKER_UNIT_ROWS = new Semaphore(1);
@@ -9,10 +11,12 @@ MUTEX_WALKER_ZERO_ROW  = new Semaphore(1);
 // the load button.
 MUTEX_WALKER_UNIT_LOAD = new Semaphore(1);
 
+/******************************* GRID - CACHING *******************************/
 // `GRID_CACHE` is a 2-d array. The first two dimensions are the rows and
 // walkers, respectively. Each element accessed by an index, (row, walker),
 // contains a map from `vocabname` to its value (either the measure or vocabid.
-Map[][] GRID_CACHE = null;
+Map[][] GRID_CACHE   = null;
+Map     GRID_WALKERS = null;
 
 /* The grid is a 2-d array. The first two dimensions are the rows and walkers,
  * respectively. Each element accessed by an index, (row, walker), contains a
@@ -54,15 +58,19 @@ updateGridCache(String callback) {
 }
 
 updateGridCache(Object result) {
-  GRID_CACHE = new HashMap[numberOfRows()][numberOfWalkers()];
+  int gridWidth  = numberOfWalkers() + 1;
+  int gridHeight = numberOfRows()    + 1;
 
+  GRID_CACHE = new HashMap[gridHeight][gridWidth];
+
+  // 1. Insert 'Walker Unit' data from database
   for (dbRow : result) {
-       sRowId  =             dbRow.get(0) ;
-       iRowId  = stringToInt(dbRow.get(0));
-    sWalkerId  =             dbRow.get(1) ;
-    iWalkerId  = stringToInt(dbRow.get(1));
-    attribName =             dbRow.get(2) ;
-    attribVal  =             dbRow.get(3) ;
+    String     sRowId =             dbRow.get(0) ;
+    int        iRowId = stringToInt(dbRow.get(0));
+    String  sWalkerId =             dbRow.get(1) ;
+    int     iWalkerId = stringToInt(dbRow.get(1));
+    String attribName =             dbRow.get(2) ;
+    String attribVal  =             dbRow.get(3) ;
 
     if (!isValidInt(   sRowId)) continue;
     if (!isValidInt(sWalkerId)) continue;
@@ -71,18 +79,189 @@ updateGridCache(Object result) {
     if (   iRowId < 1) continue;
     if (iWalkerId < 1) continue;
 
-    // Get a `cell` from or create a new cell in `GRID_CACHE` if one doesn't
-    // exist.
-    Map cell = GRID_CACHE[iRowId-1][iWalkerId-1];
-    if (cell == null) {
-      cell = new HashMap();
-      GRID_CACHE[iRowId-1][iWalkerId-1] = cell;
-    }
+    updateGridCache(iRowId, iWalkerId, attribName, attribVal);
+  }
 
-    cell.put(attribName, attribVal);
+  // 2. Insert 'Walker' data from database
+  for (int i = 1; i < gridWidth; i++) {
+    String initials = GRID_WALKERS.get(i);
+    boolean hasInitials = !isNull(initials);
+    updateGridCache(0, i, "hasInitials", hasInitials);
+    if (hasInitials)
+      updateGridCache(0, i, "Initials", initials);
+  }
+
+  // 3. Update data about the user's interactions during this session
+  for   (int i = 0; i < GRID_CACHE   .length; i++) {
+    for (int j = 0; j < GRID_CACHE[i].length; j++) {
+      updateGridCache(i, j);
+    }
   }
 }
 
+// Updates the "pre-computed facts". Does not access the database.
+updateGridCache(i, j) {
+  updateGridCache(i, j, "", "");
+}
+
+updateGridCache(i, j, attribName, attribVal) {
+  if (GRID_CACHE == null                                    ) return;
+  if (i >= GRID_CACHE   .length || GRID_CACHE   .length == 0) return;
+  if (j >= GRID_CACHE[0].length || GRID_CACHE[0].length == 0) return;
+
+  String defaultInitials = "&mdash;";
+  String defaultNa       = "N/A";
+  String defaultAncient  = "0";
+  String defaultModern   = "0";
+
+  // 1. Get the  `cell` from `GRID_CACHE`.
+  Map cell = GRID_CACHE[i][j];
+
+  // 2. Pre-compute some useful facts.
+  Boolean isHighlighted = (i == highlightedRow() && j == highlightedWalker());
+  Boolean isSelected    = (i == selectedRow()    && j == selectedWalker());
+  Boolean isRowIndex    = (i >  0 && j == 0);
+  Boolean isWalkerIndex = (i == 0 && j >  0);
+  Boolean isSide        = (i == 0 || j == 0);
+  Boolean isMain        = !isSide;
+  Boolean isConfirmed   = isMain && (cell != null && cell.get("isConfirmed"))
+                                 || attribName.equals("Ancient")
+                                 || attribName.equals("Modern");
+  Boolean isNa          = (cell != null && cell.get("isNa"))
+                   && !(attribName.equals("isNa")        && attribVal == false)
+                   && !(attribName.equals("N A")         && attribVal == false);  // TODO
+  Boolean hasInitials   = (cell != null && cell.get("hasInitials"))
+                   && !(attribName.equals("hasInitials") && isNull(attribVal))
+                   && !(attribName.equals("initials")    && isNull(attribVal));   // TODO
+
+  // 3. If no `cell` could be retrieved in step 1, make one.
+  if (cell == null) {
+    cell = new HashMap();
+    GRID_CACHE[i][j] = cell;
+  }
+
+  // 4. Put the (attribName, attribVal) pair.
+  if (!isNull(attribName)) cell.put(attribName, attribVal);
+
+  // 5. Put the facts which were pre-computed facts in step 2.
+  String na       = "";
+  String ancient  = "0";
+  String modern   = "0";
+  String initials = "&mdash;";
+  if (isNa)        na       = "N/A";
+  if (isConfirmed) ancient  = GRID_CACHE[i][j].get("Ancient");
+  if (isConfirmed) modern   = GRID_CACHE[i][j].get("Modern");
+  if (hasInitials) initials = GRID_CACHE[i][j].get("Initials");
+
+  GRID_CACHE[i][j].put("Ancient"       , ancient      );
+  GRID_CACHE[i][j].put("Initials"      , initials     );
+  GRID_CACHE[i][j].put("Modern"        , modern       );
+  GRID_CACHE[i][j].put("N A"           , na           );
+  GRID_CACHE[i][j].put("hasInitials"   , hasInitials  );
+  GRID_CACHE[i][j].put("isConfirmed"   , isConfirmed  );
+  GRID_CACHE[i][j].put("isHighlighted" , isHighlighted);
+  GRID_CACHE[i][j].put("isMain"        , isMain       );
+  GRID_CACHE[i][j].put("isNa"          , isNa         );
+  GRID_CACHE[i][j].put("isRowIndex"    , isRowIndex   );
+  GRID_CACHE[i][j].put("isSelected"    , isSelected   );
+  GRID_CACHE[i][j].put("isSide"        , isSide       );
+  GRID_CACHE[i][j].put("isWalkerIndex" , isWalkerIndex);
+}
+
+// copyGridCache(Map[][] src, Map[][] dst) {
+//   int I = min(src   .length, dst   .length);
+//   int J = min(src[0].length, dst[0].length);
+// 
+//   for   (int i = 0; i < I; i++) {
+//     for (int j = 0; j < J; j++) {
+//       dst[i][j] = src[i][j];
+//     }
+//   }
+// }
+// 
+// resizeGridCache(int newNumRows, int newNumWalkers) {
+//     TMP_GRID_CACHE = new HashMap[newNumRows][newNumWalkers];
+//     copyGridCache(GRID_CACHE, TMP_GRID_CACHE);
+//     GRID_CACHE = TMP_GRID_CACHE;
+// }
+//
+
+updateGridCacheNa() {
+  String ref = "Walker_Unit/Walker_Unit/N_A";
+  List   val = getFieldValue(ref);
+
+  String attribVal;
+  if (val.isEmpty()) attribVal = "";
+  else               attribVal = "N/A";
+  updateGridCache(selectedRow(), selectedWalker(), "N A", attribVal);
+}
+
+updateGridCacheAncient() {
+  String ref = "Walker_Unit/Walker_Unit/Ancient";
+  String val = getFieldValue(ref);
+
+  String attribName = "Ancient";
+  String attribVal  = val;
+
+  updateGridCache(selectedRow(), selectedWalker(), attribName, attribVal);
+}
+
+updateGridCacheModern() {
+  String ref = "Walker_Unit/Walker_Unit/Modern";
+  String val = getFieldValue(ref);
+
+  String attribName = "Modern";
+  String attribVal  = val;
+
+  updateGridCache(selectedRow(), selectedWalker(), attribName, attribVal);
+}
+
+updateGridWalkers() {
+  String parentUuid = getUuid("Survey_Unit");
+
+  String q = "";
+  q += " SELECT walkerID, initials";
+  q += "         FROM (SELECT uuid, measure AS initials";
+  q += "                 FROM parentchild";
+  q += "                 JOIN latestnondeletedaentvalue on (childuuid = uuid)";
+  q += "                 JOIN attributekey USING (attributeid)";
+  q += "                WHERE parentuuid = {parentUuid}";
+  q += "                  AND attributename IN ('Initials'))";
+  q += "         JOIN (SELECT uuid, measure AS walkerID";
+  q += "                 FROM parentchild";
+  q += "                 JOIN latestnondeletedaentvalue on (childuuid = uuid)";
+  q += "                 JOIN attributekey USING (attributeid)";
+  q += "                WHERE parentuuid = {parentUuid}";
+  q += "                  AND attributename IN ('Walker ID')) USING (uuid);";
+  q  = replaceFirst(q, "{parentUuid}", parentUuid);
+  q  = replaceFirst(q, "{parentUuid}", parentUuid);
+
+  FetchCallback updateGridWalkers = new FetchCallback() {
+    onFetch(result) {
+      updateGridWalkers(result);
+    }
+  };
+
+  fetchAll(q, updateGridWalkers);
+}
+
+updateGridWalkers(Object result) {
+  GRID_WALKERS = new HashMap();
+
+  for (dbRow : result) {
+    String sWalkerId =             dbRow.get(0);
+    int    iWalkerId = stringToInt(dbRow.get(0));
+    String initials  =             dbRow.get(1);
+
+    GRID_WALKERS.put(iWalkerId, initials);
+  }
+}
+
+addOnEvent("Survey_Unit",                 "create", "updateGridWalkers()");
+addOnEvent("Survey_Unit",                 "fetch",  "updateGridWalkers()");
+addOnEvent("Walker",                      "save",   "updateGridWalkers()");
+
+/******************************* GRID - DRAWING *******************************/
 redrawGrid() {
   redrawGrid(false);
 }
@@ -90,10 +269,10 @@ redrawGrid() {
 redrawGrid(Boolean doRefreshCache) {
   if (doRefreshCache) {
     updateGridCache("redrawGrid()");
-    //showWarning("", "Updating");
+    showWarning("", "Updating");
     return;
   }
-  //showWarning("", "Redrawing");
+  showWarning("", "Redrawing");
 
   String refGridWebView = "Walker_Unit/Walker_Unit/Grid";
   // In a probably vain attempt to improve performance, this code is valid
@@ -141,21 +320,18 @@ redrawGrid(Boolean doRefreshCache) {
   html += "  </head>";
   html += "  <table>";
 
-  for (int i = numberOfRows(); i >= 0; i--) {
+  for (int i = GRID_CACHE.length - 1; i >= 0; i--) {
     html += "    <tr>";
-    for (int j = 0; j <= numberOfWalkers(); j++) {
-      Boolean isHighlighted = (i == highlightedRow() && j == highlightedWalker());
-      Boolean isSelected    = (i == selectedRow()    && j == selectedWalker());
-      Boolean isRowIndex    = (i >  0 && j == 0);
-      Boolean isWalkerName  = (i == 0 && j >  0);
-      Boolean isSide        = (i == 0 || j == 0);
-      Boolean isMain        = !isSide;
-      Boolean isConfirmed   = isMain && GRID_CACHE             != null
-                                     && GRID_CACHE     .length  > i - 1
-                                     && GRID_CACHE[i-1].length  > j - 1
-                                     && GRID_CACHE[i-1][j-1]   != null;
-      Boolean isNa          = isConfirmed
-                                     && GRID_CACHE[i-1][j-1].get("N A") != null;
+    for (int j = 0; j < GRID_CACHE[i].length; j++) {
+      Boolean isHighlighted = GRID_CACHE[i][j].get("isHighlighted");
+      Boolean isSelected    = GRID_CACHE[i][j].get("isSelected");
+      Boolean isRowIndex    = GRID_CACHE[i][j].get("isRowIndex");
+      Boolean isWalkerIndex = GRID_CACHE[i][j].get("isWalkerIndex");
+      Boolean isSide        = GRID_CACHE[i][j].get("isSide");
+      Boolean isMain        = GRID_CACHE[i][j].get("isMain");
+      Boolean isConfirmed   = GRID_CACHE[i][j].get("isConfirmed");
+      Boolean isNa          = GRID_CACHE[i][j].get("isNa");
+      Boolean hasInitials   = GRID_CACHE[i][j].get("hasInitials");
 
       // Build the string of CSS classes to apply to this <td> element
       String  cssClass = "";
@@ -165,20 +341,18 @@ redrawGrid(Boolean doRefreshCache) {
       if (isSide       ) cssClass += " side";
       if (isConfirmed  ) cssClass += " confirmed";
 
-      // Get the attribute values ('Modern', 'Ancient', 'N/A', ...?)
-      String na      = "";
-      String ancient = "0";
-      String modern  = "0";
-      if (isNa)        na      = "N/A";
-      if (isConfirmed) ancient = GRID_CACHE[i-1][j-1].get("Ancient");
-      if (isConfirmed) modern  = GRID_CACHE[i-1][j-1].get("Modern" );
+      // Get the <td> values ('Modern', 'Ancient', 'N/A', ...?)
+      na       = GRID_CACHE[i][j].get("N A");
+      ancient  = GRID_CACHE[i][j].get("Ancient");
+      modern   = GRID_CACHE[i][j].get("Modern");
+      initials = GRID_CACHE[i][j].get("Initials");
 
       // Build the HTML string for this <td>
       String htmlCell = "";
       htmlCell += "      <td class=\"{cssClass}\">";
       if (isRowIndex     ) htmlCell += i;
-      if (isWalkerName   ) htmlCell += "W.N.";
-      if (isMain &&  isNa) htmlCell += "N/A";
+      if (isWalkerIndex  ) htmlCell += initials;
+      if (isMain &&  isNa) htmlCell += na;
       if (isMain && !isNa) htmlCell += "<sup>{anc}</sup>/<sub>{mod}</sub>";
       htmlCell  = replaceFirst(htmlCell, "{cssClass}", cssClass);
       htmlCell  = replaceFirst(htmlCell, "{anc}",      ancient );
@@ -196,6 +370,10 @@ redrawGrid(Boolean doRefreshCache) {
   // Now that the html string has been built, we can populate the web view
   populateWebViewHtml(refGridWebView, html);
 }
+
+redrawGridNa()      { updateGridCacheNa();      redrawGrid(); }
+redrawGridAncient() { updateGridCacheAncient(); redrawGrid(); }
+redrawGridModern()  { updateGridCacheModern();  redrawGrid(); }
 
 numberOfRows() {
   String ref = "Control/Vars/Number_of_Rows";
@@ -272,11 +450,20 @@ highlightedRow() {
   return clip(val, 1, numberOfRows());
 }
 
-highlightedRow(int val) {
-  val = clip(val, 1, numberOfRows());
-
+highlightedRow(int newVal) {
   String ref = "Control/Vars/Highlighted_Row";
-  setFieldValue(ref, String.valueOf(val));
+  int    highlightedWalker = highlightedWalker();
+
+  String sOldVal  = getFieldValue(ref);
+  int    iOldVal  = stringToInt(sOldVal);
+
+  int    iNewVal = clip(newVal, 1, numberOfRows());
+  String sNewVal = String.valueOf(iNewVal);
+
+  setFieldValue(ref, sNewVal);
+
+  updateGridCache(iOldVal, highlightedWalker, "isHighlighted", false);
+  updateGridCache(iNewVal, highlightedWalker, "isHighlighted", true );
 }
 
 selectedRow() {
@@ -296,11 +483,20 @@ highlightedWalker() {
   return clip(val, 1, numberOfWalkers());
 }
 
-highlightedWalker(int val) {
-  val = clip(val, 1, numberOfWalkers());
+highlightedWalker(int newVal) {
+  String ref    = "Control/Vars/Highlighted_Walker";
+  int    highlightedRow = highlightedRow();
 
-  String ref = "Control/Vars/Highlighted_Walker";
-  setFieldValue(ref, String.valueOf(val));
+  String sOldVal = getFieldValue(ref);
+  int    iOldVal = stringToInt(sOldVal);
+
+  int    iNewVal = clip(newVal, 1, numberOfWalkers());
+  String sNewVal = String.valueOf(iNewVal);
+
+  setFieldValue(ref, sNewVal);
+
+  updateGridCache(highlightedRow, iOldVal, "isHighlighted", false);
+  updateGridCache(highlightedRow, iNewVal, "isHighlighted", true );
 }
 
 selectedWalker() {
@@ -509,7 +705,7 @@ inheritWalkerUnitFields() {
 
 onCreateWalkerUnit() {
   inheritWalkerUnitFields();
-  redrawGrid();
+  redrawGrid(true);
   zeroIfBlank();
 }
 
@@ -815,3 +1011,7 @@ addOnEvent("Walker_Unit",                        "save",   "redrawGrid(true)");
 addOnEvent("Walker_Unit",                        "leave",  "initHighlighted()");
 
 addOnEvent("Survey_Unit",                        "create", "onCreateSurveyUnit()");
+
+addOnEvent("Walker_Unit/Walker_Unit/N_A",     "click",  "redrawGridNa()");
+addOnEvent("Walker_Unit/Walker_Unit/Ancient", "blur",   "redrawGridAncient()");
+addOnEvent("Walker_Unit/Walker_Unit/Modern",  "blur",   "redrawGridModern()");

@@ -43,3 +43,13 @@ clip(int x, int min, int max) {
   if (x < min) return min;
   return x;
 }
+
+min(int a, int b) {
+  if (a > b) return a;
+  else       return b;
+}
+
+max(int a, int b) {
+  if (a < b) return a;
+  else       return b;
+}
