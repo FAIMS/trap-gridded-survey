@@ -39,11 +39,131 @@
 </Control>
 
 <Survey_Unit>
-  <Survey_Unit f="noscroll">
+  <Survey_Unit>
     <Survey_Unit_ID f="id autonum"/>
+    <Land_Use>
+      <desc>Prevalent landuse in a given Survey Unit.</desc>
+      <opts>
+        <opt>Annual Agriculture</opt>
+        <opt>Perennial Agriculture</opt>
+        <opt>Fallow field</opt>
+        <opt>Pasture</opt>
+        <opt>Scrub</opt>
+        <opt>Forest</opt>
+        <opt>Wetland</opt>
+        <opt>Urban</opt>
+        <opt>Industrial</opt>
+        <opt>Communication</opt>
+        <opt>Beach</opt>
+        <opt>Other</opt>
+      </opts>
+    </Land_Use>
+    <Agricultural_Condition>
+      <desc>Agricultural condition of fields in use.</desc>
+      <opts>
+        <opt>Ploughed</opt>
+        <opt>Harrowed</opt>
+        <opt>Seedlings</opt>
+        <opt>Immature Crop</opt>
+        <opt>Mature Crop</opt>
+        <opt>Harvested Clean</opt>
+        <opt>Harvested with Stubble</opt>
+        <opt>Partially Fallow</opt>
+        <opt>Burnt</opt>
+        <opt>Other</opt>
+      </opts>
+    </Agricultural_Condition>
+    <Topography>
+      <desc>Topography of the surveyed area.</desc>
+      <opts>
+        <opt>N/A</opt>
+        <opt>Valley Bottom</opt>
+        <opt>Hillside</opt>
+        <opt>Ridgeline</opt>
+        <opt>River Terrace</opt>
+        <opt>Reservoir Slope</opt>
+        <opt>Other</opt>
+      </opts>
+    </Topography>
+    <Slope>
+      <desc>Slope of the surveyed surface. Level &lt;2%, Gentle 2-15%, Steep 15-30 %, Very Steep 30-45%, Impassable &gt;45%.</desc>
+      <opts>
+        <opt>Level</opt>
+        <opt>Gentle</opt>
+        <opt>Steep</opt>
+        <opt>Very Steep</opt>
+        <opt>Impassable</opt>
+      </opts>
+    </Slope>
+    <Visibility>
+      <desc>Surface visibility in quantiles. 0-20% none, 20-40% low, 40-60% moderate, 60-80% good, 80-100% excellent  </desc>
+      <opts>
+        <opt>0-20%</opt>
+        <opt>20-40%</opt>
+        <opt>40-60%</opt>
+        <opt>60-80%</opt>
+        <opt>80-100%</opt>
+      </opts>
+    </Visibility>
+    <Passability t="radio">
+      <desc>Passability on a scale from 1-5 with 1 being Easy Passable and 5 Impassable.</desc>
+      <opts>
+        <opt>1</opt>
+        <opt>2</opt>
+        <opt>3</opt>
+        <opt>4</opt>
+        <opt>5</opt>
+      </opts>
+    </Passability>
+    <Drainage t="radio">
+      <desc>Drainage of the surveyed area with 1 being dry, 5 wet.</desc>
+      <opts>
+        <opt>1</opt>
+        <opt>2</opt>
+        <opt>3</opt>
+        <opt>4</opt>
+        <opt>5</opt>
+      </opts>
+    </Drainage>
+    <Vegetation t="radio">
+      <desc>Vegetation of the surveyed surface with 1 having no vegetation, 5 being overgrown with vegetation. </desc>
+      <opts>
+        <opt>1</opt>
+        <opt>2</opt>
+        <opt>3</opt>
+        <opt>4</opt>
+        <opt>5</opt>
+      </opts>
+    </Vegetation>
+    <Stoniness t="radio">
+      <desc>Presence of stones in the surveyed area with 1 being not present at all, and 5 being very frequent.</desc>
+      <opts>
+        <opt>1</opt>
+        <opt>2</opt>
+        <opt>3</opt>
+        <opt>4</opt>
+        <opt>5</opt>
+      </opts>
+    </Stoniness>
+    <Shade t="radio">
+      <desc>Presence of shade in the surveyed area with 1 being not present at all, and 5 covering all the surveyed area.</desc>
+      <opts>
+        <opt>1</opt>
+        <opt>2</opt>
+        <opt>3</opt>
+        <opt>4</opt>
+        <opt>5</opt>
+      </opts>
+    </Shade>
+  </Survey_Unit>
+  <Walkers f="noscroll">
+    <Add_New_Walker lc="Walker" t="button"/>
+    <Walkers        ec="Walker"/>
+  </Walkers>
+  <Walker_Units f="noscroll">
     <Add_New_Walker_Unit lc="Walker_Unit" t="button"/>
     <Walker_Units        ec="Walker_Unit"/>
-  </Survey_Unit>
+  </Walker_Units>
   <Vars>
     <Number_of_Rows/>
     <Number_of_Walkers/>
@@ -51,6 +171,27 @@
     <Walker_Interval/>
   </Vars>
 </Survey_Unit>
+
+<Walker>
+  <Walker>
+    <Help t="webview">
+      The 'Walker ID' dictates the position of each walker in the grid. Numbers
+      should start at 1, indicating the left-most walker.
+    </Help>
+    <Walker_ID   f="id" b="decimal">
+      <str><fmt>$2</fmt></str>
+    </Walker_ID>
+    <First_Name f="id">
+      <str><fmt>{{if $2 then " - $2"}}</fmt></str>
+    </First_Name>
+    <Last_Name  f="id">
+      <str><fmt>{{if $2 then " $2"}}</fmt></str>
+    </Last_Name>
+    <Initials   f="id">
+      <str><fmt>{{if $2 then " ($2)"}}</fmt></str>
+    </Initials>
+  </Walker>
+</Walker>
 
 <Walker_Unit>
   <Walker_Unit>
@@ -173,6 +314,7 @@
   <!--@SOURCE: logic/navigation-drawer.bsh-->
   <!--@SOURCE: logic/persistence.bsh-->
   <!--@SOURCE: logic/survey-unit-id-population.bsh-->
+  <!--@SOURCE: logic/survey-unit-walker-population.bsh-->
   <!--@SOURCE: logic/validation.bsh-->
 ]]></logic>
 
