@@ -20,22 +20,12 @@
     </Number_of_Walkers>
     <Row_Interval      b="decimal">
       Row Interval (m)
-      <!--TODO: This must be inherited by the Survey Unit-->
     </Row_Interval>
-    <Walker_Interval      b="decimal">
+    <Walker_Interval   b="decimal">
       Walker Interval (m)
-      <!--TODO: This must be inherited by the Survey Unit-->
     </Walker_Interval>
   </Main>
   <search/>
-  <Vars>
-    <Highlighted_Row/>
-    <Highlighted_Walker/>
-    <Number_of_Rows/>
-    <Number_of_Walkers/>
-    <Row_Interval/>
-    <Walker_Interval/>
-  </Vars>
 </Control>
 
 <Survey_Unit>
@@ -169,6 +159,8 @@
     <Number_of_Walkers/>
     <Row_Interval/>
     <Walker_Interval/>
+    <Highlighted_Row    f="nodata"/>
+    <Highlighted_Walker f="nodata"/>
   </Vars>
 </Survey_Unit>
 

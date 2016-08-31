@@ -15,8 +15,15 @@ MUTEX_WALKER_UNIT_LOAD = new Semaphore(1);
 // `GRID_CACHE` is a 2-d array. The first two dimensions are the rows and
 // walkers, respectively. Each element accessed by an index, (row, walker),
 // contains a map from `vocabname` to its value (either the measure or vocabid.
-Map[][] GRID_CACHE   = null;
-Map     GRID_WALKERS = null;
+Map[][] GRID_CACHE = null;
+
+// These two variables determine the size of the cache.
+int     GRID_MAX_WIDTH  = 20;
+int     GRID_MAX_HEIGHT = 25;
+
+initGridCache() {
+  GRID_CACHE = new HashMap[GRID_MAX_HEIGHT][GRID_MAX_WIDTH];
+}
 
 /* The grid is a 2-d array. The first two dimensions are the rows and walkers,
  * respectively. Each element accessed by an index, (row, walker), contains a
@@ -58,10 +65,7 @@ updateGridCache(String callback) {
 }
 
 updateGridCache(Object result) {
-  int gridWidth  = numberOfWalkers() + 1;
-  int gridHeight = numberOfRows()    + 1;
-
-  GRID_CACHE = new HashMap[gridHeight][gridWidth];
+  if (result == null) return;
 
   // 1. Insert 'Walker Unit' data from database
   for (dbRow : result) {
@@ -82,15 +86,9 @@ updateGridCache(Object result) {
     updateGridCache(iRowId, iWalkerId, attribName, attribVal);
   }
 
-  // 2. Insert 'Walker' data from database
-  for (int i = 1; i < gridWidth; i++) {
-    String initials = GRID_WALKERS.get(i);
-    updateGridCache(0, i, "Initials", initials);
-  }
-
-  // 3. Update data about the user's interactions during this session
-  for   (int i = 0; i < GRID_CACHE   .length; i++) {
-    for (int j = 0; j < GRID_CACHE[i].length; j++) {
+  // 2. Update data about the user's interactions during this session
+  for   (int i = 0; i < GRID_MAX_HEIGHT; i++) {
+    for (int j = 0; j < GRID_MAX_WIDTH;  j++) {
       updateGridCache(i, j);
     }
   }
@@ -102,9 +100,10 @@ updateGridCache(i, j) {
 }
 
 updateGridCache(i, j, attribName, attribVal) {
-  if (GRID_CACHE == null                                    ) return;
-  if (i >= GRID_CACHE   .length || GRID_CACHE   .length == 0) return;
-  if (j >= GRID_CACHE[0].length || GRID_CACHE[0].length == 0) return;
+  if (attribVal == null)
+    return;
+  if (GRID_CACHE == null)
+    initGridCache();
 
   String attribNameNa       = "N A";
   String attribNameInitials = "Initials";
@@ -129,22 +128,40 @@ updateGridCache(i, j, attribName, attribVal) {
                                  || attribName.equals("Modern");
   Boolean isNa          = false;
   Boolean hasInitials   = false;
+  // 2.1 Compute `isNa`
   if (cell != null && cell.get(attribNameNa) != null) {
-    String newVal = cell.get(attribNameNa);
-    isNa = !isNull(newVal);
+    String oldVal = cell.get(attribNameNa);
+    isNa = !isNull(oldVal);
   }
-  if (attribName.equals(attribNameNa))
-    isNa = !isNull(attribVal);
-
+  if (attribName.equals(attribNameNa)) isNa = !isNull(attribVal);
+  // 2.2 Compute `hasInitials`
   if (cell != null && cell.get(attribNameInitials) != null) {
-    String newVal = cell.get(attribNameInitials);
-    hasInitials = !isNull(newVal) && !newVal.equals(defaultInitials);
+    String oldVal = cell.get(attribNameInitials);
+    hasInitials = !isNull(oldVal) && !oldVal.equals(defaultInitials);
   }
-  if (attribName.equals(attribNameInitials))
-    hasInitials = !isNull(attribVal);
+  if (attribName.equals(attribNameInitials)) hasInitials = !isNull(attribVal);
+  // 2.3 Compute `isHighlighted`
+  if (cell != null && cell.get("isHighlighted") != null) {
+    Boolean oldVal = cell.get("isHighlighted");
+    isHighlighted = oldVal;
+  }
+  if (attribName.equals("isHighlighted")) isHighlighted = attribVal;
+  // 2.4 Compute `isSelected`
+  if (cell != null && cell.get("isSelected") != null) {
+    Boolean oldVal = cell.get("isSelected");
+    isSelected = oldVal;
+  }
+  if (attribName.equals("isSelected")) isSelected = attribVal;
+  // 2.5 Compute `isSelected`
+  if (cell != null && cell.get("isConfirmed") != null) {
+    Boolean oldVal = cell.get("isConfirmed");
+    isConfirmed = oldVal;
+  }
+  if (attribName.equals("isConfirmed")) isConfirmed = attribVal;
 
   // 3. If no `cell` could be retrieved in step 1, make one.
   if (cell == null) {
+    //cell = Collections.synchronizedMap(new HashMap());
     cell = new HashMap();
     GRID_CACHE[i][j] = cell;
   }
@@ -176,24 +193,6 @@ updateGridCache(i, j, attribName, attribVal) {
   GRID_CACHE[i][j].put("isSide"        , isSide       );
   GRID_CACHE[i][j].put("isWalkerIndex" , isWalkerIndex);
 }
-
-// copyGridCache(Map[][] src, Map[][] dst) {
-//   int I = min(src   .length, dst   .length);
-//   int J = min(src[0].length, dst[0].length);
-// 
-//   for   (int i = 0; i < I; i++) {
-//     for (int j = 0; j < J; j++) {
-//       dst[i][j] = src[i][j];
-//     }
-//   }
-// }
-// 
-// resizeGridCache(int newNumRows, int newNumWalkers) {
-//     TMP_GRID_CACHE = new HashMap[newNumRows][newNumWalkers];
-//     copyGridCache(GRID_CACHE, TMP_GRID_CACHE);
-//     GRID_CACHE = TMP_GRID_CACHE;
-// }
-//
 
 updateGridCacheNa() {
   String ref = "Walker_Unit/Walker_Unit/N_A";
@@ -257,17 +256,23 @@ updateGridWalkers() {
 }
 
 updateGridWalkers(Object result) {
-  GRID_WALKERS = new HashMap();
+  // 1. Clear walkers
+  for (int i = 0; i < GRID_MAX_WIDTH; i++) {
+    updateGridCache(0, i, "Initials", "");
+  }
 
+  // 2. Insert new walkers
   for (dbRow : result) {
     String sWalkerId =             dbRow.get(0);
     int    iWalkerId = stringToInt(dbRow.get(0));
     String initials  =             dbRow.get(1);
 
-    GRID_WALKERS.put(iWalkerId, initials);
+    updateGridCache(0, iWalkerId, "Initials", initials);
   }
 }
 
+addOnEvent("Survey_Unit",                 "create", "updateGridCache()");
+addOnEvent("Survey_Unit",                 "fetch",  "updateGridCache()");
 addOnEvent("Survey_Unit",                 "create", "updateGridWalkers()");
 addOnEvent("Survey_Unit",                 "fetch",  "updateGridWalkers()");
 addOnEvent("Walker",                      "save",   "updateGridWalkers()");
@@ -284,6 +289,9 @@ redrawGrid(Boolean doRefreshCache) {
     return;
   }
   showWarning("", "Redrawing");
+  if (GRID_CACHE == null) {
+    return;
+  }
 
   String refGridWebView = "Walker_Unit/Walker_Unit/Grid";
   // In a probably vain attempt to improve performance, this code is valid
@@ -331,9 +339,9 @@ redrawGrid(Boolean doRefreshCache) {
   html += "  </head>";
   html += "  <table>";
 
-  for (int i = GRID_CACHE.length - 1; i >= 0; i--) {
+  for (int i = numberOfRows(); i >= 0; i--) {
     html += "    <tr>";
-    for (int j = 0; j < GRID_CACHE[i].length; j++) {
+    for (int j = 0; j <= numberOfWalkers(); j++) {
       Boolean isHighlighted = GRID_CACHE[i][j].get("isHighlighted");
       Boolean isSelected    = GRID_CACHE[i][j].get("isSelected");
       Boolean isRowIndex    = GRID_CACHE[i][j].get("isRowIndex");
@@ -387,8 +395,10 @@ redrawGridAncient() { updateGridCacheAncient(); redrawGrid(); }
 redrawGridModern()  { updateGridCacheModern();  redrawGrid(); }
 
 numberOfRows() {
-  String ref = "Control/Vars/Number_of_Rows";
-  return getFieldValueAsInt(ref);
+  String ref = "Survey_Unit/Vars/Number_of_Rows";
+  int    val = getFieldValueAsInt(ref);
+
+  return clip(val, 0, GRID_MAX_HEIGHT);
 }
 
 /* It is assumed that this function is only ever called while "Walker_Unit" is
@@ -401,12 +411,11 @@ numberOfRows(int val) {
 numberOfRows(int val, String callback) {
   if (val < 1) val = 1; // `val` cannot be lower than 1.
 
-  String  refRowsControl    = "Control/Vars/Number_of_Rows";
-  String  refRowsSurveyUnit = "Survey_Unit/Vars/Number_of_Rows";
-  String  parentTabGroup    = getTabGroupRef(refRowsSurveyUnit);
+  String  refRows           = "Survey_Unit/Vars/Number_of_Rows";
+  String  parentTabGroup    = getTabGroupRef(refRows);
   String  parentUuid        = getUuid       (parentTabGroup);
   String  parentArchEntType = getArchEntType(parentTabGroup);
-  String  attrName          = getAttributeName(refRowsSurveyUnit);
+  String  attrName          = getAttributeName(refRows);
   String  numberOfRows      = String.valueOf(val);
   List    geometry          = null;
   List    attributes        = createAttributeList();
@@ -415,22 +424,17 @@ numberOfRows(int val, String callback) {
   if (!getDisplayedTabGroup().equals("Walker_Unit"))
     return;
 
-  if (!MUTEX_WALKER_UNIT_ROWS.tryAcquire()) {
+  if (!MUTEX_WALKER_UNIT_ROWS.tryAcquire())
     return;
-  }
 
   // 1. If getPreviousTabGroup() == parentTabGroup, the user will visit it
   //    when they hit the back button. In this case, the value saved in the db
   //    must be made consistent with the one in the UI.
   if (getPreviousTabGroup().equals(parentTabGroup)) {
-    setFieldValue(refRowsSurveyUnit, numberOfRows);
+    setFieldValue(refRows, numberOfRows);
   }
 
-  // 2. Also update the value in `refRowsControl`, which is used as a global
-  //   variable.
-  setFieldValue(refRowsControl, numberOfRows);
-
-  // 3. Update 'Number of Rows' using saveArchEnt
+  // 2. Update 'Number of Rows' using saveArchEnt
   SaveCallback release = new SaveCallback() {
     onSave(uuid, newRecord) {
       if (!doLoadWalkerUnit) {
@@ -446,7 +450,7 @@ numberOfRows(int val, String callback) {
 
   saveArchEnt(parentUuid, parentArchEntType, geometry, attributes, release);
 
-  // 4. If the cursor (i.e. `highlightedRow()`) has changed, the entity under-
+  // 3. If the cursor (i.e. `highlightedRow()`) has changed, the entity under-
   //    neath it should be loaded.
   if (doLoadWalkerUnit) {
     highlightedWalker(selectedWalker());
@@ -455,14 +459,14 @@ numberOfRows(int val, String callback) {
 }
 
 highlightedRow() {
-  String ref = "Control/Vars/Highlighted_Row";
+  String ref = "Survey_Unit/Vars/Highlighted_Row";
   int    val = getFieldValueAsInt(ref);
 
   return clip(val, 1, numberOfRows());
 }
 
 highlightedRow(int newVal) {
-  String ref = "Control/Vars/Highlighted_Row";
+  String ref = "Survey_Unit/Vars/Highlighted_Row";
   int    highlightedWalker = highlightedWalker();
 
   int    iOldVal  = highlightedRow();
@@ -478,23 +482,27 @@ highlightedRow(int newVal) {
 
 selectedRow() {
   String ref = "Walker_Unit/Vars/Row_ID";
-  return getFieldValueAsInt(ref);
+  int    val = getFieldValueAsInt(ref);
+
+  return max(1, val);
 }
 
 numberOfWalkers() {
-  String ref = "Control/Vars/Number_of_Walkers";
-  return getFieldValueAsInt(ref);
+  String ref = "Survey_Unit/Vars/Number_of_Walkers";
+  int    val = getFieldValueAsInt(ref);
+
+  return clip(val, 0, GRID_MAX_WIDTH);
 }
 
 highlightedWalker() {
-  String ref = "Control/Vars/Highlighted_Walker";
+  String ref = "Survey_Unit/Vars/Highlighted_Walker";
   int    val = getFieldValueAsInt(ref);
 
   return clip(val, 1, numberOfWalkers());
 }
 
 highlightedWalker(int newVal) {
-  String ref    = "Control/Vars/Highlighted_Walker";
+  String ref    = "Survey_Unit/Vars/Highlighted_Walker";
   int    highlightedRow = highlightedRow();
 
   int    iOldVal = highlightedWalker();
@@ -510,7 +518,9 @@ highlightedWalker(int newVal) {
 
 selectedWalker() {
   String ref = "Walker_Unit/Vars/Walker_ID";
-  return getFieldValueAsInt(ref);
+  int    val = getFieldValueAsInt(ref);
+
+  return max(1, val);
 }
 
 moveWalker(int delta) {
@@ -622,7 +632,7 @@ nextWalkerUnit () {
     nextRow();
   } else {
     moveWalker(+1);
-    loadWalkerUnit();
+    loadWalkerUnit("");
   }
 }
 
@@ -631,8 +641,8 @@ gridDown () { moveRow   (-1); redrawGrid(); }
 gridLeft () { moveWalker(-1); redrawGrid(); }
 gridRight() { moveWalker(+1); redrawGrid(); }
 
-addRow   () { numberOfRows(numberOfRows() + 1, "redrawGrid(true)"); }
-deleteRow() { numberOfRows(numberOfRows() - 1, "redrawGrid(true)"); }
+addRow   () { numberOfRows(numberOfRows() + 1, "redrawGrid()"); }
+deleteRow() { numberOfRows(numberOfRows() - 1, "redrawGrid()"); }
 
 zeroRowAndNext() {
   if (MUTEX_WALKER_ZERO_ROW.drainPermits() == 0) {
@@ -654,27 +664,6 @@ zeroRowAndNextComplete() {
 }
 
 inheritSurveyUnitFields() {
-  copyFieldValue(
-    "Control/Main/Number_of_Rows",
-    "Control/Vars/Number_of_Rows",
-    false
-  );
-  copyFieldValue(
-    "Control/Main/Number_of_Walkers",
-    "Control/Vars/Number_of_Walkers",
-    false
-  );
-  copyFieldValue(
-    "Control/Main/Row_Interval",
-    "Control/Vars/Row_Interval",
-    false
-  );
-  copyFieldValue(
-    "Control/Main/Walker_Interval",
-    "Control/Vars/Walker_Interval",
-    false
-  );
-
   copyFieldValue(
     "Control/Main/Number_of_Rows",
     "Survey_Unit/Vars/Number_of_Rows",
@@ -714,94 +703,14 @@ inheritWalkerUnitFields() {
 
 onCreateWalkerUnit() {
   inheritWalkerUnitFields();
-  redrawGrid(true);
   zeroIfBlank();
-}
-
-/* Fetches the 'Number of Rows' and 'Number of Walkers' attributes stored in
- * the parent and loads them into the global vars. Here we have used fields
- * as globals.
- */
-updateGridDimsVars() {
-  updateGridDimsVars("redrawGrid(true)");
-}
-
-updateGridDimsVars(String callback) {
-  String tabgroup   = "Walker_Unit";
-  String childUuid  = getUuid(tabgroup);
-
-  String q = "";
-  q += " SELECT attributename, measure";
-  q += "   FROM latestnondeletedaentvalue";
-  q += "   JOIN attributekey USING (attributeid)";
-  q += "   JOIN parentchild ON (uuid = parentuuid)";
-  q += "  WHERE attributename IN ('Number of Rows', 'Number of Walkers')";
-  q += "    AND childuuid = '{childUuid}'";
-  q  = replaceFirst(q, "{childUuid}", childUuid);
-
-  FetchCallback updateGridDimsVars = new FetchCallback() {
-    onFetch(result) {
-      updateGridDimsVars(result);
-      execute(callback);
-    }
-  };
-
-  fetchAll(q, updateGridDimsVars);
-  updateWalkerUnitParentVars(childUuid);
-}
-
-updateGridDimsVars(Object result) {
-  String refRows    = "Control/Vars/Number_of_Rows";
-  String refWalkers = "Control/Vars/Number_of_Walkers";
-
-  String attrNameRows    = getAttributeName(refRows);
-  String attrNameWalkers = getAttributeName(refWalkers);
-
-  if (result == null) return;
-  for (row : result) {
-    String attrName = row.get(0);
-    String attrVal  = row.get(1);
-
-    if (attrName.equals(attrNameRows   )) setFieldValue(refRows,    attrVal);
-    if (attrName.equals(attrNameWalkers)) setFieldValue(refWalkers, attrVal);
-  }
-}
-
-updateWalkerUnitParentVars(String childUuid) {
-  updateWalkerUnitParentVars(childUuid, "");
-}
-
-updateWalkerUnitParentVars(String childUuid, String callback) {
-  String q = "";
-  q += " SELECT parentuuid";
-  q += "   FROM parentchild";
-  q += "  WHERE childuuid='{childUuid}'";
-  q += "    AND parentparticipatesverb='Parent Of'";
-  q  = replaceFirst(q, "{childUuid}", childUuid);
-
-  FetchCallback updateWalkerUnitParentVars = new FetchCallback() {
-    onFetch(result) {
-      parentTabgroup   = "Survey_Unit";
-      parentTabgroup__ = "Survey_Unit";
-
-      if (result        == null) { execute(callback); return; }
-      if (result.size() == 0   ) { execute(callback); return; }
-
-      String parentUuid = result.get(0).get(0);
-      setUuid(parentTabgroup, parentUuid);
-
-      execute(callback);
-    }
-  };
-
-  fetchAll(q, updateWalkerUnitParentVars);
 }
 
 /* This function is intended to be called from eitherthe "Walker_Unit" or 
  * "Survey_Unit" tab group.
  */
 loadWalkerUnit() {
-  loadWalkerUnit("");
+  loadWalkerUnit("redrawGrid()");
 }
 
 loadWalkerUnit(String callback) {
@@ -855,15 +764,19 @@ loadWalkerUnit(String callback) {
       int highlightedRow    = highlightedRow   ();
       int highlightedWalker = highlightedWalker();
 
-      // 3. Leave "Walker_Unit".
+      // 3. Update grid cache
+      updateGridCache(highlightedRow, highlightedWalker, "isSelected",  true);
+      updateGridCache(highlightedRow, highlightedWalker, "isConfirmed", true);
+
+      // 4. Leave "Walker_Unit".
       if (getDisplayedTabGroup().equals(tabgroup))
         cancelTabGroup(tabgroup, false);
 
-      // 4. Restore the highlighted cell.
+      // 5. Restore the highlighted cell.
       highlightedRow   (highlightedRow   );
       highlightedWalker(highlightedWalker);
 
-      // 5. Re-enter "Walker_Unit" with the desired record loaded.
+      // 6. Re-enter "Walker_Unit" with the desired record loaded.
       if (result == null || result.size() == 0) {
         parentTabgroup = "Survey_Unit";
         newWalkerUnit();
@@ -872,14 +785,15 @@ loadWalkerUnit(String callback) {
         loadWalkerUnitFrom(uuid);
       }
 
-      // 6. Gotta do that callback
+      // 7. Gotta do that callback
       execute(callback);
 
-      // 7. The `loadWalkerUnit` is effectively finished.
+      // 8. The `loadWalkerUnit` is effectively finished.
       MUTEX_WALKER_UNIT_LOAD.release();
     }
   };
 
+  updateGridCache(selectedRow(), selectedWalker(), "isSelected", false);
   fetchAll(q, loadWalkerUnit);
 }
 
@@ -916,7 +830,7 @@ onClickSurveyUnitAddNewWalkerUnit () {
   }
   parentTabgroup   = tabgroup;
   parentTabgroup__ = tabgroup;
-  loadWalkerUnit();
+  loadWalkerUnit("redrawGrid()");
 }
 
 getZeroableRefs() {
@@ -986,7 +900,7 @@ blankIfZero(String ref) {
 }
 
 rowInterval() {
-  String ref = "Control/Vars/Row_Interval";
+  String ref = "Survey_Unit/Vars/Row_Interval";
   return getFieldValueAsFloat(ref);
 }
 
@@ -1015,7 +929,6 @@ addOnEvent("Walker_Unit/Walker_Unit/Right",      "click",  "gridRight      ()");
 addOnEvent("Walker_Unit/Walker_Unit/Load",       "click",  "loadWalkerUnit ()");
 
 addOnEvent("Walker_Unit",                        "create", "onCreateWalkerUnit()");
-addOnEvent("Walker_Unit",                        "fetch",  "updateGridDimsVars()");
 addOnEvent("Walker_Unit",                        "leave",  "initHighlighted()");
 
 addOnEvent("Survey_Unit",                        "create", "onCreateSurveyUnit()");
