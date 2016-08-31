@@ -85,10 +85,7 @@ updateGridCache(Object result) {
   // 2. Insert 'Walker' data from database
   for (int i = 1; i < gridWidth; i++) {
     String initials = GRID_WALKERS.get(i);
-    boolean hasInitials = !isNull(initials);
-    updateGridCache(0, i, "hasInitials", hasInitials);
-    if (hasInitials)
-      updateGridCache(0, i, "Initials", initials);
+    updateGridCache(0, i, "Initials", initials);
   }
 
   // 3. Update data about the user's interactions during this session
@@ -109,6 +106,9 @@ updateGridCache(i, j, attribName, attribVal) {
   if (i >= GRID_CACHE   .length || GRID_CACHE   .length == 0) return;
   if (j >= GRID_CACHE[0].length || GRID_CACHE[0].length == 0) return;
 
+  String attribNameNa       = "N A";
+  String attribNameInitials = "Initials";
+
   String defaultInitials = "&mdash;";
   String defaultNa       = "N/A";
   String defaultAncient  = "0";
@@ -127,12 +127,21 @@ updateGridCache(i, j, attribName, attribVal) {
   Boolean isConfirmed   = isMain && (cell != null && cell.get("isConfirmed"))
                                  || attribName.equals("Ancient")
                                  || attribName.equals("Modern");
-  Boolean isNa          = (cell != null && cell.get("isNa"))
-                   && !(attribName.equals("isNa")        && attribVal == false)
-                   && !(attribName.equals("N A")         && attribVal == false);  // TODO
-  Boolean hasInitials   = (cell != null && cell.get("hasInitials"))
-                   && !(attribName.equals("hasInitials") && isNull(attribVal))
-                   && !(attribName.equals("initials")    && isNull(attribVal));   // TODO
+  Boolean isNa          = false;
+  Boolean hasInitials   = false;
+  if (cell != null && cell.get(attribNameNa) != null) {
+    String newVal = cell.get(attribNameNa);
+    isNa = !isNull(newVal);
+  }
+  if (attribName.equals(attribNameNa))
+    isNa = !isNull(attribVal);
+
+  if (cell != null && cell.get(attribNameInitials) != null) {
+    String newVal = cell.get(attribNameInitials);
+    hasInitials = !isNull(newVal) && !newVal.equals(defaultInitials);
+  }
+  if (attribName.equals(attribNameInitials))
+    hasInitials = !isNull(attribVal);
 
   // 3. If no `cell` could be retrieved in step 1, make one.
   if (cell == null) {
@@ -190,10 +199,12 @@ updateGridCacheNa() {
   String ref = "Walker_Unit/Walker_Unit/N_A";
   List   val = getFieldValue(ref);
 
+  String attribName = "N A";
   String attribVal;
   if (val.isEmpty()) attribVal = "";
   else               attribVal = "N/A";
-  updateGridCache(selectedRow(), selectedWalker(), "N A", attribVal);
+
+  updateGridCache(selectedRow(), selectedWalker(), attribName, attribVal);
 }
 
 updateGridCacheAncient() {
@@ -454,8 +465,7 @@ highlightedRow(int newVal) {
   String ref = "Control/Vars/Highlighted_Row";
   int    highlightedWalker = highlightedWalker();
 
-  String sOldVal  = getFieldValue(ref);
-  int    iOldVal  = stringToInt(sOldVal);
+  int    iOldVal  = highlightedRow();
 
   int    iNewVal = clip(newVal, 1, numberOfRows());
   String sNewVal = String.valueOf(iNewVal);
@@ -487,8 +497,7 @@ highlightedWalker(int newVal) {
   String ref    = "Control/Vars/Highlighted_Walker";
   int    highlightedRow = highlightedRow();
 
-  String sOldVal = getFieldValue(ref);
-  int    iOldVal = stringToInt(sOldVal);
+  int    iOldVal = highlightedWalker();
 
   int    iNewVal = clip(newVal, 1, numberOfWalkers());
   String sNewVal = String.valueOf(iNewVal);
@@ -1007,7 +1016,6 @@ addOnEvent("Walker_Unit/Walker_Unit/Load",       "click",  "loadWalkerUnit ()");
 
 addOnEvent("Walker_Unit",                        "create", "onCreateWalkerUnit()");
 addOnEvent("Walker_Unit",                        "fetch",  "updateGridDimsVars()");
-addOnEvent("Walker_Unit",                        "save",   "redrawGrid(true)");
 addOnEvent("Walker_Unit",                        "leave",  "initHighlighted()");
 
 addOnEvent("Survey_Unit",                        "create", "onCreateSurveyUnit()");
