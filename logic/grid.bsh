@@ -271,7 +271,7 @@ updateGridWalkers(Object result) {
   }
 }
 
-addOnEvent("Survey_Unit",                 "create", "updateGridCache()");
+addOnEvent("Survey_Unit",                 "create", "initGridCache()");
 addOnEvent("Survey_Unit",                 "fetch",  "updateGridCache()");
 addOnEvent("Survey_Unit",                 "create", "updateGridWalkers()");
 addOnEvent("Survey_Unit",                 "fetch",  "updateGridWalkers()");
@@ -409,7 +409,7 @@ numberOfRows(int val) {
 }
 
 numberOfRows(int val, String callback) {
-  if (val < 1) val = 1; // `val` cannot be lower than 1.
+  val = clip(1, GRID_MAX_HEIGHT); // `val` cannot be lower than 1.
 
   String  refRows           = "Survey_Unit/Vars/Number_of_Rows";
   String  parentTabGroup    = getTabGroupRef(refRows);
@@ -523,11 +523,11 @@ selectedWalker() {
   return max(1, val);
 }
 
-moveWalker(int delta) {
+moveHighlightedWalker(int delta) {
   highlightedWalker(highlightedWalker() + delta);
 }
 
-moveRow(int delta) {
+moveHighlightedRow(int delta) {
   highlightedRow(highlightedRow() + delta);
 }
 
@@ -536,6 +536,7 @@ initHighlighted() {
   highlightedWalker(1);
 }
 
+// TODO: `zeroRow` needs to zero rows using a query
 zeroRow() {
   String rowId          = String.valueOf(selectedRow());
   String tabgroup       = "Walker_Unit";
@@ -569,6 +570,9 @@ zeroRow() {
 }
 
 zeroRow(result) {
+  int selectedWalker = selectedWalker();
+  int selectedRow    = selectedRow();
+
   Set   savedWalkerIds = new HashSet();
   Set     allWalkerIds = new HashSet();
   Set unsavedWalkerIds = new HashSet();
@@ -580,7 +584,7 @@ zeroRow(result) {
   }
   // We must accommodate for the fact that the currently displayed Walker Unit
   // will be saved when it is navigated away from.
-  savedWalkerIds.add(selectedWalker() + "");
+  savedWalkerIds.add(selectedWalker + "");
 
   // Populate `allWalkerIds`
   for (int i = 1; i <= numberOfWalkers(); i++) {
@@ -591,6 +595,12 @@ zeroRow(result) {
   // Compute `unsavedWalkerIds`
   allWalkerIds.removeAll(savedWalkerIds);
   unsavedWalkerIds = allWalkerIds;
+
+  // Update the grid cache
+  for (String sWalkerId : unsavedWalkerIds) {
+    int iWalkerId = stringToInt(sWalkerId);
+    updateGridCache(selectedRow, iWalkerId, "isConfirmed", true);
+  }
 
   // Create "Walker Unit" records which were previously unsaved
   rowId = String.valueOf(selectedRow());
@@ -631,15 +641,17 @@ nextWalkerUnit () {
   if (highlightedWalker() == numberOfWalkers()) {
     nextRow();
   } else {
-    moveWalker(+1);
-    loadWalkerUnit("");
+    highlightedRow   (  selectedRow   ());
+    highlightedWalker(1+selectedWalker());
+
+    loadWalkerUnit();
   }
 }
 
-gridUp   () { moveRow   (+1); redrawGrid(); }
-gridDown () { moveRow   (-1); redrawGrid(); }
-gridLeft () { moveWalker(-1); redrawGrid(); }
-gridRight() { moveWalker(+1); redrawGrid(); }
+gridUp   () { moveHighlightedRow   (+1); redrawGrid(); }
+gridDown () { moveHighlightedRow   (-1); redrawGrid(); }
+gridLeft () { moveHighlightedWalker(-1); redrawGrid(); }
+gridRight() { moveHighlightedWalker(+1); redrawGrid(); }
 
 addRow   () { numberOfRows(numberOfRows() + 1, "redrawGrid()"); }
 deleteRow() { numberOfRows(numberOfRows() - 1, "redrawGrid()"); }
