@@ -18,11 +18,18 @@ MUTEX_WALKER_UNIT_LOAD = new Semaphore(1);
 Map[][] GRID_CACHE = null;
 
 // These two variables determine the size of the cache.
-int     GRID_MAX_WIDTH  = 20;
-int     GRID_MAX_HEIGHT = 25;
+int GRID_MAX_WIDTH  = 20;
+int GRID_MAX_HEIGHT = 25;
 
 initGridCache() {
   GRID_CACHE = new HashMap[GRID_MAX_HEIGHT][GRID_MAX_WIDTH];
+
+  // Update data about the user's interactions during this session
+  for   (int i = 0; i < GRID_MAX_HEIGHT; i++) {
+    for (int j = 0; j < GRID_MAX_WIDTH;  j++) {
+      updateGridCache(i, j);
+    }
+  }
 }
 
 /* The grid is a 2-d array. The first two dimensions are the rows and walkers,
@@ -67,7 +74,7 @@ updateGridCache(String callback) {
 updateGridCache(Object result) {
   if (result == null) return;
 
-  // 1. Insert 'Walker Unit' data from database
+  // Insert 'Walker Unit' data from database
   for (dbRow : result) {
     String     sRowId =             dbRow.get(0) ;
     int        iRowId = stringToInt(dbRow.get(0));
@@ -84,13 +91,6 @@ updateGridCache(Object result) {
     if (iWalkerId < 1) continue;
 
     updateGridCache(iRowId, iWalkerId, attribName, attribVal);
-  }
-
-  // 2. Update data about the user's interactions during this session
-  for   (int i = 0; i < GRID_MAX_HEIGHT; i++) {
-    for (int j = 0; j < GRID_MAX_WIDTH;  j++) {
-      updateGridCache(i, j);
-    }
   }
 }
 
@@ -152,11 +152,7 @@ updateGridCache(i, j, attribName, attribVal) {
     isSelected = oldVal;
   }
   if (attribName.equals("isSelected")) isSelected = attribVal;
-  // 2.5 Compute `isSelected`
-  if (cell != null && cell.get("isConfirmed") != null) {
-    Boolean oldVal = cell.get("isConfirmed");
-    isConfirmed = oldVal;
-  }
+  // 2.5 Compute `isConfirmed`
   if (attribName.equals("isConfirmed")) isConfirmed = attribVal;
 
   // 3. If no `cell` could be retrieved in step 1, make one.
@@ -409,7 +405,7 @@ numberOfRows(int val) {
 }
 
 numberOfRows(int val, String callback) {
-  val = clip(1, GRID_MAX_HEIGHT); // `val` cannot be lower than 1.
+  val = clip(val, 1, GRID_MAX_HEIGHT);
 
   String  refRows           = "Survey_Unit/Vars/Number_of_Rows";
   String  parentTabGroup    = getTabGroupRef(refRows);
@@ -536,7 +532,6 @@ initHighlighted() {
   highlightedWalker(1);
 }
 
-// TODO: `zeroRow` needs to zero rows using a query
 zeroRow() {
   String rowId          = String.valueOf(selectedRow());
   String tabgroup       = "Walker_Unit";
@@ -602,28 +597,78 @@ zeroRow(result) {
     updateGridCache(selectedRow, iWalkerId, "isConfirmed", true);
   }
 
-  // Create "Walker Unit" records which were previously unsaved
+  // Enqueue "Walker Unit" records which were previously unsaved
   rowId = String.valueOf(selectedRow());
   for (String walkerId : unsavedWalkerIds) {
-    String       parentUuid = getUuid("Survey_Unit");
-    String       uuid       = null;
-    String       entityType = "Walker Unit";
-    List         geometry   = null;
-    List         attributes = createZeroedAttributeList(rowId, walkerId);
-    SaveCallback relate     = new SaveCallback() {
-      onSave(uuid, newRecord) {
-        saveEntitiesToHierRel(
-          "Survey Unit - Walker Unit",
-          parentUuid,
-          uuid,
-          "Parent Of",
-          "Child Of",
-          ""
-        );
-      }
-    };
-    saveArchEnt(uuid, entityType, geometry, attributes, relate);
+    String parentUuid = getUuid("Survey_Unit");
+
+    // Pack fields
+    List walkerUnitToZero = new ArrayList();
+    walkerUnitToZero.add(parentUuid);
+    walkerUnitToZero.add(     rowId);
+    walkerUnitToZero.add(  walkerId);
+
+    // Enque packed fields
+    WALKER_UNITS_TO_ZERO.put(walkerUnitToZero);
   }
+  // Start saving them, one at a time.
+  dequeWalkerUnitsToZero();
+}
+
+// TODO: Re-structure these.
+WALKER_UNITS_TO_ZERO      = new LinkedBlockingQueue();
+MUTEX_DEQUEUE_WAKER_UNITS = new Semaphore(1);
+
+/* Create 'Walker Unit' records listed in `WALKER_UNITS_TO_ZERO`.
+ *
+ * Notice that this function is essentially composed of two:
+ *
+ *   - `dequeWalkerUnitsToZero()`    --- Non-recursive part
+ *   - `dequeWalkerUnitsToZeroRec()` --- Recursive part
+ *
+ * The function is written this way to help coordinate locking behaviour. This
+ * function's uses `MUTEX_DEQUEUE_WAKER_UNITS` to lock `WALKER_UNITS_TO_ZERO`.
+ */
+dequeWalkerUnitsToZero() {
+  if (MUTEX_DEQUEUE_WAKER_UNITS.drainPermits() == 0) {
+    return;
+  }
+  dequeWalkerUnitsToZeroRec();
+}
+
+dequeWalkerUnitsToZeroRec() {
+  if (WALKER_UNITS_TO_ZERO.size() == 0) {
+    MUTEX_DEQUEUE_WAKER_UNITS.release();
+    return;
+  }
+
+  List walkerUnitToZero = WALKER_UNITS_TO_ZERO.take();
+
+  // Unpack fields from queue
+  String parentUuid   = walkerUnitToZero.get(0); // UUID of Survey Unit
+  String      rowId   = walkerUnitToZero.get(1);
+  String   walkerId   = walkerUnitToZero.get(2);
+  // Prepare other fields which are required to perform a save
+  String uuid         = null;
+  String entityType   = "Walker Unit";
+  List   geometry     = null;
+  List   attributes   = createZeroedAttributeList(rowId, walkerId);
+  SaveCallback relate = new SaveCallback() {
+    onSave(uuid, newRecord) {
+      saveEntitiesToHierRel(
+        "Survey Unit - Walker Unit",
+        parentUuid,
+        uuid,
+        "Parent Of",
+        "Child Of",
+        "dequeWalkerUnitsToZeroRec()" // Beware pitfalls! Recursive call here!
+      );
+    }
+  };
+
+  // Save 'Walker Unit'. This should create a new record as opposed to
+  // overwriting an existing one.
+  saveArchEnt(uuid, entityType, geometry, attributes, relate);
 }
 
 nextRow() {
@@ -746,6 +791,7 @@ loadWalkerUnit(String callback) {
     return;
   }
 
+  // TODO: We can move the UUID into the cache.
   String q = "";
   q += " SELECT uuid";
   q += "   FROM latestnondeletedaentvalue";
