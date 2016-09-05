@@ -9,6 +9,7 @@
   </Login>
 </Login>
 
+<!--TODO: Survey Unit's properties need to be moved to Control -->
 <Control f="nodata">
   <Main>
     <Add_New_Survey_Unit t="button" l="Survey_Unit"/>
@@ -200,7 +201,7 @@
     </cols>
     <cols>
       <Left       t="button"/>
-      <Load       t="button"/>
+      <Load       t="button">Load/Save</Load>
       <Right      t="button"/>
     </cols>
     <cols>
@@ -268,6 +269,7 @@
         Next Cell
       </Next_Walker_Unit_2>
     </cols>
+    <Load_Walker t="radio" f="nodata"/>
     <!--Secondary recording fields-->
     <Chronology t="checkbox">
       <opts>
@@ -287,15 +289,21 @@
         <opt>Wear</opt>
       </opts>
     </Wear>
-    <Next_Survey_Unit t="button">
-      <!--TODO: Implement me-->
-    </Next_Survey_Unit>
+    <Next_Survey_Unit t="button"/>
   </Walker_Unit>
   <Vars>
     <Row_ID    b="decimal" f="id readonly"/>
     <Walker_ID b="decimal" f="id readonly"/>
   </Vars>
 </Walker_Unit>
+
+<Saving f="nodata">
+  Saving...
+  <Saving>
+    Saving...
+    <Saving t="webview" f="nolabel"/>
+  </Saving>
+</Saving>
 
 <logic><![CDATA[
   <!--@SOURCE: logic/header.bsh-->

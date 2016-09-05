@@ -5,8 +5,6 @@
 // the 'Add Row' and 'Delete Row' buttons.
 MUTEX_WALKER_UNIT_ROWS = new Semaphore(1);
 
-MUTEX_WALKER_ZERO_ROW  = new Semaphore(1);
-
 /******************************* GRID - CACHING *******************************/
 // `GRID_CACHE` is a 2-d array. The first two dimensions are the rows and
 // walkers, respectively. Each element accessed by an index, (row, walker),
@@ -33,7 +31,7 @@ initGridCache() {
  * map of statistics. In other words, `GRID_CACHE.get(0).get(0)` is a Map.
  */
 updateGridCache() {
-  updateGridCache("");
+  updateGridCache("redrawGrid()");
 }
 
 updateGridCache(String callback) {
@@ -115,8 +113,8 @@ updateGridCache(i, j, attribName, attribVal) {
   Map cell = GRID_CACHE[i][j];
 
   // 2. Pre-compute some useful facts.
-  Boolean isHighlighted = (i == highlightedRow() && j == highlightedWalker());
-  Boolean isSelected    = (i == selectedRow()    && j == selectedWalker());
+  Boolean isHighlighted = false;
+  Boolean isSelected    = false;
   Boolean isRowIndex    = (i >  0 && j == 0);
   Boolean isWalkerIndex = (i == 0 && j >  0);
   Boolean isSide        = (i == 0 || j == 0);
@@ -188,6 +186,28 @@ updateGridCache(i, j, attribName, attribVal) {
   GRID_CACHE[i][j].put("isWalkerIndex" , isWalkerIndex);
 }
 
+deselectAll() {
+  int I = -1 + GRID_MAX_HEIGHT;
+  int J = -1 + GRID_MAX_WIDTH;
+  deselectAll(I, J);
+}
+
+unhighlightAll() {
+  int I = -1 + GRID_MAX_HEIGHT;
+  int J = -1 + GRID_MAX_WIDTH;
+  unhighlightAll(I, J);
+}
+
+deselectAll   (int I, int J) { setGridInRange(I, J, "isSelected",    false); }
+unhighlightAll(int I, int J) { setGridInRange(I, J, "isHighlighted", false); }
+
+setGridInRange(int I, int J, attribName, attribVal) {
+  if (GRID_CACHE == null) return;
+  for   (int i = 0; i <= I; i++)
+    for (int j = 0; j <= J; j++)
+      GRID_CACHE[i][j].put(attribName, attribVal);
+}
+
 updateGridCacheNa() {
   String ref = "Walker_Unit/Walker_Unit/N_A";
   List   val = getFieldValue(ref);
@@ -243,6 +263,7 @@ updateGridWalkers() {
   FetchCallback updateGridWalkers = new FetchCallback() {
     onFetch(result) {
       updateGridWalkers(result);
+      redrawGrid();
     }
   };
 
@@ -284,6 +305,7 @@ redrawGrid(Boolean doRefreshCache) {
   int    numberOfRows    = numberOfRows();
   int    numberOfWalkers = numberOfWalkers();
   String refGridWebView  = "Walker_Unit/Walker_Unit/Grid";
+
   // In a probably vain attempt to improve performance, this code is valid
   // HTML5.
   String html = "";
@@ -466,8 +488,8 @@ highlightedRow(int newVal) {
 
   setFieldValue(ref, sNewVal);
 
-  updateGridCache(iOldVal, highlightedWalker, "isHighlighted", false);
-  updateGridCache(iNewVal, highlightedWalker, "isHighlighted", true );
+  unhighlightAll();
+  updateGridCache(iNewVal, highlightedWalker, "isHighlighted", true);
 }
 
 selectedRow() {
@@ -502,8 +524,8 @@ highlightedWalker(int newVal) {
 
   setFieldValue(ref, sNewVal);
 
-  updateGridCache(highlightedRow, iOldVal, "isHighlighted", false);
-  updateGridCache(highlightedRow, iNewVal, "isHighlighted", true );
+  unhighlightAll();
+  updateGridCache(highlightedRow, iNewVal, "isHighlighted", true);
 }
 
 selectedWalker() {
@@ -514,11 +536,27 @@ selectedWalker() {
 }
 
 moveHighlightedWalker(int delta) {
-  highlightedWalker(highlightedWalker() + delta);
+  int numberOfWalkers   = numberOfWalkers  ();
+  int highlightedWalker = highlightedWalker();
+
+  int update = mod(
+      (highlightedWalker - 1) + delta,
+      numberOfWalkers
+  ) + 1;
+
+  highlightedWalker(update);
 }
 
 moveHighlightedRow(int delta) {
-  highlightedRow(highlightedRow() + delta);
+  int numberOfRows   = numberOfRows  ();
+  int highlightedRow = highlightedRow();
+
+  int update = mod(
+      (highlightedRow - 1) + delta,
+      numberOfRows
+  ) + 1;
+
+  highlightedRow(update);
 }
 
 initHighlighted() {
@@ -530,6 +568,13 @@ gridUp   () { moveHighlightedRow   (+1); redrawGrid(); }
 gridDown () { moveHighlightedRow   (-1); redrawGrid(); }
 gridLeft () { moveHighlightedWalker(-1); redrawGrid(); }
 gridRight() { moveHighlightedWalker(+1); redrawGrid(); }
+gridRandomAccessWalker() {
+  String ref      = "Walker_Unit/Walker_Unit/Load_Walker";
+  int    walkerId = getFieldValueAsInt(ref);
+
+  highlightedWalker(walkerId);
+  loadWalkerUnit();
+}
 
 /******************************** ROW ZEROING *********************************/
 // A queue of the 'Walker Unit' entities which require creation and
@@ -539,73 +584,30 @@ WALKER_UNITS_TO_ZERO      = new LinkedBlockingQueue();
 // A lock on the `WALKER_UNITS_TO_ZERO` variable.
 MUTEX_DEQUEUE_WAKER_UNITS = new Semaphore(1);
 
-zeroRow() {
-  String rowId          = String.valueOf(selectedRow());
-  String tabgroup       = "Walker_Unit";
-  String parentTabGroup = "Survey_Unit";
-  String parentUuid     = getUuid(parentTabGroup);
+// TODO: This needs to be called only once the 'Walker Unit' tab group is
+//       finished saving.
+zeroRowAndNext() {
+  int numberOfWalkers = numberOfWalkers();
+  int selectedWalker  = selectedWalker();
+  int selectedRow     = selectedRow();
 
-  String q = "";
-  q += " SELECT measure AS savedWalkerIds";
-  q += "   FROM latestnondeletedaentvalue";
-  q += "   JOIN attributekey USING (attributeid)";
-  q += "  WHERE attributename = 'Walker ID'";
-  q += "    AND uuid IN (";
-  q += "         SELECT uuid";
-  q += "           FROM latestnondeletedaentvalue";
-  q += "           JOIN attributekey USING (attributeid)";
-  q += "           JOIN parentchild ON (uuid = childuuid)";
-  q += "          WHERE measure = '{rowId}'";
-  q += "            AND attributename = 'Row ID'";
-  q += "            AND parentuuid = '{parentUuid}'";
-  q += "        )";
-  q  = replaceFirst(q, "{rowId}",      rowId);
-  q  = replaceFirst(q, "{parentUuid}", parentUuid);
+  Set unsavedWalkerIds = new TreeSet();
 
-  FetchCallback zeroRow = new FetchCallback() {
-    onFetch(result) {
-      zeroRow(result);
-    }
-  };
+  // Populate `unsavedWalkerIds`
+  for (int i = 1; i <= numberOfWalkers(); i++) {
+    // We take "isConfirmed" to be synonymous with "is saved".
+    Boolean isConfirmed = GRID_CACHE[selectedRow][i].get("isConfirmed");
+    if (isConfirmed != null && isConfirmed == true) continue;
 
-  fetchAll(q, zeroRow);
-}
-
-zeroRow(result) {
-  int selectedWalker = selectedWalker();
-  int selectedRow    = selectedRow();
-
-  Set   savedWalkerIds = new HashSet();
-  Set     allWalkerIds = new HashSet();
-  Set unsavedWalkerIds = new HashSet();
-
-  // Populate `savedWalkerIds`
-  for (dbRow : result) {
-    String savedWalkerId = dbRow.get(0);
-    savedWalkerIds.add(savedWalkerId);
+    String walkerId = String.valueOf(i);
+    unsavedWalkerIds.add(walkerId);
   }
   // We must accommodate for the fact that the currently displayed Walker Unit
   // will be saved when it is navigated away from.
-  savedWalkerIds.add(selectedWalker + "");
-
-  // Populate `allWalkerIds`
-  for (int i = 1; i <= numberOfWalkers(); i++) {
-    String walkerId = String.valueOf(i);
-    allWalkerIds.add(walkerId);
-  }
-
-  // Compute `unsavedWalkerIds`
-  allWalkerIds.removeAll(savedWalkerIds);
-  unsavedWalkerIds = allWalkerIds;
-
-  // Update the grid cache
-  for (String sWalkerId : unsavedWalkerIds) {
-    int iWalkerId = stringToInt(sWalkerId);
-    updateGridCache(selectedRow, iWalkerId, "isConfirmed", true);
-  }
+  unsavedWalkerIds.remove(selectedWalker + "");
 
   // Enqueue "Walker Unit" records which were previously unsaved
-  rowId = String.valueOf(selectedRow());
+  rowId = String.valueOf(selectedRow);
   for (String walkerId : unsavedWalkerIds) {
     String parentUuid = getUuid("Survey_Unit");
 
@@ -622,6 +624,7 @@ zeroRow(result) {
   dequeWalkerUnitsToZero();
 }
 
+
 /* Create 'Walker Unit' records listed in `WALKER_UNITS_TO_ZERO`.
  *
  * Notice that this function is essentially composed of two:
@@ -636,26 +639,39 @@ dequeWalkerUnitsToZero() {
   if (MUTEX_DEQUEUE_WAKER_UNITS.drainPermits() == 0) {
     return;
   }
+
+  showTabGroup("Saving");
+
   dequeWalkerUnitsToZeroRec();
 }
 
 dequeWalkerUnitsToZeroRec() {
   if (WALKER_UNITS_TO_ZERO.size() == 0) {
     MUTEX_DEQUEUE_WAKER_UNITS.release();
+
+    Boolean doWarn = false;
+    cancelTabGroup("Saving", doWarn);
+
+    nextRow();
+
     return;
   }
+
+  populateWebViewHtml("Saving/Saving/Saving", getSavingHtml());
 
   List walkerUnitToZero = WALKER_UNITS_TO_ZERO.take();
 
   // Unpack fields from queue
-  String parentUuid   = walkerUnitToZero.get(0); // UUID of Survey Unit
-  String      rowId   = walkerUnitToZero.get(1);
-  String   walkerId   = walkerUnitToZero.get(2);
+  String parentUuid   =             walkerUnitToZero.get(0); // Survey Unit UUID
+  String     sRowId   =             walkerUnitToZero.get(1);
+  int        iRowId   = stringToInt(walkerUnitToZero.get(1));
+  String  sWalkerId   =             walkerUnitToZero.get(2);
+  int     iWalkerId   = stringToInt(walkerUnitToZero.get(2));
   // Prepare other fields which are required to perform a save
   String uuid         = null;
   String entityType   = "Walker Unit";
   List   geometry     = null;
-  List   attributes   = createZeroedAttributeList(rowId, walkerId);
+  List   attributes   = createZeroedAttributeList(sRowId, sWalkerId);
   SaveCallback relate = new SaveCallback() {
     onSave(uuid, newRecord) {
       saveEntitiesToHierRel(
@@ -672,6 +688,56 @@ dequeWalkerUnitsToZeroRec() {
   // Save 'Walker Unit'. This should create a new record as opposed to
   // overwriting an existing one.
   saveArchEnt(uuid, entityType, geometry, attributes, relate);
+  updateGridCache(iRowId, iWalkerId, "isConfirmed", true);
+}
+
+getSavingHtml() {
+  String html = "";
+
+  html += "<!DOCTYPE html>";
+  html += "<html>";
+  html += "  <head><title>Saving...</title></head>";
+  html += "  <p>";
+  html += "    <b>Please do not leave this tab group.</b>";
+  html += "    The following Walker Unit records are saving:";
+  html += "  </p>";
+  html += "  <ul>";
+  html += getSavingHtmlLis();
+  html += "  </ul>";
+  html += "  <p>";
+  html += "    This list will update automatically as each record is saved.";
+  html += "  </p>";
+  html += "  <p>You will be returned to the previous tab group shortly.</p>";
+  html += "</html>";
+
+  return html;
+}
+
+getSavingHtmlLis() {
+  // Copy Queue object to avoid blocking
+  LinkedBlockingQueue walkerUnitsToZero;
+  synchronized (WALKER_UNITS_TO_ZERO) {
+    walkerUnitsToZero = new LinkedBlockingQueue(WALKER_UNITS_TO_ZERO);
+  }
+
+  String html = "";
+  while(!walkerUnitsToZero.isEmpty()) {
+    List walkerUnitToZero = walkerUnitsToZero.take();
+
+    // Unpack values from `walkerUnitToZero`
+    String    rowId = walkerUnitToZero.get(1);
+    String walkerId = walkerUnitToZero.get(2);
+
+    // Build the <li> string
+    String fmtHtmlLi = "<li>Row %s, Walker %s</li>";
+    String    htmlLi = replaceFirst(fmtHtmlLi,    rowId);
+              htmlLi = replaceFirst(   htmlLi, walkerId);
+
+    // Append the <li> string
+    html += htmlLi;
+  }
+
+  return html;
 }
 
 nextRow() {
@@ -681,7 +747,7 @@ nextRow() {
     highlightedWalker(1);
     highlightedRow   (1+selectedRow());
 
-    loadWalkerUnit("redrawGrid()");
+    loadWalkerUnit();
   }
 }
 
@@ -698,25 +764,6 @@ nextWalkerUnit () {
 
 addRow   () { numberOfRows(numberOfRows() + 1, "redrawGrid()"); }
 deleteRow() { numberOfRows(numberOfRows() - 1, "redrawGrid()"); }
-
-zeroRowAndNext() {
-  if (MUTEX_WALKER_ZERO_ROW.drainPermits() == 0) {
-    return;
-  }
-
-  dialog = showBusy("Confirming Zero Entries", "Please wait...");
-  zeroRow();
-  nextRow();
-}
-
-/* Intended to be called when `zeroRowAndNext()` is finished executing.
- */
-zeroRowAndNextComplete() {
-  if (dialog != null) {
-    dialog.dismiss();
-  }
-  MUTEX_WALKER_ZERO_ROW.release();
-}
 
 getZeroableRefs() {
   List   elemNames = new ArrayList(); // names of zeroable elements
@@ -798,7 +845,7 @@ for (ref : getZeroableRefs()) {
 }
 
 /********************************** LOADING ***********************************/
-/* This function is intended to be called from eitherthe "Walker_Unit" or 
+/* This function is intended to be called from either the "Walker_Unit" or
  * "Survey_Unit" tab group.
  */
 loadWalkerUnit() {
@@ -823,6 +870,7 @@ loadWalkerUnit(String callback) {
       highlightedRow    == selectedRow        &&
       highlightedWalker == selectedWalker
   ) {
+    saveWalkerUnit(); // TODO: This should happen every time the load/save button is pressed. There should be a callback to leave the cell if needed.
     return;
   }
 
@@ -831,9 +879,8 @@ loadWalkerUnit(String callback) {
   zeroIfBlank();
 
   // 2. Update grid cache
-  updateGridCache(   selectedRow,    selectedWalker, "isSelected",  false);
+  deselectAll();
   updateGridCache(highlightedRow, highlightedWalker, "isSelected",  true );
-  updateGridCache(highlightedRow, highlightedWalker, "isConfirmed", true );
 
   // 3. Leave "Walker_Unit".
   if (getDisplayedTabGroup().equals(tabgroup))
@@ -859,9 +906,13 @@ loadWalkerUnit(String callback) {
 // Overrides autogen's definition
 loadWalkerUnitFrom(String uuid) {
   if (!isDisplayed("Survey_Unit")) {
-    // TODO: This needs a nicer message
-    String head = "Load From somewhere else";
-    String body = "Load From somewhere else";
+    String head = "";
+    String body = "";
+
+    head  = "Walker Unit Could Not Be Loaded";
+    body  = "'Walker Unit' records must be loaded from the 'Survey Unit' tab";
+    body += " group";
+
     showWarning(head, body);
     return;
   }
@@ -879,6 +930,102 @@ loadWalkerUnitFrom(String uuid) {
 
   showTabGroup(tabgroup, uuid, cb);
 }
+
+/*********************************** SAVING ***********************************/
+MUTEX_WALKER_UNIT_SAVE = new Semaphore(1);
+
+// Overrides autogen's definition. Disables autosaving.
+onShowWalkerUnit() {
+  return;
+}
+
+saveWalkerUnit() {
+  if (MUTEX_WALKER_UNIT_SAVE.drainPermits() == 0) {
+    showToast("Still Saving...");
+    return;
+  }
+
+  String  tabgroup            = "Walker_Unit";
+  Boolean enableAutosave      = false;
+  String  id                  = getUuid(tabgroup);
+  List    geometry            = null;
+  List    attributes          = null;
+  String  parentTabgroup_     = parentTabgroup;
+  String  parentTabgroupUuid_ = getUuid(parentTabgroup_);
+  Boolean userWasSet          = !username.equals("");
+  String  callback            = "onSaveWalkerUnit__()";
+
+  // Callback to update grid cache
+  int     i_i                 =      selectedRow();
+  int     i_j                 =      selectedWalker();
+  String  s_i                 = "" + selectedRow();
+  String  s_j                 = "" + selectedWalker();
+  String  callbackConfirm     = "confirmWalkerUnit(%s, %s)";
+          callbackConfirm     = replaceFirst(callbackConfirm, s_i);
+          callbackConfirm     = replaceFirst(callbackConfirm, s_j);
+
+  // Callback to release mutex
+  String  callbackRelease     = "MUTEX_WALKER_UNIT_SAVE.release()";
+
+  // Callback to repopulate child entity list
+  String repopulateEntityList;
+  repopulateEntityList = "populateEntityListsInTabGroup(\"{tabGroup}\")";
+  repopulateEntityList = replaceFirst(repopulateEntityList, "{tabGroup}", parentTabgroup__);
+
+  // Put all the callbacks together
+  callback = callbackConfirm      + ";" +
+             callbackRelease      + ";" +
+             repopulateEntityList + ";" +
+             callback;
+
+  parentTabgroup = null;
+
+  SaveCallback saveCallback  = new SaveCallback() {
+    onSave(uuid, newRecord) {
+      setUuid(tabgroup, uuid);
+      updateGridCache(i_i, i_j, "UUID", uuid);
+
+      // Make a child-parent relationship if need be.
+      if (
+          newRecord &&
+          !isNull(parentTabgroup_) &&
+          !isNull(parentTabgroupUuid_)
+      ) {
+        String rel = "";
+        rel += parentTabgroup_.replaceAll("_", " ");
+        rel += " - ";
+        rel += tabgroup.replaceAll("_", " ");
+        saveEntitiesToHierRel(
+          rel,
+          parentTabgroupUuid_,
+          uuid,
+          "Parent Of",
+          "Child Of",
+          callback
+        );
+      } else {
+        execute(callback);
+      }
+    }
+    onError(message) {
+      showToast(message);
+    }
+  };
+
+  saveTabGroup(tabgroup, id, geometry, attributes, saveCallback, enableAutosave);
+}
+
+confirmWalkerUnit(int i, int j) {
+  updateGridCache(i, j, "isConfirmed", true);
+}
+
+onSaveWalkerUnit() {
+  showWarning("", "save");
+
+  redrawGrid();
+}
+
+addOnEvent("Walker_Unit", "save", "onSaveWalkerUnit()");
 
 /**************************** MISC EVENT HANDLERS *****************************/
 inheritSurveyUnitFields() {
@@ -919,6 +1066,20 @@ inheritWalkerUnitFields() {
   );
 }
 
+populateWalkerRadioGroup () {
+  int    numberOfWalkers = numberOfWalkers();
+  String selectedWalker  = String.valueOf(selectedWalker());
+  String refWalker       = "Walker_Unit/Walker_Unit/Load_Walker";
+
+  List walkerIds = new ArrayList();
+  for (int i = 1; i <= numberOfWalkers; i++ ) {
+    String s_i = String.valueOf(i);
+    walkerIds.add(new NameValuePair(s_i, s_i));
+  }
+
+  populateRadioGroup(refWalker, walkerIds);
+}
+
 onCreateWalkerUnit() {
   inheritWalkerUnitFields();
   zeroIfBlank();
@@ -933,26 +1094,37 @@ onClickSurveyUnitAddNewWalkerUnit () {
   }
   parentTabgroup   = tabgroup;
   parentTabgroup__ = tabgroup;
-  loadWalkerUnit("redrawGrid()");
+  loadWalkerUnit();
+}
+
+onClickNextSurveyUnit() {
+  cancelTabGroup("Walker_Unit", false);
+  cancelTabGroup("Survey_Unit", false);
+
+  onClickControlAddNewSurveyUnit();
+  onClickSurveyUnitAddNewWalkerUnit(); // TODO: Refactor the autogened code so
+                                       // that it saves the parent before
+                                       // entering the child tab group.
 }
 
 /******************************* EVENT BINDINGS *******************************/
 addOnEvent("Walker_Unit/Walker_Unit/Zero_Row_And_Next_1", "click", "zeroRowAndNext()");
 addOnEvent("Walker_Unit/Walker_Unit/Zero_Row_And_Next_2", "click", "zeroRowAndNext()");
-addOnEvent("Walker_Unit",                                 "show",  "zeroRowAndNextComplete()");
 
 addOnEvent("Walker_Unit/Walker_Unit/Next_Walker_Unit_1",    "click", "nextWalkerUnit()");
 addOnEvent("Walker_Unit/Walker_Unit/Next_Walker_Unit_2",    "click", "nextWalkerUnit()");
 
-addOnEvent("Walker_Unit/Walker_Unit/Delete_Row", "click",  "deleteRow      ()");
+addOnEvent("Walker_Unit/Walker_Unit/Delete_Row", "click",  "deleteRow()");
 
-addOnEvent("Walker_Unit/Walker_Unit/Up",         "click",  "gridUp         ()");
-addOnEvent("Walker_Unit/Walker_Unit/Down",       "click",  "gridDown       ()");
-addOnEvent("Walker_Unit/Walker_Unit/Left",       "click",  "gridLeft       ()");
-addOnEvent("Walker_Unit/Walker_Unit/Right",      "click",  "gridRight      ()");
+addOnEvent("Walker_Unit/Walker_Unit/Up",          "click",  "gridUp()");
+addOnEvent("Walker_Unit/Walker_Unit/Down",        "click",  "gridDown()");
+addOnEvent("Walker_Unit/Walker_Unit/Left",        "click",  "gridLeft()");
+addOnEvent("Walker_Unit/Walker_Unit/Right",       "click",  "gridRight()");
+addOnEvent("Walker_Unit/Walker_Unit/Load_Walker", "click",  "gridRandomAccessWalker()");
 
-addOnEvent("Walker_Unit/Walker_Unit/Load",       "click",  "loadWalkerUnit ()");
+addOnEvent("Walker_Unit/Walker_Unit/Load",       "click",  "loadWalkerUnit()");
 
+addOnEvent("Walker_Unit",                        "show", "populateWalkerRadioGroup()");
 addOnEvent("Walker_Unit",                        "create", "onCreateWalkerUnit()");
 addOnEvent("Walker_Unit",                        "leave",  "initHighlighted()");
 
@@ -966,7 +1138,9 @@ addOnEvent("Walker_Unit/Walker_Unit/Modern",  "blur",   "redrawGridModern()");
 
 
 addOnEvent("Survey_Unit",                 "create", "initGridCache()");
-addOnEvent("Survey_Unit",                 "fetch",  "updateGridCache()");   // TODO: This MUST be completed before the user clicks "Add New Walker Unit"
+addOnEvent("Survey_Unit",                 "fetch",  "updateGridCache()");
 addOnEvent("Survey_Unit",                 "create", "updateGridWalkers()");
 addOnEvent("Survey_Unit",                 "fetch",  "updateGridWalkers()");
 addOnEvent("Walker",                      "save",   "updateGridWalkers()");
+
+addOnEvent("Walker_Unit/Walker_Unit/Next_Survey_Unit", "click", "onClickNextSurveyUnit()");

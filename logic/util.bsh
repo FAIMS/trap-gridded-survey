@@ -53,3 +53,12 @@ max(int a, int b) {
   if (a > b) return a;
   else       return b;
 }
+
+// `%` returns a remainder, not a modulus. This function gives the latter.
+mod(int a, int b) {
+  int rem = a % b;
+  if (rem < 0)
+    return rem + b;
+  else
+    return rem;
+}
