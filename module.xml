@@ -3,28 +3,52 @@
 <!--@POSTPROC: ./postproc.sh -->
 <module suppressWarnings="true">
 
-<Login f="nodata">
-  <Login f="noscroll">
-    <User_Name t="list" f="user" l="Control"/>
-  </Login>
-</Login>
-
-<!--TODO: Survey Unit's properties need to be moved to Control -->
 <Control f="nodata">
   <Main>
+    <User_Name t="dropdown" f="user"/>
     <Add_New_Survey_Unit t="button" l="Survey_Unit"/>
     <autonum/>
-    <Number_of_Rows    b="decimal">
+    <Number_of_Rows    b="decimal" f="notnull">
       Starting Number of Rows
     </Number_of_Rows>
-    <Number_of_Walkers b="decimal">
+    <Number_of_Walkers b="decimal" f="notnull">
     </Number_of_Walkers>
-    <Row_Interval      b="decimal">
+    <Row_Interval      b="decimal" f="notnull">
       Row Interval (m)
     </Row_Interval>
-    <Walker_Interval   b="decimal">
+    <Walker_Interval   b="decimal" f="notnull">
       Walker Interval (m)
     </Walker_Interval>
+    <Land_Use t="dropdown">
+      <!--Populated Manually-->
+    </Land_Use>
+    <Agricultural_Condition t="dropdown">
+      <!--Populated Manually-->
+    </Agricultural_Condition>
+    <Topography t="dropdown">
+      <!--Populated Manually-->
+    </Topography>
+    <Slope t="dropdown">
+      <!--Populated Manually-->
+    </Slope>
+    <Visibility t="dropdown">
+      <!--Populated Manually-->
+    </Visibility>
+    <Passability t="radio">
+      <!--Populated Manually-->
+    </Passability>
+    <Drainage t="radio">
+      <!--Populated Manually-->
+    </Drainage>
+    <Vegetation t="radio">
+      <!--Populated Manually-->
+    </Vegetation>
+    <Stoniness t="radio">
+      <!--Populated Manually-->
+    </Stoniness>
+    <Shade t="radio">
+      <!--Populated Manually-->
+    </Shade>
   </Main>
   <search/>
 </Control>
@@ -146,6 +170,10 @@
         <opt>5</opt>
       </opts>
     </Shade>
+    <Number_of_Rows     b="decimal" f="readonly"/>
+    <Number_of_Walkers  b="decimal" f="readonly"/>
+    <Row_Interval       b="decimal" f="readonly"/>
+    <Walker_Interval    b="decimal" f="readonly"/>
   </Survey_Unit>
   <Walkers f="noscroll">
     <Add_New_Walker lc="Walker" t="button"/>
@@ -156,12 +184,8 @@
     <Walker_Units        ec="Walker_Unit"/>
   </Walker_Units>
   <Vars>
-    <Number_of_Rows/>
-    <Number_of_Walkers/>
-    <Row_Interval/>
-    <Walker_Interval/>
-    <Highlighted_Row    f="nodata"/>
-    <Highlighted_Walker f="nodata"/>
+    <Highlighted_Row    b="decimal" f="nodata"/>
+    <Highlighted_Walker b="decimal" f="nodata"/>
   </Vars>
 </Survey_Unit>
 
@@ -309,8 +333,10 @@
   <!--@SOURCE: logic/header.bsh-->
   <!--@SOURCE: logic/util.bsh-->
 
+  <!--@SOURCE: logic/control-population.bsh-->
   <!--@SOURCE: logic/density.bsh-->
   <!--@SOURCE: logic/grid.bsh-->
+  <!--@SOURCE: logic/control-to-survey-unit-inheritance.bsh-->
   <!--@SOURCE: logic/navigation-drawer.bsh-->
   <!--@SOURCE: logic/persistence.bsh-->
   <!--@SOURCE: logic/survey-unit-id-population.bsh-->

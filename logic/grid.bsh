@@ -407,7 +407,7 @@ redrawGridAncient() { updateGridCacheAncient(); redrawGrid(); }
 redrawGridModern()  { updateGridCacheModern();  redrawGrid(); }
 
 numberOfRows() {
-  String ref = "Survey_Unit/Vars/Number_of_Rows";
+  String ref = "Survey_Unit/Survey_Unit/Number_of_Rows";
   int    val = getFieldValueAsInt(ref);
 
   return clip(val, 0, GRID_MAX_HEIGHT);
@@ -423,7 +423,7 @@ numberOfRows(int val) {
 numberOfRows(int val, String callback) {
   val = clip(val, 1, GRID_MAX_HEIGHT);
 
-  String  refRows           = "Survey_Unit/Vars/Number_of_Rows";
+  String  refRows           = "Survey_Unit/Survey_Unit/Number_of_Rows";
   String  parentTabGroup    = getTabGroupRef(refRows);
   String  parentUuid        = getUuid       (parentTabGroup);
   String  parentArchEntType = getArchEntType(parentTabGroup);
@@ -500,7 +500,7 @@ selectedRow() {
 }
 
 numberOfWalkers() {
-  String ref = "Survey_Unit/Vars/Number_of_Walkers";
+  String ref = "Survey_Unit/Survey_Unit/Number_of_Walkers";
   int    val = getFieldValueAsInt(ref);
 
   return clip(val, 0, GRID_MAX_WIDTH);
@@ -832,7 +832,7 @@ blankIfZero(String ref) {
 }
 
 rowInterval() {
-  String ref = "Survey_Unit/Vars/Row_Interval";
+  String ref = "Survey_Unit/Survey_Unit/Row_Interval";
   return getFieldValueAsFloat(ref);
 }
 
@@ -980,8 +980,8 @@ saveWalkerUnit() {
 
   parentTabgroup = null;
 
-  SaveCallback saveCallback  = new SaveCallback() {
-    onSave(uuid, newRecord) {
+  SaveForceCallback saveCallback  = new SaveForceCallback() {
+    onSave(uuid, newRecord, hasChanges) {
       setUuid(tabgroup, uuid);
       updateGridCache(i_i, i_j, "UUID", uuid);
 
@@ -1028,33 +1028,6 @@ onSaveWalkerUnit() {
 addOnEvent("Walker_Unit", "save", "onSaveWalkerUnit()");
 
 /**************************** MISC EVENT HANDLERS *****************************/
-inheritSurveyUnitFields() {
-  copyFieldValue(
-    "Control/Main/Number_of_Rows",
-    "Survey_Unit/Vars/Number_of_Rows",
-    false
-  );
-  copyFieldValue(
-    "Control/Main/Number_of_Walkers",
-    "Survey_Unit/Vars/Number_of_Walkers",
-    false
-  );
-  copyFieldValue(
-    "Control/Main/Row_Interval",
-    "Survey_Unit/Vars/Row_Interval",
-    false
-  );
-  copyFieldValue(
-    "Control/Main/Walker_Interval",
-    "Survey_Unit/Vars/Walker_Interval",
-    false
-  );
-}
-
-onCreateSurveyUnit() {
-  inheritSurveyUnitFields();
-}
-
 inheritWalkerUnitFields() {
   setFieldValue(
     "Walker_Unit/Vars/Row_ID",
@@ -1105,6 +1078,7 @@ onClickNextSurveyUnit() {
   onClickSurveyUnitAddNewWalkerUnit(); // TODO: Refactor the autogened code so
                                        // that it saves the parent before
                                        // entering the child tab group.
+  // TODO: Copy Walker relationships
 }
 
 /******************************* EVENT BINDINGS *******************************/
@@ -1127,8 +1101,6 @@ addOnEvent("Walker_Unit/Walker_Unit/Load",       "click",  "loadWalkerUnit()");
 addOnEvent("Walker_Unit",                        "show", "populateWalkerRadioGroup()");
 addOnEvent("Walker_Unit",                        "create", "onCreateWalkerUnit()");
 addOnEvent("Walker_Unit",                        "leave",  "initHighlighted()");
-
-addOnEvent("Survey_Unit",                        "create", "onCreateSurveyUnit()");
 
 addOnEvent("Walker_Unit/Walker_Unit/N_A",     "click",  "redrawGridNa()");
 addOnEvent("Walker_Unit/Walker_Unit/Ancient", "blur",   "redrawGridAncient()");

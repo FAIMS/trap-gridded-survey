@@ -8,6 +8,7 @@ onClickControlAddNewSurveyUnit () {
 }
 
 validateControlMain() {
+  String refUserName        = "Control/Main/User_Name";
   String refNumberOfRows    = "Control/Main/Number_of_Rows";
   String refNumberOfWalkers = "Control/Main/Number_of_Walkers";
   String refRowInterval     = "Control/Main/Row_Interval";
@@ -19,30 +20,37 @@ validateControlMain() {
   String archWalkerInterval  = guessArch16nVal(refWalkerInterval );
 
   String    head = "Invalid Input(s)";
-  String fmtBody = "'{name}' must be an integer between 1 and {max} inclusive.";
+  String fmtBodyNum = "'{name}' must be an integer between 1 and {max} inclusive.";
+  String fmtBodyInt = "'{name}' must be an integer greater than 0.";
+
+  if (isNull(getFieldValue(refUserName))) {
+    String body = "'User Name' must be selected.";
+    showWarning(head, body);
+    return false;
+  }
 
   if (getFieldValueAsInt(refNumberOfRows) <= 0) {
-    String body = replaceFirst(fmtBody, "{name}", archNumberOfRows);
-           body = replaceFirst(fmtBody, "{max}",  GRID_MAX_HEIGHT-1);
+    String body = replaceFirst(fmtBodyNum, "{name}", archNumberOfRows);
+           body = replaceFirst(body,       "{max}",  GRID_MAX_HEIGHT-1);
     showWarning(head, body);
     return false;
   }
 
   if (getFieldValueAsInt(refNumberOfWalkers) <= 0) {
-    String body = replaceFirst(fmtBody, "{name}", archNumberOfWalkers);
-           body = replaceFirst(fmtBody, "{max}",  GRID_MAX_WIDTH-1);
+    String body = replaceFirst(fmtBodyNum, "{name}", archNumberOfWalkers);
+           body = replaceFirst(body,       "{max}",  GRID_MAX_WIDTH-1);
     showWarning(head, body);
     return false;
   }
 
   if (getFieldValueAsInt(refRowInterval) <= 0) {
-    String body = replaceFirst(fmtBody, "{name}", archRowInterval);
+    String body = replaceFirst(fmtBodyInt, "{name}", archRowInterval);
     showWarning(head, body);
     return false;
   }
 
   if (getFieldValueAsInt(refWalkerInterval) <= 0) {
-    String body = replaceFirst(fmtBody, "{name}", archWalkerInterval);
+    String body = replaceFirst(fmtBodyInt, "{name}", archWalkerInterval);
     showWarning(head, body);
     return false;
   }
