@@ -181,7 +181,9 @@
   </Walkers>
   <Walker_Units f="noscroll">
     <Add_New_Walker_Unit lc="Walker_Unit" t="button"/>
-    <Walker_Units        ec="Walker_Unit"/>
+
+    <!--Displaying this list is costly, so we just won't do it-->
+    <!--<Walker_Units        ec="Walker_Unit"/>-->
   </Walker_Units>
   <Vars>
     <Highlighted_Row    b="decimal" f="nodata"/>

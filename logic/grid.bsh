@@ -1,5 +1,9 @@
 /************************************ GRID ************************************/
 /* Functions and variables related to the grid interface.                     */
+/* TODO: If changes are made to a tab group, the grid should indicate that    */
+/*       they're unsaved.                                                     */
+/* TODO: addOnEvent should not delete duplicate bindings if doing so hurts    */
+/*       performance.                                                         */
 /******************************************************************************/
 // A mutex is required for `numberOfRows(int)` to handle users double-clicking
 // the 'Add Row' and 'Delete Row' buttons.
@@ -244,7 +248,7 @@ updateGridWalkers() {
   String parentUuid = getUuid("Survey_Unit");
 
   String q = "";
-  q += " SELECT walkerID, initials";
+  q += " SELECT walkerID, initials, uuid";
   q += "         FROM (SELECT uuid, measure AS initials";
   q += "                 FROM parentchild";
   q += "                 JOIN latestnondeletedaentvalue on (childuuid = uuid)";
@@ -281,9 +285,27 @@ updateGridWalkers(Object result) {
     String sWalkerId =             dbRow.get(0);
     int    iWalkerId = stringToInt(dbRow.get(0));
     String initials  =             dbRow.get(1);
+    String uuid      =             dbRow.get(2);
 
     updateGridCache(0, iWalkerId, "Initials", initials);
+    updateGridCache(0, iWalkerId, "UUID",     uuid    );
   }
+}
+
+getWalkerUuids() {
+  Set walkerUuids = new TreeSet();
+
+  if (GRID == null)
+      return walkerUuids;
+
+  for (int i = 0; i < GRID_MAX_WIDTH; i++) {
+    Map    cell = GRID[0][i];       if (cell == null) continue;
+    String uuid = cell.get("UUID"); if (uuid == null) continue;
+
+    walkerUuids.add(uuid);
+  }
+
+  return walkerUuids;
 }
 
 /******************************* GRID - DRAWING *******************************/
@@ -582,10 +604,8 @@ gridRandomAccessWalker() {
 WALKER_UNITS_TO_ZERO      = new LinkedBlockingQueue();
 
 // A lock on the `WALKER_UNITS_TO_ZERO` variable.
-MUTEX_DEQUEUE_WAKER_UNITS = new Semaphore(1);
+MUTEX_DEQUEUE_WALKER_UNITS = new Semaphore(1);
 
-// TODO: This needs to be called only once the 'Walker Unit' tab group is
-//       finished saving.
 zeroRowAndNext() {
   int numberOfWalkers = numberOfWalkers();
   int selectedWalker  = selectedWalker();
@@ -633,21 +653,22 @@ zeroRowAndNext() {
  *   - `dequeWalkerUnitsToZeroRec()` --- Recursive part
  *
  * The function is written this way to help coordinate locking behaviour. This
- * function's uses `MUTEX_DEQUEUE_WAKER_UNITS` to lock `WALKER_UNITS_TO_ZERO`.
+ * function's uses `MUTEX_DEQUEUE_WALKER_UNITS` to lock `WALKER_UNITS_TO_ZERO`.
  */
 dequeWalkerUnitsToZero() {
-  if (MUTEX_DEQUEUE_WAKER_UNITS.drainPermits() == 0) {
+  if (MUTEX_DEQUEUE_WALKER_UNITS.drainPermits() == 0) {
     return;
   }
 
   showTabGroup("Saving");
-
-  dequeWalkerUnitsToZeroRec();
+  saveWalkerUnit("dequeWalkerUnitsToZeroRec()");
 }
 
+// TODO: This needs to be called only once the 'Walker Unit' tab group is
+//       finished saving.
 dequeWalkerUnitsToZeroRec() {
   if (WALKER_UNITS_TO_ZERO.size() == 0) {
-    MUTEX_DEQUEUE_WAKER_UNITS.release();
+    MUTEX_DEQUEUE_WALKER_UNITS.release();
 
     Boolean doWarn = false;
     cancelTabGroup("Saving", doWarn);
@@ -853,6 +874,17 @@ loadWalkerUnit() {
 }
 
 loadWalkerUnit(String callback) {
+  loadWalkerUnit(callback, true);
+}
+
+loadWalkerUnit(String callback, boolean doSave) {
+  if (doSave) {
+    // TODO: This should happen every time the load/save button is pressed. There should be a callback to leave the cell if needed.
+    callback = "loadWalkerUnit(\"" + callback + "\")";
+    saveWalkerUnit(callback, false);
+    return;
+  }
+
   int highlightedRow    = highlightedRow   ();
   int highlightedWalker = highlightedWalker();
   int    selectedRow    = selectedRow   ();
@@ -870,7 +902,6 @@ loadWalkerUnit(String callback) {
       highlightedRow    == selectedRow        &&
       highlightedWalker == selectedWalker
   ) {
-    saveWalkerUnit(); // TODO: This should happen every time the load/save button is pressed. There should be a callback to leave the cell if needed.
     return;
   }
 
@@ -940,6 +971,10 @@ onShowWalkerUnit() {
 }
 
 saveWalkerUnit() {
+  saveWalkerUnit("");
+}
+
+saveWalkerUnit(callback) {
   if (MUTEX_WALKER_UNIT_SAVE.drainPermits() == 0) {
     showToast("Still Saving...");
     return;
@@ -968,14 +1003,10 @@ saveWalkerUnit() {
   String  callbackRelease     = "MUTEX_WALKER_UNIT_SAVE.release()";
 
   // Callback to repopulate child entity list
-  String repopulateEntityList;
-  repopulateEntityList = "populateEntityListsInTabGroup(\"{tabGroup}\")";
-  repopulateEntityList = replaceFirst(repopulateEntityList, "{tabGroup}", parentTabgroup__);
-
   // Put all the callbacks together
   callback = callbackConfirm      + ";" +
              callbackRelease      + ";" +
-             repopulateEntityList + ";" +
+             "onSaveWalkerUnit__()   ;" +
              callback;
 
   parentTabgroup = null;
@@ -1071,6 +1102,8 @@ onClickSurveyUnitAddNewWalkerUnit () {
 }
 
 onClickNextSurveyUnit() {
+  Set prevWalkerUuids = getWalkerUuids();
+
   cancelTabGroup("Walker_Unit", false);
   cancelTabGroup("Survey_Unit", false);
 
@@ -1078,7 +1111,40 @@ onClickNextSurveyUnit() {
   onClickSurveyUnitAddNewWalkerUnit(); // TODO: Refactor the autogened code so
                                        // that it saves the parent before
                                        // entering the child tab group.
-  // TODO: Copy Walker relationships
+
+  // Copy Walker relationships.
+  WALKERS_TO_RELATE.add(prevWalkerUuids); // TODO: Is this correct?
+  dequeWalkersToRelate();
+}
+
+WALKERS_TO_RELATE     = new LinkedBlockingQueue();
+MUTEX_DEQUEUE_WALKERS = new Semaphore(1);
+
+dequeWalkersToRelate() {
+  if (MUTEX_DEQUEUE_WALKERS.drainPermits() == 0) {
+    return;
+  }
+
+  dequeWalkersToRelateRec();
+}
+
+dequeWalkersToRelateRec() {
+  if (WALKER_UNITS_TO_ZERO.size() == 0) {
+    MUTEX_DEQUEUE_WALKER_UNITS.release();
+    return;
+  }
+
+  String parentEntityType = "Survey Unit";
+  String parentUuid       = getUuid(parentEntityType);
+  String childUuid        = WALKERS_TO_RELATE.take();
+  saveEntitiesToHierRel(
+    "Survey Unit - Walker",
+    parentUuid,
+    childUuid,
+    "Parent Of",
+    "Child Of",
+    "dequeWalkersToRelateRec()"
+  );
 }
 
 /******************************* EVENT BINDINGS *******************************/
