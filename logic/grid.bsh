@@ -1,9 +1,5 @@
 /************************************ GRID ************************************/
 /* Functions and variables related to the grid interface.                     */
-/* TODO: If changes are made to a tab group, the grid should indicate that    */
-/*       they're unsaved.                                                     */
-/* TODO: addOnEvent should not delete duplicate bindings if doing so hurts    */
-/*       performance.                                                         */
 /******************************************************************************/
 // A mutex is required for `numberOfRows(int)` to handle users double-clicking
 // the 'Add Row' and 'Delete Row' buttons.
@@ -295,11 +291,11 @@ updateGridWalkers(Object result) {
 getWalkerUuids() {
   Set walkerUuids = new TreeSet();
 
-  if (GRID == null)
+  if (GRID_CACHE == null)
       return walkerUuids;
 
   for (int i = 0; i < GRID_MAX_WIDTH; i++) {
-    Map    cell = GRID[0][i];       if (cell == null) continue;
+    Map    cell = GRID_CACHE[0][i]; if (cell == null) continue;
     String uuid = cell.get("UUID"); if (uuid == null) continue;
 
     walkerUuids.add(uuid);
@@ -316,10 +312,10 @@ redrawGrid() {
 redrawGrid(Boolean doRefreshCache) {
   if (doRefreshCache) {
     updateGridCache("redrawGrid()");
-    showWarning("", "Updating");
+    //showWarning("", "Updating");
     return;
   }
-  showWarning("", "Redrawing");
+  //showWarning("", "Redrawing");
   if (GRID_CACHE == null) {
     return;
   }
@@ -458,15 +454,12 @@ numberOfRows(int val, String callback) {
   if (!getDisplayedTabGroup().equals("Walker_Unit"))
     return;
 
-  if (!MUTEX_WALKER_UNIT_ROWS.tryAcquire())
+  if (MUTEX_WALKER_UNIT_ROWS.drainPermits() == 0)
     return;
 
-  // 1. If getPreviousTabGroup() == parentTabGroup, the user will visit it
-  //    when they hit the back button. In this case, the value saved in the db
-  //    must be made consistent with the one in the UI.
-  if (getPreviousTabGroup().equals(parentTabGroup)) {
-    setFieldValue(refRows, numberOfRows);
-  }
+  // 1. Even though we're updating the database directly, we also need to update
+  //    the UI.
+  setFieldValue(refRows, numberOfRows);
 
   // 2. Update 'Number of Rows' using saveArchEnt
   SaveCallback release = new SaveCallback() {
@@ -664,9 +657,9 @@ dequeWalkerUnitsToZero() {
   saveWalkerUnit("dequeWalkerUnitsToZeroRec()");
 }
 
-// TODO: This needs to be called only once the 'Walker Unit' tab group is
-//       finished saving.
 dequeWalkerUnitsToZeroRec() {
+  populateWebViewHtml("Saving/Saving/Saving", getSavingHtml());
+
   if (WALKER_UNITS_TO_ZERO.size() == 0) {
     MUTEX_DEQUEUE_WALKER_UNITS.release();
 
@@ -677,8 +670,6 @@ dequeWalkerUnitsToZeroRec() {
 
     return;
   }
-
-  populateWebViewHtml("Saving/Saving/Saving", getSavingHtml());
 
   List walkerUnitToZero = WALKER_UNITS_TO_ZERO.take();
 
@@ -725,10 +716,6 @@ getSavingHtml() {
   html += "  <ul>";
   html += getSavingHtmlLis();
   html += "  </ul>";
-  html += "  <p>";
-  html += "    This list will update automatically as each record is saved.";
-  html += "  </p>";
-  html += "  <p>You will be returned to the previous tab group shortly.</p>";
   html += "</html>";
 
   return html;
@@ -873,15 +860,18 @@ loadWalkerUnit() {
   loadWalkerUnit("redrawGrid()");
 }
 
+loadWalkerUnit(boolean doSave) {
+  loadWalkerUnit("redrawGrid()", doSave);
+}
+
 loadWalkerUnit(String callback) {
   loadWalkerUnit(callback, true);
 }
 
 loadWalkerUnit(String callback, boolean doSave) {
   if (doSave) {
-    // TODO: This should happen every time the load/save button is pressed. There should be a callback to leave the cell if needed.
-    callback = "loadWalkerUnit(\"" + callback + "\")";
-    saveWalkerUnit(callback, false);
+    callback = "loadWalkerUnit(\"" + callback + "\", false)";
+    saveWalkerUnit(callback);
     return;
   }
 
@@ -988,7 +978,6 @@ saveWalkerUnit(callback) {
   String  parentTabgroup_     = parentTabgroup;
   String  parentTabgroupUuid_ = getUuid(parentTabgroup_);
   Boolean userWasSet          = !username.equals("");
-  String  callback            = "onSaveWalkerUnit__()";
 
   // Callback to update grid cache
   int     i_i                 =      selectedRow();
@@ -1004,9 +993,12 @@ saveWalkerUnit(callback) {
 
   // Callback to repopulate child entity list
   // Put all the callbacks together
-  callback = callbackConfirm      + ";" +
-             callbackRelease      + ";" +
-             "onSaveWalkerUnit__()   ;" +
+  callback = callbackConfirm           + ";" +
+             callbackRelease           + ";" +
+             "updateGridCacheNa()         ;" +
+             "updateGridCacheAncient()    ;" +
+             "updateGridCacheModern()     ;" +
+             "onSaveWalkerUnit__()        ;" +
              callback;
 
   parentTabgroup = null;
@@ -1051,7 +1043,7 @@ confirmWalkerUnit(int i, int j) {
 }
 
 onSaveWalkerUnit() {
-  showWarning("", "save");
+  //showWarning("", "save");
 
   redrawGrid();
 }
@@ -1091,16 +1083,24 @@ onCreateWalkerUnit() {
 
 // Overrides autogen's definition
 onClickSurveyUnitAddNewWalkerUnit () {
+  // The use of `addOnEvent` and `delOnEvent` here is hackish; We're not calling
+  // `bindOnEvents`. The behaviour of the event accumulator system is techically
+  // undefined unless all `addOnEvent` and `delOnEvent` calls are followed by a
+  // call to `bindOnEvents`.
   String tabgroup = "Survey_Unit";
   if (isNull(getUuid(tabgroup))){
-    showToast("{You_must_save_this_tabgroup_first}");
+    addOnEvent(tabgroup, "save", "onClickSurveyUnitAddNewWalkerUnit()");
+    triggerAutoSave();
     return;
   }
+  delOnEvent(tabgroup, "save", "onClickSurveyUnitAddNewWalkerUnit()");
+
   parentTabgroup   = tabgroup;
   parentTabgroup__ = tabgroup;
-  loadWalkerUnit();
+  loadWalkerUnit(false);
 }
 
+// TODO: This isn't copying the next autonum num properly; it skips numbers
 onClickNextSurveyUnit() {
   Set prevWalkerUuids = getWalkerUuids();
 
@@ -1108,12 +1108,10 @@ onClickNextSurveyUnit() {
   cancelTabGroup("Survey_Unit", false);
 
   onClickControlAddNewSurveyUnit();
-  onClickSurveyUnitAddNewWalkerUnit(); // TODO: Refactor the autogened code so
-                                       // that it saves the parent before
-                                       // entering the child tab group.
+  onClickSurveyUnitAddNewWalkerUnit();
 
-  // Copy Walker relationships.
-  WALKERS_TO_RELATE.add(prevWalkerUuids); // TODO: Is this correct?
+  // Copy Walker relationships. TODO: Ensure this works
+  WALKERS_TO_RELATE.addAll(prevWalkerUuids);
   dequeWalkersToRelate();
 }
 
@@ -1167,10 +1165,6 @@ addOnEvent("Walker_Unit/Walker_Unit/Load",       "click",  "loadWalkerUnit()");
 addOnEvent("Walker_Unit",                        "show", "populateWalkerRadioGroup()");
 addOnEvent("Walker_Unit",                        "create", "onCreateWalkerUnit()");
 addOnEvent("Walker_Unit",                        "leave",  "initHighlighted()");
-
-addOnEvent("Walker_Unit/Walker_Unit/N_A",     "click",  "redrawGridNa()");
-addOnEvent("Walker_Unit/Walker_Unit/Ancient", "blur",   "redrawGridAncient()");
-addOnEvent("Walker_Unit/Walker_Unit/Modern",  "blur",   "redrawGridModern()");
 
 
 

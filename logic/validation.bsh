@@ -8,7 +8,6 @@ onClickControlAddNewSurveyUnit () {
 }
 
 validateControlMain() {
-  String refUserName        = "Control/Main/User_Name";
   String refNumberOfRows    = "Control/Main/Number_of_Rows";
   String refNumberOfWalkers = "Control/Main/Number_of_Walkers";
   String refRowInterval     = "Control/Main/Row_Interval";
@@ -22,12 +21,6 @@ validateControlMain() {
   String    head = "Invalid Input(s)";
   String fmtBodyNum = "'{name}' must be an integer between 1 and {max} inclusive.";
   String fmtBodyInt = "'{name}' must be an integer greater than 0.";
-
-  if (isNull(getFieldValue(refUserName))) {
-    String body = "'User Name' must be selected.";
-    showWarning(head, body);
-    return false;
-  }
 
   if (getFieldValueAsInt(refNumberOfRows) <= 0) {
     String body = replaceFirst(fmtBodyNum, "{name}", archNumberOfRows);

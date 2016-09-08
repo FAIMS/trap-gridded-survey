@@ -3,9 +3,14 @@
 <!--@POSTPROC: ./postproc.sh -->
 <module suppressWarnings="true">
 
+<Login f="nodata">
+  <Login f="noscroll">
+    <User t="list" f="user" l="Control"/>
+  </Login>
+</Login>
+
 <Control f="nodata">
   <Main>
-    <User_Name t="dropdown" f="user"/>
     <Add_New_Survey_Unit t="button" l="Survey_Unit"/>
     <autonum/>
     <Number_of_Rows    b="decimal" f="notnull">
@@ -55,6 +60,7 @@
 
 <Survey_Unit>
   <Survey_Unit>
+    <Trigger_AutoSave t="button"/>
     <Survey_Unit_ID f="id autonum"/>
     <Land_Use>
       <desc>Prevalent landuse in a given Survey Unit.</desc>
@@ -334,6 +340,7 @@
 <logic><![CDATA[
   <!--@SOURCE: logic/header.bsh-->
   <!--@SOURCE: logic/util.bsh-->
+  <!--@SOURCE: logic/saving-2.5.bsh-->
 
   <!--@SOURCE: logic/control-population.bsh-->
   <!--@SOURCE: logic/density.bsh-->
