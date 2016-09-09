@@ -16,6 +16,11 @@ persistOverSessions("Control/Main/Topography");
 persistOverSessions("Control/Main/Slope");
 persistOverSessions("Control/Main/Visibility");
 
+persistOverSessions("Control/Main/Number_of_Rows");
+persistOverSessions("Control/Main/Number_of_Walkers");
+persistOverSessions("Control/Main/Row_Interval");
+persistOverSessions("Control/Main/Walker_Interval");
+
 // BUG: Radio buttons don't persist
 // persistOverSessions("Control/Main/Passability");
 // persistOverSessions("Control/Main/Drainage");

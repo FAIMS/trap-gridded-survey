@@ -1,4 +1,0 @@
-persistOverSessions("Control/Main/Number_of_Rows");
-persistOverSessions("Control/Main/Number_of_Walkers");
-persistOverSessions("Control/Main/Row_Interval");
-persistOverSessions("Control/Main/Walker_Interval");

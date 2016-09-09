@@ -1100,7 +1100,6 @@ onClickSurveyUnitAddNewWalkerUnit () {
   loadWalkerUnit(false);
 }
 
-// TODO: This isn't copying the next autonum num properly; it skips numbers
 onClickNextSurveyUnit() {
   Set prevWalkerUuids = getWalkerUuids();
 

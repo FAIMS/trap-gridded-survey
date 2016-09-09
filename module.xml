@@ -347,7 +347,6 @@
   <!--@SOURCE: logic/grid.bsh-->
   <!--@SOURCE: logic/control-to-survey-unit-inheritance.bsh-->
   <!--@SOURCE: logic/navigation-drawer.bsh-->
-  <!--@SOURCE: logic/persistence.bsh-->
   <!--@SOURCE: logic/survey-unit-id-population.bsh-->
   <!--@SOURCE: logic/survey-unit-walker-population.bsh-->
   <!--@SOURCE: logic/validation.bsh-->
