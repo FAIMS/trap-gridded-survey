@@ -1,5 +1,2 @@
-<?xml version="1.0"?>
-<ValidationSchema>
-  <ArchaeologicalElement name="Survey_Unit"/>
-  <ArchaeologicalElement name="Walker_Unit"/>
-</ValidationSchema>
+<?xml version='1.0' encoding='utf-8'?>
+<ValidationSchema/>

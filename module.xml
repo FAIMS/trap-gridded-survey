@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--@PREPROC:  ./preproc.sh -->
 <!--@POSTPROC: ./postproc.sh -->
-<module suppressWarnings="true">
+<module>
 
 <Login f="nodata">
   <Login f="noscroll">
@@ -13,56 +13,35 @@
   <Main>
     <Add_New_Survey_Unit t="button" l="Survey_Unit"/>
     <autonum/>
-    <Number_of_Rows    b="decimal" f="notnull">
+    <Number_of_Rows    b="decimal" f="notnull persist">
       Starting Number of Rows
     </Number_of_Rows>
-    <Number_of_Walkers b="decimal" f="notnull">
+    <Number_of_Walkers b="decimal" f="notnull persist">
     </Number_of_Walkers>
-    <Row_Interval      b="decimal" f="notnull">
+    <Row_Interval      b="decimal" f="notnull persist">
       Row Interval (m)
     </Row_Interval>
-    <Walker_Interval   b="decimal" f="notnull">
+    <Walker_Interval   b="decimal" f="notnull persist">
       Walker Interval (m)
     </Walker_Interval>
-    <Land_Use t="dropdown">
-      <!--Populated Manually-->
-    </Land_Use>
-    <Agricultural_Condition t="dropdown">
-      <!--Populated Manually-->
-    </Agricultural_Condition>
-    <Topography t="dropdown">
-      <!--Populated Manually-->
-    </Topography>
-    <Slope t="dropdown">
-      <!--Populated Manually-->
-    </Slope>
-    <Visibility t="dropdown">
-      <!--Populated Manually-->
-    </Visibility>
-    <Passability t="radio">
-      <!--Populated Manually-->
-    </Passability>
-    <Drainage t="radio">
-      <!--Populated Manually-->
-    </Drainage>
-    <Vegetation t="radio">
-      <!--Populated Manually-->
-    </Vegetation>
-    <Stoniness t="radio">
-      <!--Populated Manually-->
-    </Stoniness>
-    <Shade t="radio">
-      <!--Populated Manually-->
-    </Shade>
+    <Land_Use t="dropdown" f="persist" vp="Survey_Unit/Survey_Unit/Land_Use"/>
+    <Agricultural_Condition t="dropdown" f="persist" vp="Survey_Unit/Survey_Unit/Agricultural_Condition"/>
+    <Topography t="dropdown" f="persist" vp="Survey_Unit/Survey_Unit/Topography"/>
+    <Slope t="dropdown" f="persist" vp="Survey_Unit/Survey_Unit/Slope"/>
+    <Visibility t="dropdown" f="persist" vp="Survey_Unit/Survey_Unit/Visibility"/>
+    <Passability t="radio" f="persist" vp="Survey_Unit/Survey_Unit/Passability"/>
+    <Drainage t="radio" f="persist" vp="Survey_Unit/Survey_Unit/Drainage"/>
+    <Vegetation t="radio" f="persist" vp="Survey_Unit/Survey_Unit/Vegetation"/>
+    <Stoniness t="radio" f="persist" vp="Survey_Unit/Survey_Unit/Stoniness"/>
+    <Shade t="radio" f="persist" vp="Survey_Unit/Survey_Unit/Shade"/>
   </Main>
   <search/>
 </Control>
 
 <Survey_Unit>
   <Survey_Unit>
-    <Trigger_AutoSave t="button"/>
     <Survey_Unit_ID f="id autonum"/>
-    <Land_Use>
+    <Land_Use i="Control/Main/Land_Use">
       <desc>Prevalent landuse in a given Survey Unit.</desc>
       <opts>
         <opt>Annual Agriculture</opt>
@@ -79,7 +58,7 @@
         <opt>Other</opt>
       </opts>
     </Land_Use>
-    <Agricultural_Condition>
+    <Agricultural_Condition i="Control/Main/Agricultural_Condition">
       <desc>Agricultural condition of fields in use.</desc>
       <opts>
         <opt>Ploughed</opt>
@@ -94,7 +73,7 @@
         <opt>Other</opt>
       </opts>
     </Agricultural_Condition>
-    <Topography>
+    <Topography i="Control/Main/Topography">
       <desc>Topography of the surveyed area.</desc>
       <opts>
         <opt>N/A</opt>
@@ -106,7 +85,7 @@
         <opt>Other</opt>
       </opts>
     </Topography>
-    <Slope>
+    <Slope i="Control/Main/Slope">
       <desc>Slope of the surveyed surface. Level &lt;2%, Gentle 2-15%, Steep 15-30 %, Very Steep 30-45%, Impassable &gt;45%.</desc>
       <opts>
         <opt>Level</opt>
@@ -116,7 +95,7 @@
         <opt>Impassable</opt>
       </opts>
     </Slope>
-    <Visibility>
+    <Visibility i="Control/Main/Visibility">
       <desc>Surface visibility in quantiles. 0-20% none, 20-40% low, 40-60% moderate, 60-80% good, 80-100% excellent  </desc>
       <opts>
         <opt>0-20%</opt>
@@ -126,7 +105,7 @@
         <opt>80-100%</opt>
       </opts>
     </Visibility>
-    <Passability t="radio">
+    <Passability t="radio" i="Control/Main/Passability">
       <desc>Passability on a scale from 1-5 with 1 being Easy Passable and 5 Impassable.</desc>
       <opts>
         <opt>1</opt>
@@ -136,7 +115,7 @@
         <opt>5</opt>
       </opts>
     </Passability>
-    <Drainage t="radio">
+    <Drainage t="radio" i="Control/Main/Drainage">
       <desc>Drainage of the surveyed area with 1 being dry, 5 wet.</desc>
       <opts>
         <opt>1</opt>
@@ -146,7 +125,7 @@
         <opt>5</opt>
       </opts>
     </Drainage>
-    <Vegetation t="radio">
+    <Vegetation t="radio" i="Control/Main/Vegetation">
       <desc>Vegetation of the surveyed surface with 1 having no vegetation, 5 being overgrown with vegetation. </desc>
       <opts>
         <opt>1</opt>
@@ -156,7 +135,7 @@
         <opt>5</opt>
       </opts>
     </Vegetation>
-    <Stoniness t="radio">
+    <Stoniness t="radio" i="Control/Main/Stoniness">
       <desc>Presence of stones in the surveyed area with 1 being not present at all, and 5 being very frequent.</desc>
       <opts>
         <opt>1</opt>
@@ -166,7 +145,7 @@
         <opt>5</opt>
       </opts>
     </Stoniness>
-    <Shade t="radio">
+    <Shade t="radio" i="Control/Main/Shade">
       <desc>Presence of shade in the surveyed area with 1 being not present at all, and 5 covering all the surveyed area.</desc>
       <opts>
         <opt>1</opt>
@@ -176,10 +155,10 @@
         <opt>5</opt>
       </opts>
     </Shade>
-    <Number_of_Rows     b="decimal" f="readonly"/>
-    <Number_of_Walkers  b="decimal" f="readonly"/>
-    <Row_Interval       b="decimal" f="readonly"/>
-    <Walker_Interval    b="decimal" f="readonly"/>
+    <Number_of_Rows     b="decimal" f="readonly" i="Control/Main/Number_of_Rows"/>
+    <Number_of_Walkers  b="decimal" f="readonly" i="Control/Main/Number_of_Walkers"/>
+    <Row_Interval       b="decimal" f="readonly" i="Control/Main/Row_Interval"/>
+    <Walker_Interval    b="decimal" f="readonly" i="Control/Main/Walker_Interval"/>
   </Survey_Unit>
   <Walkers f="noscroll">
     <Add_New_Walker lc="Walker" t="button"/>
@@ -187,11 +166,10 @@
   </Walkers>
   <Walker_Units f="noscroll">
     <Add_New_Walker_Unit lc="Walker_Unit" t="button"/>
-
     <!--Displaying this list is costly, so we just won't do it-->
     <!--<Walker_Units        ec="Walker_Unit"/>-->
   </Walker_Units>
-  <Vars>
+  <Vars f="hidden">
     <Highlighted_Row    b="decimal" f="nodata"/>
     <Highlighted_Walker b="decimal" f="nodata"/>
   </Vars>
@@ -199,9 +177,15 @@
 
 <Walker>
   <Walker>
-    <Help t="webview">
-      The 'Walker ID' dictates the position of each walker in the grid. Numbers
-      should start at 1, indicating the left-most walker.
+    <Help t="webview" f="nolabel">
+      <markdown>
+The 'Walker ID' dictates the position of each walker in the grid. Numbers should
+start at 1, indicating the left-most walker.
+
+**Warning:** If you created this Survey Unit by using the 'Next Survey Unit'
+button, deleting this Walker will disassociate it from all the Survey Units in
+which it appears.
+      </markdown>
     </Help>
     <Walker_ID   f="id" b="decimal">
       <str><fmt>$2</fmt></str>
@@ -323,7 +307,7 @@
     </Wear>
     <Next_Survey_Unit t="button"/>
   </Walker_Unit>
-  <Vars>
+  <Vars f="hidden">
     <Row_ID    b="decimal" f="id readonly"/>
     <Walker_ID b="decimal" f="id readonly"/>
   </Vars>
@@ -342,10 +326,8 @@
   <!--@SOURCE: logic/util.bsh-->
   <!--@SOURCE: logic/saving-2.5.bsh-->
 
-  <!--@SOURCE: logic/control-population.bsh-->
   <!--@SOURCE: logic/density.bsh-->
   <!--@SOURCE: logic/grid.bsh-->
-  <!--@SOURCE: logic/control-to-survey-unit-inheritance.bsh-->
   <!--@SOURCE: logic/navigation-drawer.bsh-->
   <!--@SOURCE: logic/survey-unit-id-population.bsh-->
   <!--@SOURCE: logic/survey-unit-walker-population.bsh-->

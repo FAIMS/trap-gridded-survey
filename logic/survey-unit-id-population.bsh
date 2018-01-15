@@ -1,12 +1,11 @@
 /************************* SURVEY UNIT ID POPULATION **************************/
-updateSurveyUnitId() {
+void updateSurveyUnitId() {
   String identifierRef = "Survey_Unit/Survey_Unit/Survey_Unit_ID";
   String    webViewRef = "Walker_Unit/Walker_Unit/Survey_Unit_ID";
   String identifier    = getFieldValue(identifierRef);
 
   String html = "";
-  html += "<b>Survey Unit ID:</b> %s ";
-  html += "<b style=\"float: right; color: red;\">Autosaving Disabled</b>";
+  html += "<b>Survey Unit ID:</b> %s";
   html  = replaceFirst(html, identifier);
 
   populateWebViewHtml(webViewRef, html);
@@ -14,3 +13,4 @@ updateSurveyUnitId() {
 
 addOnEvent("Walker_Unit", "create", "updateSurveyUnitId()");
 addOnEvent("Walker_Unit", "fetch",  "updateSurveyUnitId()");
+

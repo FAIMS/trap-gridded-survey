@@ -1,5 +1,6 @@
+
 /************************************ UTIL ************************************/
-isValidInt(String val) {
+boolean isValidInt(String val) {
   try {
     Integer.valueOf(val);
     return true;
@@ -8,7 +9,7 @@ isValidInt(String val) {
   }
 }
 
-stringToFloat(String val) {
+float stringToFloat(String val) {
   Float valAsFloat = 0;
 
   try {
@@ -18,7 +19,7 @@ stringToFloat(String val) {
   return valAsFloat.floatValue();
 }
 
-stringToInt(String val) {
+int stringToInt(String val) {
   Integer valAsInteger = 0;
 
   try {
@@ -28,34 +29,34 @@ stringToInt(String val) {
   return valAsInteger.intValue();
 }
 
-getFieldValueAsInt(String ref) {
+int getFieldValueAsInt(String ref) {
   String val = getFieldValue(ref);
   return stringToInt(val);
 }
 
-getFieldValueAsFloat(String ref) {
+float getFieldValueAsFloat(String ref) {
   String val = getFieldValue(ref);
   return stringToFloat(val);
 }
 
-clip(int x, int min, int max) {
+int clip(int x, int min, int max) {
   if (x > max) return max;
   if (x < min) return min;
   return x;
 }
 
-min(int a, int b) {
+int min(int a, int b) {
   if (a < b) return a;
   else       return b;
 }
 
-max(int a, int b) {
+int max(int a, int b) {
   if (a > b) return a;
   else       return b;
 }
 
 // `%` returns a remainder, not a modulus. This function gives the latter.
-mod(int a, int b) {
+int mod(int a, int b) {
   int rem = a % b;
   if (rem < 0)
     return rem + b;

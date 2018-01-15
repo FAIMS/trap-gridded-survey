@@ -294,6 +294,7 @@ REF_TO_TYPE.put("Control/Search/Search_Term", "input");
 REF_TO_TYPE.put("Control/Search/Search_Button", "button");
 REF_TO_TYPE.put("Control/Search/Entity_Types", "dropdown");
 REF_TO_TYPE.put("Control/Search/Entity_List", "list");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Trigger_AutoSave", "button");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Survey_Unit_ID", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Land_Use", "dropdown");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Agricultural_Condition", "dropdown");
@@ -356,6 +357,7 @@ REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Wear", "checkbox");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Next_Survey_Unit", "button");
 REF_TO_TYPE.put("Walker_Unit/Vars/Row_ID", "input");
 REF_TO_TYPE.put("Walker_Unit/Vars/Walker_ID", "input");
+REF_TO_TYPE.put("Walker_Unit/Vars/Redraw_Grid", "button");
 REF_TO_TYPE.put("Saving/Saving/Saving", "webview");
 REF_TO_TYPE.put("Login/Login", "tab");
 REF_TO_TYPE.put("Control/Main", "tab");
@@ -2524,17 +2526,6 @@ boolean populateMenu(String ref, List entries) {
   return populateMenu(null, ref, "", entries, true);
 }
 
-void populateMenu(String ref, String entry) {
-  List row  = new ArrayList();
-  row.add("");
-  row.add(entry);
-
-  List entries = new ArrayList();
-  entries.add(row);
-
-  populateMenu(ref, entries);
-}
-
 /******************************************************************************/
 /*                             MENU VALUE GETTER                              */
 /*                                                                            */
@@ -2882,6 +2873,17 @@ addActionBarItem("external_gps", new ToggleActionButtonCallback() {
 /******************************************************************************/
 boolean USER_MENU_IS_LOADED = false;
 
+void populateMenu(String ref, String entry) {
+  List row  = new ArrayList();
+  row.add("");
+  row.add(entry);
+
+  List entries = new ArrayList();
+  entries.add(row);
+
+  populateMenu(ref, entries);
+}
+
 void populateListForUsers(){
   String q = "";
   q  = " SELECT          userid ";
@@ -2894,12 +2896,15 @@ void populateListForUsers(){
   q += "   FROM user ";
   q += "  WHERE userdeleted is null";
 
-  fetchAll(q, new FetchCallback() {
+  FetchCallback populate = new FetchCallback() {
     onFetch(result) {
       populateMenu(USER_MENU_PATH, result);
       USER_MENU_IS_LOADED = true;
     }
-  });
+  };
+
+  populateMenu(USER_MENU_PATH, "Loading...");
+  fetchAll(q, populate);
 }
 
 String getUserMenuValue(int i) {
@@ -4047,7 +4052,7 @@ void incAutoNum(String destPath) {
 /******************************************************************************/
 /*                         POPULATION VIA <MARKDOWN>                          */
 /******************************************************************************/
-populateWebViewHtml("Walker/Walker/Help", "<p>The ‘Walker ID’ dictates the position of each walker in the grid. Numbers should start at 1, indicating the left-most walker.</p>\n<p><strong>Warning:</strong> If you created this Survey Unit by using the ‘Next Survey Unit’ button, deleting this Walker will disassociate it from all the Survey Units in which it appears.</p>\n");
+
 
 /******************************************************************************/
 /*                POPULATION OF ENTITY AND CHILD ENTITY LISTS                 */
@@ -4207,6 +4212,15 @@ setSyncEnabled    (false);
 
 delOnEvents("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "click");
 
+String getUuid(String tabgroup) {
+  Log.d("getUuid", tabgroup + " " + tabgroupToUuid.get(tabgroup) + " " + this.callstack);
+  return tabgroupToUuid.get(tabgroup);
+}
+
+void setUuid(String tabgroup, String uuid) {
+  Log.d("setUuid", tabgroup + " " + uuid + " " + this.callstack);
+  tabgroupToUuid.put(tabgroup, uuid);
+}
 /************************************ UTIL ************************************/
 boolean isValidInt(String val) {
   try {
@@ -4372,14 +4386,14 @@ void triggerSave() {
   //autoSaveAttrs = null;
 //}
 
-//addOnEvent("Survey_Unit/Survey_Unit/Trigger_AutoSave", "click", "triggerAutoSave()");
+addOnEvent("Survey_Unit/Survey_Unit/Trigger_AutoSave", "click", "triggerAutoSave()");
 
 /********************************** DENSITY ***********************************/
-densityToCount(int density) {
+int densityToCount(int density) {
   return density * rowInterval();
 }
 
-calculateCount(String refDest) {
+void calculateCount(String refDest) {
   String density  = getLastTextAlertInput();
   int    iDensity = stringToInt(density);
 
@@ -4394,7 +4408,7 @@ calculateCount(String refDest) {
   setFieldValue(refDest, String.valueOf(count));
 }
 
-addDensityAsCount(String refDest) {
+void addDensityAsCount(String refDest) {
   String head = "Density Required";
   String body = "Please enter a density measurement in square metres.";
 
@@ -4407,42 +4421,42 @@ addDensityAsCount(String refDest) {
   showTextAlert(head, body, okCallback, cancelCallback);
 }
 
-addAncientM2() {
+void addAncientM2() {
   String refDest = "Walker_Unit/Walker_Unit/Ancient";
   addDensityAsCount(refDest);
 }
 
-addModernM2() {
+void addModernM2() {
   String refDest = "Walker_Unit/Walker_Unit/Modern";
   addDensityAsCount(refDest);
 }
 
-addAcM2() {
+void addAcM2() {
   String refDest = "Walker_Unit/Walker_Unit/A_C";
   addDensityAsCount(refDest);
 }
 
-addDaubM2() {
+void addDaubM2() {
   String refDest = "Walker_Unit/Walker_Unit/Daub";
   addDensityAsCount(refDest);
 }
 
-addHmM2() {
+void addHmM2() {
   String refDest = "Walker_Unit/Walker_Unit/HM";
   addDensityAsCount(refDest);
 }
 
-addLithicM2() {
+void addLithicM2() {
   String refDest = "Walker_Unit/Walker_Unit/Lithic";
   addDensityAsCount(refDest);
 }
 
-addGlassM2() {
+void addGlassM2() {
   String refDest = "Walker_Unit/Walker_Unit/Glass";
   addDensityAsCount(refDest);
 }
 
-addOtherM2() {
+void addOtherM2() {
   String refDest = "Walker_Unit/Walker_Unit/Other";
   addDensityAsCount(refDest);
 }
@@ -5654,8 +5668,14 @@ addOnEvent("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "click", "onClickSurv
 addOnEventCond("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "click", "onClickSurveyUnitAddNewWalkerUnitCond()");
 addOnEvent("Walker_Unit/Walker_Unit/Load_Walker", "click",  "gridRandomAccessWalker()");
 addOnEvent("Walker_Unit/Walker_Unit/Load",       "click",  "loadOrMakeWalkerUnit()");
+
+
+addOnEvent("Walker_Unit/Vars/Redraw_Grid", "click", "redrawGrid()");
+
+// Trigger save before leaving 'Walker_Unit'?
 /***************************** NAVIGATION DRAWER ******************************/
 delOnEvent("Walker_Unit", "show", "addNavigationButtons(\"Walker_Unit\")");
+
 /************************* SURVEY UNIT ID POPULATION **************************/
 void updateSurveyUnitId() {
   String identifierRef = "Survey_Unit/Survey_Unit/Survey_Unit_ID";
@@ -5671,7 +5691,6 @@ void updateSurveyUnitId() {
 
 addOnEvent("Walker_Unit", "create", "updateSurveyUnitId()");
 addOnEvent("Walker_Unit", "fetch",  "updateSurveyUnitId()");
-
 /*********************** SURVEY UNIT WALKER POPULATION ************************/
 /* Overrides the autogenerated function definition.
  *
@@ -5754,13 +5773,15 @@ populateMenuWithEntities (
   }
 }
 /********************************* VALIDATION *********************************/
-addOnEventCond(
-    "Control/Main/Add_New_Survey_Unit",
-    "click",
-    "validateControlMain()"
-);
+// Overrides autogenerated function
+onClickControlAddNewSurveyUnit () {
+  parentTabgroup__ = "Control";
+  if (validateControlMain()) {
+    newSurveyUnit();
+  }
+}
 
-boolean validateControlMain() {
+validateControlMain() {
   String refNumberOfRows    = "Control/Main/Number_of_Rows";
   String refNumberOfWalkers = "Control/Main/Number_of_Walkers";
   String refRowInterval     = "Control/Main/Row_Interval";

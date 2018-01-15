@@ -1,84 +1,102 @@
 /********************************* SAVING 2.5 *********************************/
 /* FAIMS 2.5-style saving.                                                    */
 /******************************************************************************/
-saveTabGroup(String tabgroup, String callback) {
-  Boolean enableAutosave      = true;
-  String  id                  = getUuid(tabgroup);
-  List    geometry            = null;
-  List    attributes          = null;
-  String  parentTabgroup_     = parentTabgroup;
-  String  parentTabgroupUuid_ = getUuid(parentTabgroup_);
-  Boolean userWasSet          = !username.equals("");
+void triggerSave() {
+  // Pick a `refToChange`
+  String refToChange   = null;
+  List   refs          = getRefsMatching(getDisplayedTabGroup() + "/*/*");
+  Set    types         = new HashSet();
+  types.add("input");
 
-  String repopulateEntityList;
-  repopulateEntityList = "populateEntityListsInTabGroup(\"{tabGroup}\")";
-  repopulateEntityList = replaceFirst(repopulateEntityList, "{tabGroup}", parentTabgroup__);
-
-  callback = repopulateEntityList + ";" + callback;
-
-  parentTabgroup = null;
-
-  SaveForceCallback saveCallback  = new SaveForceCallback() {
-    onSave(uuid, newRecord, hasChanges) {
-      setUuid(tabgroup, uuid);
-      // Make a child-parent relationship if need be.
-      if (
-          newRecord &&
-          !isNull(parentTabgroup_) &&
-          !isNull(parentTabgroupUuid_)
-      ) {
-        String rel = "";
-        rel += parentTabgroup_.replaceAll("_", " ");
-        rel += " - ";
-        rel += tabgroup.replaceAll("_", " ");
-        saveEntitiesToHierRel(
-          rel,
-          parentTabgroupUuid_,
-          uuid,
-          "Parent Of",
-          "Child Of",
-          callback
-        );
-      } else {
-        execute(callback);
-      }
-
-      // This fixes an interesting bug. Without this, if a user was not set
-      // (by calling `setUser`) at the time `saveTabGroup` was first called, but
-      // set by the time `onSave` was called, the tab group is saved correctly
-      // the first time only.
-      //
-      // Adding this allows subsequent saves to succeed. Presumably it plays
-      // some role in helping FAIMS associate the correct user with a record.
-      if (!userWasSet) {
-        saveTabGroup(tabgroup, callback);
-      }
-
-      showWarning("uuid, hasChanges, callback", uuid + ", " + hasChanges + ", " + callback);
+  for (String ref : refs) {
+    if (types.contains(getType(ref))) {
+      refToChange = ref;
+      break;
     }
-    onError(message) {
-      showToast(message);
-    }
-  };
+  }
 
-  saveTabGroup(tabgroup, id, geometry, attributes, saveCallback, enableAutosave);
-  triggerAutoSave();
-}
+  // No `refToChange` could be found
+  if (refToChange == null) {
+    String msg = "Save could not be triggered";
 
-populateEntityListsInTabGroup(String tabGroup) {
-  showWarning("", tabGroup);
-  if (isNull(tabGroup)) {
+    showToast(msg);
+    Log.e("triggerSave", msg);
+
     return;
   }
 
-  for (m : ENTITY_MENUS) {
-    String path         = m[1];
-    String menuTabGroup = getTabGroupRef(path);
-    String functionCall = getEntityMenuPopulationFunction(m);
-
-    if (menuTabGroup.equals(tabGroup))
-      execute(functionCall);
-  }
+  // Save the tab group by changing the value at `refToChange`
+  String val = getFieldValue(refToChange);
+  setFieldValue(refToChange, getRandomString(64)); triggerAutoSave();
+  setFieldValue(refToChange, val);                 triggerAutoSave();
 }
 
-addOnEvent("Survey_Unit/Survey_Unit/Trigger_AutoSave", "click", "triggerAutoSave()");
+//void saveTabGroup(String tabgroup, String callback) {
+  //Boolean enableAutosave      = true;
+  //String  id                  = getUuid(tabgroup);
+  //String  parentTabgroup_     = parentTabgroup;
+  //String  parentTabgroupUuid_ = getUuid(parentTabgroup_);
+  //Boolean userWasSet          = !username.equals("");
+
+  //callback += "; " + fun2str("executeOnEvent", new Object[]{tabgroup, "save"});
+
+  //parentTabgroup = null;
+
+  //SaveForceCallback saveCallback  = new SaveForceCallback() {
+    //onSave(uuid, newRecord, hasChanges) {
+      //setUuid(tabgroup, uuid);
+      //// Make a child-parent relationship if need be.
+      //if (
+          //newRecord &&
+          //!isNull(parentTabgroup_) &&
+          //!isNull(parentTabgroupUuid_)
+      //) {
+        //String rel = "";
+        //rel += parentTabgroup_.replaceAll("_", " ");
+        //rel += " - ";
+        //rel += tabgroup.replaceAll("_", " ");
+        //saveEntitiesToHierRel(
+          //rel,
+          //parentTabgroupUuid_,
+          //uuid,
+          //"Parent Of",
+          //"Child Of",
+          //callback
+        //);
+      //} else {
+        //execute(callback);
+      //}
+
+      //// This fixes an interesting bug. Without this, if a user was not set
+      //// (by calling `setUser`) at the time `saveTabGroup` was first called, but
+      //// set by the time `onSave` was called, the tab group is saved correctly
+      //// the first time only.
+      ////
+      //// Adding this allows subsequent saves to succeed. Presumably it plays
+      //// some role in helping FAIMS associate the correct user with a record.
+      //if (!userWasSet) {
+        //saveTabGroup(tabgroup, callback);
+      //}
+
+    //}
+    //onError(message) {
+      //showToast(message);
+    //}
+  //};
+
+  //saveTabGroup(
+      //tabgroup,
+      //id,
+      //autoSaveGeo,
+      //autoSaveAttrs,
+      //saveCallback,
+      //enableAutosave
+  //);
+  //triggerSave();
+
+  //// Reset global variables
+  //autoSaveGeo   = null;
+  //autoSaveAttrs = null;
+//}
+
+//addOnEvent("Survey_Unit/Survey_Unit/Trigger_AutoSave", "click", "triggerAutoSave()");

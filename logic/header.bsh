@@ -1,2 +1,8 @@
+/*********************************** HEADER ***********************************/
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.LinkedBlockingQueue;
+
+setFileSyncEnabled(false);
+setSyncEnabled    (false);
+
+delOnEvents("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "click");

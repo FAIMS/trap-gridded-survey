@@ -24,7 +24,7 @@ populateMenuWithEntities (
       "   JOIN (SELECT uuid, CAST(measure AS INTEGER) AS position" +
       "       FROM latestnondeletedaentvalue " +
       "       JOIN attributekey using (attributeid)" +
-      "       WHERE attributename = 'Walker ID') USING (uuid)" +
+      "       WHERE attributename = 'Walker Walker ID' or attributename = 'Walker Unit Walker ID') USING (uuid)" +
       "  WHERE relationshipid IN (SELECT relationshipid " +
       "                             FROM latestnondeletedrelationship JOIN relntype USING (relntypeid)" +
       "                            WHERE relntypename = '"+relType+"')" +
@@ -42,7 +42,7 @@ populateMenuWithEntities (
       "                           WHERE relntypename = '"+relType+"') " +
       "   AND parentuuid = " + parentUuid + " " +
       "   AND (childaenttypename = '"+entType+"' OR '"+entType+"' = '') " +
-      " ORDER BY createdat DESC ";
+      " ORDER BY parentchild.createdat DESC ";
   }
 
   String getEntitiesQ = "" +
