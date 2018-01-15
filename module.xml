@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--TODO: Bug: Sometimes multiple Walker Units at the same position in the grid-->
+<!--can be made. Something somthing async.-->
 <!--@PREPROC:  ./preproc.sh -->
 <!--@POSTPROC: ./postproc.sh -->
 <module>

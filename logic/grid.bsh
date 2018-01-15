@@ -85,8 +85,8 @@ void updateGridCache(Object result) {
 
     if (!isValidInt(   sRowId)) continue;
     if (!isValidInt(sWalkerId)) continue;
-    if (   iRowId > numberOfRows   ()) continue;
-    if (iWalkerId > numberOfWalkers()) continue;
+    if (   iRowId > GRID_MAX_HEIGHT) continue;
+    if (iWalkerId > GRID_MAX_WIDTH ) continue;
     if (   iRowId < 1) continue;
     if (iWalkerId < 1) continue;
 
@@ -513,7 +513,8 @@ void numberOfRows(int val, String callback) {
   String  numberOfRows      = String.valueOf(val);
   List    geometry          = null;
   List    attributes        = createAttributeList();
-  boolean doDelete          = val < numberOfRows();
+  boolean doRehighlight     = val < highlightedRow();
+  boolean doReselect        = val < selectedRow();
 
   if (!isDisplayed("Walker_Unit"))
     return;
@@ -528,6 +529,13 @@ void numberOfRows(int val, String callback) {
   // 2. Update 'Number of Rows' using saveArchEnt
   SaveCallback release = new SaveCallback() {
     onSave(uuid, newRecord) {
+      if (doRehighlight) {
+        highlightedRow(val);
+      }
+      if (doReselect) {
+        loadOrMakeWalkerUnit();
+      }
+
       execute(callback);
       MUTEX_WALKER_UNIT_ROWS.release();
     }
