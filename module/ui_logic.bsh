@@ -1,5 +1,5 @@
 /*
- * GENERATED WITH FAIMS-TOOLS, SHA1: 2c8f979d2bf05b95a0a891301bb8f06c1f7f657f
+ * GENERATED WITH FAIMS-TOOLS, SHA1: 5db20c5c211dec0ce0408704a15a270edbcae19f
  */
 import android.util.Log;
 import android.os.Build.MODEL;
@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 // Beanshell won't let me write "\0".
 final String SEP = Character.toString ((char) 0);
+
+final String MSG_LOADING = "Loading...";
 
 final String USER_MENU_PATH = "Login/Login/User";
 userMenuPath = USER_MENU_PATH; // Depricated. Use `USER_MENU_PATH` instead
@@ -2525,12 +2527,8 @@ boolean populateMenu(String ref, List entries) {
 }
 
 void populateMenu(String ref, String entry) {
-  List row  = new ArrayList();
-  row.add("");
-  row.add(entry);
-
-  List entries = new ArrayList();
-  entries.add(row);
+  List entries  = new ArrayList();
+  entries.add(new NameValuePair(entry, ""));
 
   populateMenu(ref, entries);
 }
@@ -2894,12 +2892,17 @@ void populateListForUsers(){
   q += "   FROM user ";
   q += "  WHERE userdeleted is null";
 
-  fetchAll(q, new FetchCallback() {
+
+  FetchCallback callback = new FetchCallback() {
     onFetch(result) {
       populateMenu(USER_MENU_PATH, result);
       USER_MENU_IS_LOADED = true;
     }
-  });
+  };
+
+  USER_MENU_IS_LOADED = false;
+  populateMenu(USER_MENU_PATH, MSG_LOADING);
+  fetchAll(q, callback);
 }
 
 String getUserMenuValue(int i) {
@@ -3803,6 +3806,7 @@ void search(){
   searchQuery = dbReplaceFirst(searchQuery, "{type}", type);
   searchQuery = dbReplaceFirst(searchQuery, "{type}", type);
 
+  populateMenu(refEntityList, MSG_LOADING);
   populateCursorList(refEntityList, searchQuery, 25);
   refreshTabgroupCSS("Control");
 
