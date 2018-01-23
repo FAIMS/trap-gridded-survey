@@ -1,1 +1,0 @@
-executeOnEvent("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "click");

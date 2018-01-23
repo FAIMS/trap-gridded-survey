@@ -1192,6 +1192,8 @@ addOnEvent("Survey_Unit",                 "fetch",  "initGridCache()", PRECEDENC
 addOnEvent("Survey_Unit",                 "fetch",  "updateGridCache()");
 addOnEvent("Survey_Unit",                 "fetch",  "updateGridWalkers()");
 
+addOnEvent("Survey_Unit",                 "copy",   "initGridCache()", PRECEDENCE_MID-1);
+
 addOnEvent("Walker",                      "save",   "updateGridWalkers()");
 addOnEvent("Walker",                      "delete", "updateGridWalkers()");
 
