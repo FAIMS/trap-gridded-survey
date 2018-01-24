@@ -282,6 +282,7 @@ REF_TO_TYPE.put("Control/Main/Number_of_Rows", "input");
 REF_TO_TYPE.put("Control/Main/Number_of_Walkers", "input");
 REF_TO_TYPE.put("Control/Main/Row_Interval", "input");
 REF_TO_TYPE.put("Control/Main/Walker_Interval", "input");
+REF_TO_TYPE.put("Control/Main/Add_New_Walker", "button");
 REF_TO_TYPE.put("Control/Main/Land_Use", "dropdown");
 REF_TO_TYPE.put("Control/Main/Agricultural_Condition", "dropdown");
 REF_TO_TYPE.put("Control/Main/Topography", "dropdown");
@@ -311,8 +312,13 @@ REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Number_of_Rows", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Number_of_Walkers", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Row_Interval", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Walker_Interval", "input");
-REF_TO_TYPE.put("Survey_Unit/Walkers/Add_New_Walker", "button");
-REF_TO_TYPE.put("Survey_Unit/Walkers/Walkers", "list");
+REF_TO_TYPE.put("Survey_Unit/Walkers/Up", "button");
+REF_TO_TYPE.put("Survey_Unit/Walkers/Down", "button");
+REF_TO_TYPE.put("Survey_Unit/Walkers/Plus", "button");
+REF_TO_TYPE.put("Survey_Unit/Walkers/Minus", "button");
+REF_TO_TYPE.put("Survey_Unit/Walkers/Toggle_Selection", "button");
+REF_TO_TYPE.put("Survey_Unit/Walkers/Save", "button");
+REF_TO_TYPE.put("Survey_Unit/Walkers/Walkers", "webview");
 REF_TO_TYPE.put("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "button");
 REF_TO_TYPE.put("Survey_Unit/Vars/Highlighted_Row", "input");
 REF_TO_TYPE.put("Survey_Unit/Vars/Highlighted_Walker", "input");
@@ -1493,19 +1499,19 @@ void timedPopulateCursorList(String ref, String q, int limit) {
 
 void setUpTypeHierarchy() {
   //- 
+  //  - Walker
   //  - Survey Unit
-  //    - Walker
   //    - Walker Unit
 
   n0 = Tree("", 1);
-  n1 = Tree("Survey Unit", 1);
-  n2 = Tree("Walker", 1);
+  n1 = Tree("Walker", 1);
+  n2 = Tree("Survey Unit", 1);
   n3 = Tree("Walker Unit", 1);
 
   n0.addChild(n1);
+  n0.addChild(n2);
 
-  n1.addChild(n2);
-  n1.addChild(n3);
+  n2.addChild(n3);
 
 
   PERF_TYPE_TREE = n0;
@@ -3202,22 +3208,23 @@ void onClickControlAddNewSurveyUnit () {
   newSurveyUnit();
 }
 
-
-
-
-
-
-
-void onClickSurveyUnitAddNewWalker () {
-  newWalker("Survey_Unit");
+void onClickControlAddNewWalker () {
+  parentTabgroup__ = "Control";
+  newWalker();
 }
+
+
+
+
+
+
 
 void onClickSurveyUnitAddNewWalkerUnit () {
   newWalkerUnit("Survey_Unit");
 }
 addOnEvent("Login/Login/User", "click", "onClickLoginUser()");
 addOnEvent("Control/Main/Add_New_Survey_Unit", "click", "onClickControlAddNewSurveyUnit()");
-addOnEvent("Survey_Unit/Walkers/Add_New_Walker", "click", "onClickSurveyUnitAddNewWalker()");
+addOnEvent("Control/Main/Add_New_Walker", "click", "onClickControlAddNewWalker()");
 addOnEvent("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "click", "onClickSurveyUnitAddNewWalkerUnit()");
 
 /******************************************************************************/
@@ -4183,12 +4190,7 @@ String getEntityMenuPopulationFunction(String[] menuDescriptor) {
 }
 
 ENTITY_MENUS = new ArrayList();
-ENTITY_MENUS.add(new String[] {
-    "Survey_Unit/Walkers/Walkers",
-    "getUuid(\"Survey_Unit\")",
-    "Walker",
-    "Survey Unit - Walker"
-});
+
 for (m : ENTITY_MENUS) {
   String functionCall = getEntityMenuPopulationFunction(m);
   execute(functionCall);
@@ -4204,7 +4206,7 @@ for (m : ENTITY_MENUS) {
   addOnEvent(ref, evt, cmd);
 }
 
-addOnEvent("Survey_Unit/Walkers/Walkers", "click", "loadEntity()");
+
 /******************************************************************************/
 /*                             HANDWRITTEN LOGIC                              */
 /******************************************************************************/
@@ -4875,7 +4877,7 @@ void redrawGrid(boolean doRefreshCache) {
   html += "      td {";
   html += "        border: 1px solid #000000;";
   html += "        font-weight: 100;";
-  html += "        padding: 3px;";
+  html += "        padding: 2px;";
   html += "        text-align: center;";
   html += "      }";
   html += "      td.highlighted {";
@@ -4884,8 +4886,8 @@ void redrawGrid(boolean doRefreshCache) {
   html += "        padding: 0px;";
   html += "      }";
   html += "      td.selected {";
-  html += "        background-color: #00AA00;";
-  html += "        color:            #FFFFFF;";
+  html += "        background-color: #77FF77;";
+  html += "        color:            #000000;";
   html += "      }";
   html += "      td.row-index {";
   html += "        white-space:nowrap;";
@@ -5881,6 +5883,186 @@ void search(){
 
   Log.d("Module", "Search query: " + searchQuery);
 }
+/****************************** WALKER ORDERING *******************************/
+Map[] WALKER_CACHE = null;
+int MAX_NUM_WALKERS = 100;
+
+void initWalkerCache() {
+  WALKER_CACHE = new HashMap[MAX_NUM_WALKERS];
+}
+
+void updateWalkerCache() {
+  updateWalkerCache("");
+}
+
+void updateWalkerCache(String callback) {
+  String q = "";
+  q += " select identifier, parentUuid, childUuid";
+
+  FetchCallback updateWalkerCache = new FetchCallback() {
+    onFetch(result) {
+      updateWalkerCache(result);
+      execute(callback);
+    }
+  };
+
+  fetchAll(q, updateWalkerCache);
+}
+
+void updateWalkerCache(List results) {
+  for (int i = 0; i < results.size(); i++) {
+    String identifier = results.get(i).get(0);
+    String uuidParent = results.get(i).get(1);
+    String uuidChild  = results.get(i).get(2);
+
+    updateWalkerCache(i, "Identifier",  identifier);
+    updateWalkerCache(i, "UUID/Parent", uuidParent);
+    updateWalkerCache(i, "UUID/Child",  uuidChild);
+  }
+}
+
+void updateWalkerCache(int i) {
+  updateWalkerCache(i, "", "");
+}
+
+void updateWalkerCache(int i, String attribName, attribVal) {
+  if (WALKER_CACHE == null)
+    initWalkerCache();
+
+  Map cell = WALKER_CACHE[i];
+
+  if (cell == null) {
+    cell = new HashMap();
+    WALKER_CACHE[i] = cell;
+  }
+
+  cell.put(attribName, attribVal);
+}
+
+
+void makeLocalParentChildWithAttribs() {
+  fetchOne(
+      "DROP VIEW IF EXISTS parentChildWithAttribs"
+  );
+
+  fetchOne(
+      "CREATE VIEW parentChildWithAttribs AS "+
+      "           SELECT parent.uuid as parentuuid, child.uuid as childuuid, parent.participatesverb as parentparticipatesverb, parent.relationshipid, parent.aenttypename as parentaenttypename, child.participatesverb as childparticipatesverb, child.aenttypename as childaenttypename, createdat"+
+      "             FROM (SELECT uuid, participatesverb, aenttypename, relationshipid, relntimestamp as createdat"+
+      "                     FROM latestnondeletedaentreln "+
+      "                     JOIN relationship USING (relationshipid) "+
+      "                     JOIN latestnondeletedarchent USING (uuid) "+
+      "                     JOIN aenttype USING (aenttypeid)) parent "+
+      "             JOIN (SELECT uuid, relationshipid, participatesverb, aenttypename "+
+      "                     FROM latestnondeletedaentreln "+
+      "                     JOIN relationship USING (relationshipid) "+
+      "                     JOIN latestnondeletedarchent USING (uuid) "+
+      "                     JOIN aenttype USING (aenttypeid)) child "+
+      "               ON (parent.relationshipid = child.relationshipid AND parent.uuid != child.uuid)"
+  );
+}
+
+void redrawWalkers() {
+  updateWalkerCache(0, "Identifier", "Sgt.  Meow-Meow");
+  updateWalkerCache(1, "Identifier", "Cptn. Dick Wolf");
+
+  String refWalkers = "Survey_Unit/Walkers/Walkers";
+
+  String html = "";
+  html += "<!DOCTYPE html>";
+  html += "<html>";
+  html += "  <head>";
+  html += "    <title>Grid</title>";
+  html += "    <style>";
+  html += "      li {";
+  html += "        border: 1px solid #000000;";
+  html += "        font-weight: 100;";
+  html += "        padding: 2px;";
+  html += "        padding-left: 7px;";
+  html += "      }";
+  html += "      li.highlighted {";
+  html += "        background-color: #CCCCCC;";
+  html += "        border:  3px double #000000;";
+  html += "        padding: 0px;";
+  html += "        padding-left: 7px;";
+  html += "      }";
+  html += "      li.selected {";
+  html += "        background-color: #77FF77;";
+  html += "        color:            #000000;";
+  html += "      }";
+  html += "      li.confirmed {";
+  html += "        text-shadow: 1px 0px #000;";
+  html += "        font-weight: 900;";
+  html += "      }";
+  html += "";
+  html += "    </style>";
+  html += "  </head>";
+  html += "  <ol>";
+  html += "    <li class=\"selected\">say hi to</li>";
+  html += "    <li class=\"highlighted\">your</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+
+  for (Map walker : WALKER_CACHE) {
+    if (walker == null)
+      break;
+
+    Boolean isHighlighted = walker.get("isHighlighted");
+    Boolean isSelected    = walker.get("isSelected");
+    Boolean isConfirmed   = walker.get("isConfirmed");
+
+    if (isHighlighted == null) isHighlighted = false;
+    if (isSelected    == null) isSelected    = false;
+    if (isConfirmed   == null) isConfirmed   = true;
+
+    // Build the string of CSS classes to apply to this <li> element
+    String cssClass = "";
+    if (isHighlighted) cssClass += " highlighted";
+    if (isSelected   ) cssClass += " selected";
+    if (isConfirmed  ) cssClass += " confirmed";
+
+    // Get the <li> value
+    String identifier = walker.get("Identifier");
+
+    // Build the HTML string for this <li>
+    String htmlCell = "";
+    htmlCell += "    <li class=\"{cssClass}\">{identifier}</li>";
+    htmlCell  = replaceFirst(htmlCell, "{cssClass}",   cssClass);
+    htmlCell  = replaceFirst(htmlCell, "{identifier}", identifier);
+
+    // Add the cell to the existing HTML
+    html += htmlCell;
+  }
+
+  html += "  </ol>";
+  html += "</html>";
+
+  populateWebViewHtml(refWalkers, "Loading...");
+  populateWebViewHtml(refWalkers, html);
+}
+
+makeLocalParentChildWithAttribs();
+
+addOnEvent("Survey_Unit/Walkers/Walkers", "show", "redrawWalkers()");
 
 
 /******************************************************************************/

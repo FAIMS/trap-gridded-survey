@@ -8,6 +8,15 @@
 <!--@POSTPROC: ./postproc.sh -->
 <module>
 
+<rels>
+  <RelationshipElement name="Survey Unit - Walker" type="hierarchical">
+    <description>A 1-to-n relationship between the parent and its children, respectively.</description>
+    <parent>Parent Of</parent>
+    <child>Child Of</child>
+    <property type="measure" name="Order" isIdentifier="true"/>
+  </RelationshipElement>
+</rels>
+
 <Login f="nodata">
   <Login f="noscroll">
     <User t="list" f="user" l="Control"/>
@@ -29,6 +38,7 @@
     <Walker_Interval   b="decimal" f="notnull persist">
       Walker Interval (m)
     </Walker_Interval>
+    <Add_New_Walker t="button" l="Walker"/>
     <Land_Use t="dropdown" f="persist" vp="Survey_Unit/Survey_Unit/Land_Use"/>
     <Agricultural_Condition t="dropdown" f="persist" vp="Survey_Unit/Survey_Unit/Agricultural_Condition"/>
     <Topography t="dropdown" f="persist" vp="Survey_Unit/Survey_Unit/Topography"/>
@@ -166,8 +176,21 @@
     <Walker_Interval    b="decimal" f="readonly" i="Control/Main/Walker_Interval"/>
   </Survey_Unit>
   <Walkers f="noscroll">
-    <Add_New_Walker lc="Walker" t="button"/>
-    <Walkers        ec="Walker"/>
+    <cols>
+      <col>
+        <Up   t="button"/>
+        <Down t="button"/>
+      </col>
+      <col>
+        <Plus  t="button"/> <!--TODO: Not correctly autogened-->
+        <Minus t="button"/>
+      </col>
+      <col>
+        <Toggle_Selection t="button"/>
+        <Save t="button"/>
+      </col>
+    </cols>
+    <Walkers t="webview"/>
   </Walkers>
   <Walker_Units f="noscroll">
     <Add_New_Walker_Unit lc="Walker_Unit" t="button"/>
@@ -338,6 +361,7 @@ which it appears.
   <!--@SOURCE: logic/survey-unit-walker-population.bsh-->
   <!--@SOURCE: logic/validation.bsh-->
   <!--@SOURCE: logic/custom-search.bsh-->
+  <!--@SOURCE: logic/walker-ordering.bsh-->
 ]]></logic>
 
 </module>

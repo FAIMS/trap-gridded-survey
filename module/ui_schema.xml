@@ -31,6 +31,7 @@
               <Number_of_Walkers/>
               <Row_Interval/>
               <Walker_Interval/>
+              <Add_New_Walker/>
               <Land_Use/>
               <Agricultural_Condition/>
               <Topography/>
@@ -74,7 +75,20 @@
               <Walker_Interval/>
             </Survey_Unit>
             <Walkers>
-              <Add_New_Walker/>
+              <Colgroup_1>
+                <Col_1>
+                  <Up/>
+                  <Down/>
+                </Col_1>
+                <Col_2>
+                  <Plus/>
+                  <Minus/>
+                </Col_2>
+                <Col_3>
+                  <Toggle_Selection/>
+                  <Save/>
+                </Col_3>
+              </Colgroup_1>
               <Walkers/>
             </Walkers>
             <Walker_Units>
@@ -297,6 +311,9 @@
         <input ref="Walker_Interval" faims_style_class="required">
           <label>{Walker_Interval__m_}</label>
         </input>
+        <trigger ref="Add_New_Walker">
+          <label>{Add_New_Walker}</label>
+        </trigger>
         <select1 ref="Land_Use">
           <label>{Land_Use}</label>
           <item>
@@ -493,16 +510,39 @@
       </group>
       <group ref="Walkers" faims_scrollable="false">
         <label>{Walkers}</label>
-        <trigger ref="Add_New_Walker">
-          <label>{Add_New_Walker}</label>
-        </trigger>
-        <select1 appearance="compact" ref="Walkers">
+        <group ref="Colgroup_1" faims_style="orientation">
+          <label/>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <trigger ref="Up">
+              <label>{Up}</label>
+            </trigger>
+            <trigger ref="Down">
+              <label>{Down}</label>
+            </trigger>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <trigger ref="Plus">
+              <label>{Plus}</label>
+            </trigger>
+            <trigger ref="Minus">
+              <label>{Minus}</label>
+            </trigger>
+          </group>
+          <group ref="Col_3" faims_style="even">
+            <label/>
+            <trigger ref="Toggle_Selection">
+              <label>{Toggle_Selection}</label>
+            </trigger>
+            <trigger ref="Save">
+              <label>{Save}</label>
+            </trigger>
+          </group>
+        </group>
+        <input faims_web="true" ref="Walkers">
           <label>{Walkers}</label>
-          <item>
-            <label>Options not loaded</label>
-            <value>Options not loaded</value>
-          </item>
-        </select1>
+        </input>
       </group>
       <group ref="Walker_Units" faims_scrollable="false">
         <label>{Walker_Units}</label>

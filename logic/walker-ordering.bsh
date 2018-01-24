@@ -1,0 +1,114 @@
+/****************************** WALKER ORDERING *******************************/
+void makeLocalParentChildWithAttribs() {
+  fetchOne(
+      "DROP VIEW IF EXISTS parentChildWithAttribs"
+  );
+
+  fetchOne(
+      "CREATE VIEW parentChildWithAttribs AS "+
+      "           SELECT parent.uuid as parentuuid, child.uuid as childuuid, parent.participatesverb as parentparticipatesverb, parent.relationshipid, parent.aenttypename as parentaenttypename, child.participatesverb as childparticipatesverb, child.aenttypename as childaenttypename, createdat"+
+      "             FROM (SELECT uuid, participatesverb, aenttypename, relationshipid, relntimestamp as createdat"+
+      "                     FROM latestnondeletedaentreln "+
+      "                     JOIN relationship USING (relationshipid) "+
+      "                     JOIN latestnondeletedarchent USING (uuid) "+
+      "                     JOIN aenttype USING (aenttypeid)) parent "+
+      "             JOIN (SELECT uuid, relationshipid, participatesverb, aenttypename "+
+      "                     FROM latestnondeletedaentreln "+
+      "                     JOIN relationship USING (relationshipid) "+
+      "                     JOIN latestnondeletedarchent USING (uuid) "+
+      "                     JOIN aenttype USING (aenttypeid)) child "+
+      "               ON (parent.relationshipid = child.relationshipid AND parent.uuid != child.uuid)"
+  );
+}
+
+void redrawWalkers() {
+  redrawWalkers(new ArrayList());
+  return;
+
+  String q = ""; // Query must order by `Order`
+
+  FetchCallback redrawWalkers = new FetchCallback() {
+    onFetch(result) {
+      redrawWalkers(result);
+    }
+  };
+
+  fetchAll(q, redrawWalkers);
+}
+
+void redrawWalkers(List results) {
+  String refWalkers = "Survey_Unit/Walkers/Walkers";
+
+  String html = "";
+  html += "<!DOCTYPE html>";
+  html += "<html>";
+  html += "  <head>";
+  html += "    <title>Grid</title>";
+  html += "    <style>";
+  html += "      table {";
+  html += "        table-layout: fixed;";
+  html += "        border-collapse: separate;";
+  html += "        border-spacing:  0px;";
+  html += "        width: 100%;";
+  html += "      }";
+  html += "      li {";
+  html += "        border: 1px solid #000000;";
+  html += "        font-weight: 100;";
+  html += "        padding: 2px;";
+  html += "        padding-left: 7px;";
+  html += "      }";
+  html += "      li.highlighted {";
+  html += "        background-color: #CCCCCC;";
+  html += "        border:  3px double #000000;";
+  html += "        padding: 0px;";
+  html += "        padding-left: 7px;";
+  html += "      }";
+  html += "      li.selected {";
+  html += "        background-color: #77FF77;";
+  html += "        color:            #000000;";
+  html += "      }";
+  html += "      li.confirmed {";
+  html += "        text-shadow: 1px 0px #000;";
+  html += "        font-weight: 900;";
+  html += "      }";
+  html += "";
+  html += "    </style>";
+  html += "  </head>";
+  html += "  <ol>";
+  html += "    <li class=\"selected\">say hi to</li>";
+  html += "    <li class=\"highlighted\">your</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "    <li>mother</li>";
+  html += "  </ol>";
+  html += "</html>";
+
+
+  for (List row : results) {
+    String identifier = row.get(0);
+  }
+
+  populateWebViewHtml(refWalkers, html);
+}
+
+makeLocalParentChildWithAttribs();
+
+addOnEvent("Survey_Unit/Walkers/Walkers", "show", "redrawWalkers()");

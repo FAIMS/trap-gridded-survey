@@ -159,6 +159,15 @@ public class ModuleUtil extends ModuleHelper {
 
     /*
         Type: button
+        Ref:  Control/Main/Add_New_Walker
+     */
+    public static View get_Control_Main_AddNewWalker(Solo solo) {
+        String ref = "Control/Main/Add_New_Walker";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: button
         Ref:  Control/Search/Search_Button
      */
     public static View get_Control_Search_SearchButton(Solo solo) {
@@ -177,10 +186,55 @@ public class ModuleUtil extends ModuleHelper {
 
     /*
         Type: button
-        Ref:  Survey_Unit/Walkers/Add_New_Walker
+        Ref:  Survey_Unit/Walkers/Down
      */
-    public static View get_SurveyUnit_Walkers_AddNewWalker(Solo solo) {
-        String ref = "Survey_Unit/Walkers/Add_New_Walker";
+    public static View get_SurveyUnit_Walkers_Down(Solo solo) {
+        String ref = "Survey_Unit/Walkers/Down";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: button
+        Ref:  Survey_Unit/Walkers/Minus
+     */
+    public static View get_SurveyUnit_Walkers_Minus(Solo solo) {
+        String ref = "Survey_Unit/Walkers/Minus";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: button
+        Ref:  Survey_Unit/Walkers/Plus
+     */
+    public static View get_SurveyUnit_Walkers_Plus(Solo solo) {
+        String ref = "Survey_Unit/Walkers/Plus";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: button
+        Ref:  Survey_Unit/Walkers/Save
+     */
+    public static View get_SurveyUnit_Walkers_Save(Solo solo) {
+        String ref = "Survey_Unit/Walkers/Save";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: button
+        Ref:  Survey_Unit/Walkers/Toggle_Selection
+     */
+    public static View get_SurveyUnit_Walkers_ToggleSelection(Solo solo) {
+        String ref = "Survey_Unit/Walkers/Toggle_Selection";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: button
+        Ref:  Survey_Unit/Walkers/Up
+     */
+    public static View get_SurveyUnit_Walkers_Up(Solo solo) {
+        String ref = "Survey_Unit/Walkers/Up";
         return (android.view.View) solo.getView((Object) ref);
     }
 
@@ -761,15 +815,6 @@ public class ModuleUtil extends ModuleHelper {
     }
 
     /*
-        Type: list
-        Ref:  Survey_Unit/Walkers/Walkers
-     */
-    public static View get_SurveyUnit_Walkers_Walkers(Solo solo) {
-        String ref = "Survey_Unit/Walkers/Walkers";
-        return (android.view.View) solo.getView((Object) ref);
-    }
-
-    /*
         Type: radio
         Ref:  Control/Main/Drainage
      */
@@ -874,6 +919,15 @@ public class ModuleUtil extends ModuleHelper {
      */
     public static View get_Saving_Saving_Saving(Solo solo) {
         String ref = "Saving/Saving/Saving";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: webview
+        Ref:  Survey_Unit/Walkers/Walkers
+     */
+    public static View get_SurveyUnit_Walkers_Walkers(Solo solo) {
+        String ref = "Survey_Unit/Walkers/Walkers";
         return (android.view.View) solo.getView((Object) ref);
     }
 

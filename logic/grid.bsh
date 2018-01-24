@@ -406,7 +406,7 @@ void redrawGrid(boolean doRefreshCache) {
   html += "      td {";
   html += "        border: 1px solid #000000;";
   html += "        font-weight: 100;";
-  html += "        padding: 3px;";
+  html += "        padding: 2px;";
   html += "        text-align: center;";
   html += "      }";
   html += "      td.highlighted {";
@@ -415,8 +415,8 @@ void redrawGrid(boolean doRefreshCache) {
   html += "        padding: 0px;";
   html += "      }";
   html += "      td.selected {";
-  html += "        background-color: #00AA00;";
-  html += "        color:            #FFFFFF;";
+  html += "        background-color: #77FF77;";
+  html += "        color:            #000000;";
   html += "      }";
   html += "      td.row-index {";
   html += "        white-space:nowrap;";
