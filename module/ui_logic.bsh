@@ -5884,7 +5884,12 @@ void search(){
   Log.d("Module", "Search query: " + searchQuery);
 }
 /****************************** WALKER ORDERING *******************************/
+final String REF_WALKERS = "Survey_Unit/Walkers/Walkers";
+int HIGHLIGHTED_ORDINAL_WALKER = 0;
+int NUM_WALKERS = 0;
+
 Map[] WALKER_CACHE = null;
+Map[] WALKER_CACHE_CLEAN = null;
 int MAX_NUM_WALKERS = 100;
 
 void initWalkerCache() {
@@ -5897,7 +5902,11 @@ void updateWalkerCache() {
 
 void updateWalkerCache(String callback) {
   String q = "";
-  q += " select identifier, parentUuid, childUuid";
+  q += "       select 'fug' as identifier, 69 as parentUuid, 42 as childUuid";
+  q += " union select 'guh' as identifier, 70 as parentUuid, 43 as childUuid";
+  q += " union select 'muh' as identifier, 71 as parentUuid, 44 as childUuid";
+  q += " union select 'luh' as identifier, 72 as parentUuid, 45 as childUuid";
+  q += " union select 'buh' as identifier, 73 as parentUuid, 46 as childUuid";
 
   FetchCallback updateWalkerCache = new FetchCallback() {
     onFetch(result) {
@@ -5918,7 +5927,17 @@ void updateWalkerCache(List results) {
     updateWalkerCache(i, "Identifier",  identifier);
     updateWalkerCache(i, "UUID/Parent", uuidParent);
     updateWalkerCache(i, "UUID/Child",  uuidChild);
+    updateWalkerCache(i, "isConfirmed", true);
+    updateWalkerCache(i, "isSelected",  false);
   }
+
+  NUM_WALKERS = results.size();
+
+  // Clone WALKER_CACHE into WALKER_CACHE_CLEAN
+  WALKER_CACHE_CLEAN = new HashMap[MAX_NUM_WALKERS];
+  for (int i = 0; i < MAX_NUM_WALKERS; i++)
+    if (WALKER_CACHE[i] != null)
+      WALKER_CACHE_CLEAN[i] = new HashMap(WALKER_CACHE[i]);
 }
 
 void updateWalkerCache(int i) {
@@ -5938,7 +5957,6 @@ void updateWalkerCache(int i, String attribName, attribVal) {
 
   cell.put(attribName, attribVal);
 }
-
 
 void makeLocalParentChildWithAttribs() {
   fetchOne(
@@ -5963,11 +5981,6 @@ void makeLocalParentChildWithAttribs() {
 }
 
 void redrawWalkers() {
-  updateWalkerCache(0, "Identifier", "Sgt.  Meow-Meow");
-  updateWalkerCache(1, "Identifier", "Cptn. Dick Wolf");
-
-  String refWalkers = "Survey_Unit/Walkers/Walkers";
-
   String html = "";
   html += "<!DOCTYPE html>";
   html += "<html>";
@@ -5998,41 +6011,15 @@ void redrawWalkers() {
   html += "    </style>";
   html += "  </head>";
   html += "  <ol>";
-  html += "    <li class=\"selected\">say hi to</li>";
-  html += "    <li class=\"highlighted\">your</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
-  html += "    <li>mother</li>";
 
-  for (Map walker : WALKER_CACHE) {
+  for (int i = 0; i < WALKER_CACHE.length; i++) {
+    walker = WALKER_CACHE[i];
     if (walker == null)
       break;
 
-    Boolean isHighlighted = walker.get("isHighlighted");
+    Boolean isHighlighted = HIGHLIGHTED_ORDINAL_WALKER == i;
     Boolean isSelected    = walker.get("isSelected");
     Boolean isConfirmed   = walker.get("isConfirmed");
-
-    if (isHighlighted == null) isHighlighted = false;
-    if (isSelected    == null) isSelected    = false;
-    if (isConfirmed   == null) isConfirmed   = true;
 
     // Build the string of CSS classes to apply to this <li> element
     String cssClass = "";
@@ -6056,14 +6043,105 @@ void redrawWalkers() {
   html += "  </ol>";
   html += "</html>";
 
-  populateWebViewHtml(refWalkers, "Loading...");
-  populateWebViewHtml(refWalkers, html);
+  populateWebViewHtml(REF_WALKERS, html);
+}
+
+void updateWalkerCacheAndRedraw() {
+  populateWebViewHtml(REF_WALKERS, "Loading...");
+  updateWalkerCache("redrawWalkers()");
+}
+
+void ordinalWalkerUp  () {
+  if (HIGHLIGHTED_ORDINAL_WALKER <= 0)
+    return;
+  HIGHLIGHTED_ORDINAL_WALKER--;
+  redrawWalkers();
+}
+
+void ordinalWalkerDown() {
+  if (HIGHLIGHTED_ORDINAL_WALKER >= NUM_WALKERS - 1)
+    return;
+  HIGHLIGHTED_ORDINAL_WALKER++;
+  redrawWalkers();
+}
+
+void ordinalWalkerPlus () {
+  if (HIGHLIGHTED_ORDINAL_WALKER == 0)
+    return;
+
+  // Swap
+  Map toSwap     = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER];
+  Map toSwapWith = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER-1];
+
+  WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER-1] = toSwap;
+  WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER]   = toSwapWith;
+
+  // Un-confirm
+  updateWalkerCache(HIGHLIGHTED_ORDINAL_WALKER,   "isConfirmed", false);
+  updateWalkerCache(HIGHLIGHTED_ORDINAL_WALKER-1, "isConfirmed", false);
+
+  HIGHLIGHTED_ORDINAL_WALKER--;
+
+  redrawWalkers();
+}
+
+void ordinalWalkerMinus() {
+  if (HIGHLIGHTED_ORDINAL_WALKER >= NUM_WALKERS - 1)
+    return;
+
+  // Swap
+  Map toSwap     = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER];
+  Map toSwapWith = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER+1];
+
+  WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER+1] = toSwap;
+  WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER]   = toSwapWith;
+
+  // Un-confirm
+  updateWalkerCache(HIGHLIGHTED_ORDINAL_WALKER,   "isConfirmed", false);
+  updateWalkerCache(HIGHLIGHTED_ORDINAL_WALKER+1, "isConfirmed", false);
+
+  HIGHLIGHTED_ORDINAL_WALKER++;
+
+  redrawWalkers();
+}
+
+void ordinalWalkerToggleSelection() {
+  // Toggle selection
+  Boolean val = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get("isSelected");
+  if (val == null)
+    val = false;
+  updateWalkerCache(HIGHLIGHTED_ORDINAL_WALKER, "isSelected", !val);
+
+  // Un-confirm
+  updateWalkerCache(HIGHLIGHTED_ORDINAL_WALKER, "isConfirmed", false);
+
+  redrawWalkers();
+}
+
+void computeConfirmedness() {
+  // Reset walkers' isConfirmed property
+  for (Map walker : WALKER_CACHE)
+    walker.put("isConfirmed", true);
+
+  for (int i = 0; i < NUM_WALKERS; i++) {
+    boolean isConfirmed = WALKER_CACHE[i].equals(WALKER_CACHE_CLEAN[i]);
+    WALKER_CACHE[i].put("isConfirmed", isConfirmed);
+  }
+}
+
+void ordinalWalkerSave() {
+  computeConfirmedness();
+  redrawWalkers();
 }
 
 makeLocalParentChildWithAttribs();
-
-addOnEvent("Survey_Unit/Walkers/Walkers", "show", "redrawWalkers()");
-
+addOnEvent("Survey_Unit/Walkers/Walkers", "show", "updateWalkerCacheAndRedraw()");
+addOnEvent("Survey_Unit/Walkers/Down",    "click", "ordinalWalkerDown()");
+addOnEvent("Survey_Unit/Walkers/Up",      "click", "ordinalWalkerUp()");
+addOnEvent("Survey_Unit/Walkers/Plus",    "click", "ordinalWalkerPlus()");
+addOnEvent("Survey_Unit/Walkers/Minus",   "click", "ordinalWalkerMinus()");
+addOnEvent("Survey_Unit/Walkers/Toggle_Selection", "click", "ordinalWalkerToggleSelection()");
+addOnEvent("Survey_Unit/Walkers/Save", "click", "ordinalWalkerSave()");
 
 /******************************************************************************/
 /*                                    INIT                                    */
