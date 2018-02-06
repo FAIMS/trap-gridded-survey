@@ -1,5 +1,3 @@
-#!/usr/bin/env bsh
-
 String funName() {
   namespace = this.callstack.get(1);
   return namespace.getInvocationLine() + ": " + namespace.getInvocationText();
@@ -44,7 +42,7 @@ void validateRefs() {
       throw new Exception("Ref '" + ref + "' may not refer to a UI element");
 }
 
-sourceRelative("mock.bsh");
+sourceRelative("mock/mock.bsh");
 sourceRelative("../module/ui_logic.bsh");
 
 validateRefs();

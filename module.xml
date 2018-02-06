@@ -40,7 +40,6 @@
     <Walker_Interval   b="decimal" f="notnull persist">
       Walker Interval (m)
     </Walker_Interval>
-    <Add_New_Walker t="button" l="Walker"/>
     <Land_Use t="dropdown" f="persist" vp="Survey_Unit/Survey_Unit/Land_Use"/>
     <Agricultural_Condition t="dropdown" f="persist" vp="Survey_Unit/Survey_Unit/Agricultural_Condition"/>
     <Topography t="dropdown" f="persist" vp="Survey_Unit/Survey_Unit/Topography"/>
@@ -52,6 +51,24 @@
     <Stoniness t="radio" f="persist" vp="Survey_Unit/Survey_Unit/Stoniness"/>
     <Shade t="radio" f="persist" vp="Survey_Unit/Survey_Unit/Shade"/>
   </Main>
+  <Walkers f="noscroll">
+    <Add_New_Walker t="button" l="Walker"/>
+    <cols>
+      <col>
+        <Up   t="button"/>
+        <Down t="button"/>
+      </col>
+      <col>
+        <Plus  t="button"/> <!--TODO: Not correctly autogened-->
+        <Minus t="button"/>
+      </col>
+      <col>
+        <Toggle_Selection t="button"/>
+        <Save t="button"/>
+      </col>
+    </cols>
+    <Walkers t="webview"/>
+  </Walkers>
   <search/>
 </Control>
 
@@ -177,23 +194,6 @@
     <Row_Interval       b="decimal" f="readonly" i="Control/Main/Row_Interval"/>
     <Walker_Interval    b="decimal" f="readonly" i="Control/Main/Walker_Interval"/>
   </Survey_Unit>
-  <Walkers f="noscroll">
-    <cols>
-      <col>
-        <Up   t="button"/>
-        <Down t="button"/>
-      </col>
-      <col>
-        <Plus  t="button"/> <!--TODO: Not correctly autogened-->
-        <Minus t="button"/>
-      </col>
-      <col>
-        <Toggle_Selection t="button"/>
-        <Save t="button"/>
-      </col>
-    </cols>
-    <Walkers t="webview"/>
-  </Walkers>
   <Walker_Units f="noscroll">
     <Add_New_Walker_Unit lc="Walker_Unit" t="button"/>
     <!--Displaying this list is costly, so we just won't do it-->

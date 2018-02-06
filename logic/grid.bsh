@@ -431,10 +431,11 @@ void redrawGrid(boolean doRefreshCache) {
   html += "      }";
   html += "    </style>";
   html += "  </head>";
-  html += "  <table>";
+  html += "  <body>";
+  html += "    <table>";
 
   for (int i = numberOfRows; i >= 0; i--) {
-    html += "    <tr>";
+    html += "      <tr>";
     for (int j = 0; j <= numberOfWalkers; j++) {
       Boolean isHighlighted = GRID_CACHE[i][j].get("isHighlighted");
       Boolean isSelected    = GRID_CACHE[i][j].get("isSelected");
@@ -462,7 +463,7 @@ void redrawGrid(boolean doRefreshCache) {
 
       // Build the HTML string for this <td>
       String htmlCell = "";
-      htmlCell += "      <td class=\"{cssClass}\">";
+      htmlCell += "        <td class=\"{cssClass}\">";
       if (isRowIndex     ) htmlCell += i;
       if (isWalkerIndex  ) htmlCell += initials;
       if (isMain &&  isNa) htmlCell += na;
@@ -470,14 +471,15 @@ void redrawGrid(boolean doRefreshCache) {
       htmlCell  = replaceFirst(htmlCell, "{cssClass}", cssClass);
       htmlCell  = replaceFirst(htmlCell, "{anc}",      ancient );
       htmlCell  = replaceFirst(htmlCell, "{mod}",      modern  );
-      htmlCell += "      </td>";
+      htmlCell += "        </td>";
 
       // Add the cell to the existing HTML
       html += htmlCell;
     }
-    html += "    </tr>";
+    html += "      </tr>";
   }
-  html += "  </table>";
+  html += "    </table>";
+  html += "  </body>";
   html += "</html>";
 
   // Now that the html string has been built, we can populate the web view
