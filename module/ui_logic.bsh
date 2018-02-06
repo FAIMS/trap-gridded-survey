@@ -282,7 +282,6 @@ REF_TO_TYPE.put("Control/Main/Number_of_Rows", "input");
 REF_TO_TYPE.put("Control/Main/Number_of_Walkers", "input");
 REF_TO_TYPE.put("Control/Main/Row_Interval", "input");
 REF_TO_TYPE.put("Control/Main/Walker_Interval", "input");
-REF_TO_TYPE.put("Control/Main/Add_New_Walker", "button");
 REF_TO_TYPE.put("Control/Main/Land_Use", "dropdown");
 REF_TO_TYPE.put("Control/Main/Agricultural_Condition", "dropdown");
 REF_TO_TYPE.put("Control/Main/Topography", "dropdown");
@@ -293,6 +292,14 @@ REF_TO_TYPE.put("Control/Main/Drainage", "radio");
 REF_TO_TYPE.put("Control/Main/Vegetation", "radio");
 REF_TO_TYPE.put("Control/Main/Stoniness", "radio");
 REF_TO_TYPE.put("Control/Main/Shade", "radio");
+REF_TO_TYPE.put("Control/Walkers/Add_New_Walker", "button");
+REF_TO_TYPE.put("Control/Walkers/Up", "button");
+REF_TO_TYPE.put("Control/Walkers/Down", "button");
+REF_TO_TYPE.put("Control/Walkers/Plus", "button");
+REF_TO_TYPE.put("Control/Walkers/Minus", "button");
+REF_TO_TYPE.put("Control/Walkers/Toggle_Selection", "button");
+REF_TO_TYPE.put("Control/Walkers/Save", "button");
+REF_TO_TYPE.put("Control/Walkers/Walkers", "webview");
 REF_TO_TYPE.put("Control/Search/Search_Term", "input");
 REF_TO_TYPE.put("Control/Search/Search_Button", "button");
 REF_TO_TYPE.put("Control/Search/Entity_Types", "dropdown");
@@ -312,13 +319,6 @@ REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Number_of_Rows", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Number_of_Walkers", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Row_Interval", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Walker_Interval", "input");
-REF_TO_TYPE.put("Survey_Unit/Walkers/Up", "button");
-REF_TO_TYPE.put("Survey_Unit/Walkers/Down", "button");
-REF_TO_TYPE.put("Survey_Unit/Walkers/Plus", "button");
-REF_TO_TYPE.put("Survey_Unit/Walkers/Minus", "button");
-REF_TO_TYPE.put("Survey_Unit/Walkers/Toggle_Selection", "button");
-REF_TO_TYPE.put("Survey_Unit/Walkers/Save", "button");
-REF_TO_TYPE.put("Survey_Unit/Walkers/Walkers", "webview");
 REF_TO_TYPE.put("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "button");
 REF_TO_TYPE.put("Survey_Unit/Vars/Highlighted_Row", "input");
 REF_TO_TYPE.put("Survey_Unit/Vars/Highlighted_Walker", "input");
@@ -367,9 +367,9 @@ REF_TO_TYPE.put("Walker_Unit/Vars/Walker_ID", "input");
 REF_TO_TYPE.put("Saving/Saving/Saving", "webview");
 REF_TO_TYPE.put("Login/Login", "tab");
 REF_TO_TYPE.put("Control/Main", "tab");
+REF_TO_TYPE.put("Control/Walkers", "tab");
 REF_TO_TYPE.put("Control/Search", "tab");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit", "tab");
-REF_TO_TYPE.put("Survey_Unit/Walkers", "tab");
 REF_TO_TYPE.put("Survey_Unit/Walker_Units", "tab");
 REF_TO_TYPE.put("Survey_Unit/Vars", "tab");
 REF_TO_TYPE.put("Walker/Walker", "tab");
@@ -436,9 +436,9 @@ TAB_GROUPS_AS_LIST.add("Saving");
 
 TABS_AS_LIST.add("Login/Login");
 TABS_AS_LIST.add("Control/Main");
+TABS_AS_LIST.add("Control/Walkers");
 TABS_AS_LIST.add("Control/Search");
 TABS_AS_LIST.add("Survey_Unit/Survey_Unit");
-TABS_AS_LIST.add("Survey_Unit/Walkers");
 TABS_AS_LIST.add("Survey_Unit/Walker_Units");
 TABS_AS_LIST.add("Survey_Unit/Vars");
 TABS_AS_LIST.add("Walker/Walker");
@@ -1499,19 +1499,19 @@ void timedPopulateCursorList(String ref, String q, int limit) {
 
 void setUpTypeHierarchy() {
   //- 
-  //  - Walker
   //  - Survey Unit
   //    - Walker Unit
+  //  - Walker
 
   n0 = Tree("", 1);
-  n1 = Tree("Walker", 1);
-  n2 = Tree("Survey Unit", 1);
-  n3 = Tree("Walker Unit", 1);
+  n1 = Tree("Survey Unit", 1);
+  n2 = Tree("Walker Unit", 1);
+  n3 = Tree("Walker", 1);
 
   n0.addChild(n1);
-  n0.addChild(n2);
+  n0.addChild(n3);
 
-  n2.addChild(n3);
+  n1.addChild(n2);
 
 
   PERF_TYPE_TREE = n0;
@@ -3224,7 +3224,7 @@ void onClickSurveyUnitAddNewWalkerUnit () {
 }
 addOnEvent("Login/Login/User", "click", "onClickLoginUser()");
 addOnEvent("Control/Main/Add_New_Survey_Unit", "click", "onClickControlAddNewSurveyUnit()");
-addOnEvent("Control/Main/Add_New_Walker", "click", "onClickControlAddNewWalker()");
+addOnEvent("Control/Walkers/Add_New_Walker", "click", "onClickControlAddNewWalker()");
 addOnEvent("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "click", "onClickSurveyUnitAddNewWalkerUnit()");
 
 /******************************************************************************/
@@ -4902,10 +4902,11 @@ void redrawGrid(boolean doRefreshCache) {
   html += "      }";
   html += "    </style>";
   html += "  </head>";
-  html += "  <table>";
+  html += "  <body>";
+  html += "    <table>";
 
   for (int i = numberOfRows; i >= 0; i--) {
-    html += "    <tr>";
+    html += "      <tr>";
     for (int j = 0; j <= numberOfWalkers; j++) {
       Boolean isHighlighted = GRID_CACHE[i][j].get("isHighlighted");
       Boolean isSelected    = GRID_CACHE[i][j].get("isSelected");
@@ -4933,7 +4934,7 @@ void redrawGrid(boolean doRefreshCache) {
 
       // Build the HTML string for this <td>
       String htmlCell = "";
-      htmlCell += "      <td class=\"{cssClass}\">";
+      htmlCell += "        <td class=\"{cssClass}\">";
       if (isRowIndex     ) htmlCell += i;
       if (isWalkerIndex  ) htmlCell += initials;
       if (isMain &&  isNa) htmlCell += na;
@@ -4941,14 +4942,15 @@ void redrawGrid(boolean doRefreshCache) {
       htmlCell  = replaceFirst(htmlCell, "{cssClass}", cssClass);
       htmlCell  = replaceFirst(htmlCell, "{anc}",      ancient );
       htmlCell  = replaceFirst(htmlCell, "{mod}",      modern  );
-      htmlCell += "      </td>";
+      htmlCell += "        </td>";
 
       // Add the cell to the existing HTML
       html += htmlCell;
     }
-    html += "    </tr>";
+    html += "      </tr>";
   }
-  html += "  </table>";
+  html += "    </table>";
+  html += "  </body>";
   html += "</html>";
 
   // Now that the html string has been built, we can populate the web view
@@ -5884,7 +5886,9 @@ void search(){
   Log.d("Module", "Search query: " + searchQuery);
 }
 /****************************** WALKER ORDERING *******************************/
-final String REF_WALKERS = "Survey_Unit/Walkers/Walkers";
+final String REF_WALKER_ENT = "Walker";
+final String REF_WALKERS_WEBVIEW = "Control/Walkers/Walkers";
+final String REF_WALKERS_TAB = "Control/Walkers";
 int HIGHLIGHTED_ORDINAL_WALKER = 0;
 int NUM_WALKERS = 0;
 
@@ -5902,16 +5906,26 @@ void updateWalkerCache() {
 
 void updateWalkerCache(String callback) {
   String q = "";
-  q += "       select 'fug' as identifier, 69 as parentUuid, 42 as childUuid";
-  q += " union select 'guh' as identifier, 70 as parentUuid, 43 as childUuid";
-  q += " union select 'muh' as identifier, 71 as parentUuid, 44 as childUuid";
-  q += " union select 'luh' as identifier, 72 as parentUuid, 45 as childUuid";
-  q += " union select 'buh' as identifier, 73 as parentUuid, 46 as childUuid";
+  q += " SELECT unformatted.uuid, response, unformatted.isSelected";
+  q += "   FROM latestNonDeletedArchEntFormattedIdentifiers";
+  q += "   JOIN (";
+  q += "       SELECT DISTINCT uuid, SUBSTR(value, 1, 1) AS isSelected, CAST(substr(value, 2, 999) AS decimal) AS ordering";
+  q += "            FROM latestNonDeletedArchEntIdentifiers";
+  q += "       LEFT JOIN localsettings ON latestNonDeletedArchEntIdentifiers.uuid = localsettings.key";
+  q += "           WHERE aenttypename = '"+getArchEntType(REF_WALKER_ENT)+"'";
+  q += "     ) unformatted";
+  q += "     ON (unformatted.uuid = latestNonDeletedArchEntFormattedIdentifiers.uuid)";
+  q += " ORDER BY";
+  q += "     unformatted.ordering,";
+  q += "     latestNonDeletedArchEntFormattedIdentifiers.response";
 
   FetchCallback updateWalkerCache = new FetchCallback() {
     onFetch(result) {
       updateWalkerCache(result);
       execute(callback);
+    }
+    onError(message) {
+      showToast(message);
     }
   };
 
@@ -5919,24 +5933,31 @@ void updateWalkerCache(String callback) {
 }
 
 void updateWalkerCache(List results) {
+  if (WALKER_CACHE == null)
+    initWalkerCache();
+
   for (int i = 0; i < results.size(); i++) {
-    String identifier = results.get(i).get(0);
-    String uuidParent = results.get(i).get(1);
-    String uuidChild  = results.get(i).get(2);
+    String  uuid       =            results.get(i).get(0);
+    String  identifier =            results.get(i).get(1);
+    boolean isSelected = "1".equals(results.get(i).get(2));
 
     updateWalkerCache(i, "Identifier",  identifier);
-    updateWalkerCache(i, "UUID/Parent", uuidParent);
-    updateWalkerCache(i, "UUID/Child",  uuidChild);
+    updateWalkerCache(i, "UUID",        uuid);
     updateWalkerCache(i, "isConfirmed", true);
-    updateWalkerCache(i, "isSelected",  false);
+    updateWalkerCache(i, "isSelected",  isSelected);
   }
 
   NUM_WALKERS = results.size();
+  ordinalWalkerSaveCleanCache();
+}
 
   // Clone WALKER_CACHE into WALKER_CACHE_CLEAN
+void ordinalWalkerSaveCleanCache() {
   WALKER_CACHE_CLEAN = new HashMap[MAX_NUM_WALKERS];
   for (int i = 0; i < MAX_NUM_WALKERS; i++)
-    if (WALKER_CACHE[i] != null)
+    if (WALKER_CACHE[i] == null)
+      WALKER_CACHE_CLEAN[i] = null;
+    else
       WALKER_CACHE_CLEAN[i] = new HashMap(WALKER_CACHE[i]);
 }
 
@@ -5987,31 +6008,44 @@ void redrawWalkers() {
   html += "  <head>";
   html += "    <title>Grid</title>";
   html += "    <style>";
-  html += "      li {";
+  html += "      table {";
+  html += "        table-layout: fixed;";
+  html += "        border-collapse: separate;";
+  html += "        border-spacing:  0px;";
+  html += "        width: 100%;";
+  html += "      }";
+  html += "      td {";
   html += "        border: 1px solid #000000;";
   html += "        font-weight: 100;";
   html += "        padding: 2px;";
-  html += "        padding-left: 7px;";
+  html += "        text-align: center;";
   html += "      }";
-  html += "      li.highlighted {";
+  html += "      td.highlighted {";
   html += "        background-color: #CCCCCC;";
   html += "        border:  3px double #000000;";
   html += "        padding: 0px;";
-  html += "        padding-left: 7px;";
   html += "      }";
-  html += "      li.selected {";
+  html += "      td.selected {";
   html += "        background-color: #77FF77;";
   html += "        color:            #000000;";
   html += "      }";
-  html += "      li.confirmed {";
+  html += "      td.row-index {";
+  html += "        white-space:nowrap;";
+  html += "        width: 20px;";
+  html += "      }";
+  html += "      td.side {";
+  html += "        border: none;";
+  html += "      }";
+  html += "      td.confirmed {";
   html += "        text-shadow: 1px 0px #000;";
   html += "        font-weight: 900;";
   html += "      }";
-  html += "";
   html += "    </style>";
   html += "  </head>";
-  html += "  <ol>";
+  html += "  <body>";
+  html += "    <table>";
 
+  int index = 0;
   for (int i = 0; i < WALKER_CACHE.length; i++) {
     walker = WALKER_CACHE[i];
     if (walker == null)
@@ -6027,27 +6061,39 @@ void redrawWalkers() {
     if (isSelected   ) cssClass += " selected";
     if (isConfirmed  ) cssClass += " confirmed";
 
+    // Increment index that numbers the selected walkers in the UI
+    String indexString = "";
+    if (isSelected) {
+      index++;
+      indexString = index + "";
+    }
+
     // Get the <li> value
     String identifier = walker.get("Identifier");
 
     // Build the HTML string for this <li>
     String htmlCell = "";
-    htmlCell += "    <li class=\"{cssClass}\">{identifier}</li>";
-    htmlCell  = replaceFirst(htmlCell, "{cssClass}",   cssClass);
-    htmlCell  = replaceFirst(htmlCell, "{identifier}", identifier);
+    htmlCell += "      <tr>";
+    htmlCell += "        <td class=\"side row-index\">{indexString}</td>";
+    htmlCell += "        <td class=\"{cssClass}\">{identifier}</td>";
+    htmlCell += "      </tr>";
+    htmlCell  = replaceFirst(htmlCell, "{indexString}", indexString);
+    htmlCell  = replaceFirst(htmlCell, "{cssClass}",    cssClass);
+    htmlCell  = replaceFirst(htmlCell, "{identifier}",  identifier);
 
     // Add the cell to the existing HTML
     html += htmlCell;
   }
 
-  html += "  </ol>";
+  html += "    </table>";
+  html += "  </body>";
   html += "</html>";
 
-  populateWebViewHtml(REF_WALKERS, html);
+  populateWebViewHtml(REF_WALKERS_WEBVIEW, html);
 }
 
 void updateWalkerCacheAndRedraw() {
-  populateWebViewHtml(REF_WALKERS, "Loading...");
+  populateWebViewHtml(REF_WALKERS_WEBVIEW, "Loading...");
   updateWalkerCache("redrawWalkers()");
 }
 
@@ -6076,12 +6122,9 @@ void ordinalWalkerPlus () {
   WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER-1] = toSwap;
   WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER]   = toSwapWith;
 
-  // Un-confirm
-  updateWalkerCache(HIGHLIGHTED_ORDINAL_WALKER,   "isConfirmed", false);
-  updateWalkerCache(HIGHLIGHTED_ORDINAL_WALKER-1, "isConfirmed", false);
-
   HIGHLIGHTED_ORDINAL_WALKER--;
 
+  computeConfirmedness();
   redrawWalkers();
 }
 
@@ -6096,12 +6139,9 @@ void ordinalWalkerMinus() {
   WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER+1] = toSwap;
   WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER]   = toSwapWith;
 
-  // Un-confirm
-  updateWalkerCache(HIGHLIGHTED_ORDINAL_WALKER,   "isConfirmed", false);
-  updateWalkerCache(HIGHLIGHTED_ORDINAL_WALKER+1, "isConfirmed", false);
-
   HIGHLIGHTED_ORDINAL_WALKER++;
 
+  computeConfirmedness();
   redrawWalkers();
 }
 
@@ -6112,36 +6152,136 @@ void ordinalWalkerToggleSelection() {
     val = false;
   updateWalkerCache(HIGHLIGHTED_ORDINAL_WALKER, "isSelected", !val);
 
-  // Un-confirm
-  updateWalkerCache(HIGHLIGHTED_ORDINAL_WALKER, "isConfirmed", false);
-
+  computeConfirmedness();
   redrawWalkers();
 }
 
 void computeConfirmedness() {
   // Reset walkers' isConfirmed property
-  for (Map walker : WALKER_CACHE)
+  for (int i = 0; i < NUM_WALKERS; i++) {
+    Map walker = WALKER_CACHE[i];
     walker.put("isConfirmed", true);
+  }
 
   for (int i = 0; i < NUM_WALKERS; i++) {
-    boolean isConfirmed = WALKER_CACHE[i].equals(WALKER_CACHE_CLEAN[i]);
-    WALKER_CACHE[i].put("isConfirmed", isConfirmed);
+    Map walker = WALKER_CACHE[i];
+    boolean isConfirmed = walker.equals(WALKER_CACHE_CLEAN[i]);
+    walker.put("isConfirmed", isConfirmed);
   }
 }
 
+boolean ordinalWalkerHasChanges() {
+  for (int i = 0; i < NUM_WALKERS; i++) {
+    Map walker = WALKER_CACHE[i];
+    if (walker.get("isConfirmed") == false)
+      return true;
+  }
+  return false;
+}
+
+boolean ordinalWalkerValidateChanges() {
+  if (!isDisplayed("Control"))
+    return true;
+
+  boolean hasChanges = ordinalWalkerHasChanges();
+  if (hasChanges) {
+    String head;
+    String body;
+    String cbOk;
+    String cbBad;
+
+    // Head
+    head  = "Unsaved Changes";
+
+    // Body
+    body  = "There are unsaved changes to the ordering of the walkers. Do you ";
+    body += "really want to navigate away? Press 'OK' to navigate away ";
+    body += "away without saving changes, or 'Cancel' to return.";
+
+    // cbOk
+    if (isDisplayed("Control/Walkers"))
+      cbOk = getOnEventString(
+          "Control/Walkers/Add_New_Walker",
+          "click",
+          ON_EVT_STMTS,
+          "; ",
+          true
+      );
+    else
+      cbOk = "";
+
+    // cbBad
+    cbBad = "ordinalWalkerReturnToSaveChanges()";
+
+    // Show
+    showAlert(head, body, cbOk, cbBad);
+  }
+  return !hasChanges;
+}
+
+void ordinalWalkerReturnToSaveChanges() {
+  if (!isDisplayed("Control"))
+    return;
+
+  newTab(REF_WALKERS_TAB);
+}
+
 void ordinalWalkerSave() {
-  computeConfirmedness();
-  redrawWalkers();
+  boolean hasChanges = ordinalWalkerHasChanges();
+  if (!hasChanges) {
+    showToast("No changes to save");
+    return;
+  }
+
+  // Build query string
+  String fmt = "('%s', '%s%s')";
+  String q = "REPLACE INTO localSettings(key, value) VALUES";
+  for (int i = 0; i < NUM_WALKERS; i++) {
+    Map walker = WALKER_CACHE[i];
+    boolean isSelected = walker.get("isSelected");
+    boolean isLastPart = i == NUM_WALKERS - 1;
+
+    String uuidStr       = walker.get("UUID");
+    String isSelectedStr = isSelected ? "1" : "0";
+    String orderStr      = i + "";
+
+    String qPart = fmt;
+    qPart = replaceFirst(qPart, uuidStr);
+    qPart = replaceFirst(qPart, isSelectedStr);
+    qPart = replaceFirst(qPart, orderStr);
+    if (!isLastPart)
+      qPart += ",\n";
+
+    q += qPart;
+  }
+
+  FetchCallback cb = new FetchCallback() {
+    onFetch(results) {
+      // Mark walkers as confirmed
+      for (int i = 0; i < NUM_WALKERS; i++) {
+        Map walker = WALKER_CACHE[i];
+        walker.put("isConfirmed", true);
+      }
+      ordinalWalkerSaveCleanCache();
+
+      redrawWalkers();
+      showToast("Saved");
+    }
+  };
+
+  fetchOne(q, cb);
 }
 
 makeLocalParentChildWithAttribs();
-addOnEvent("Survey_Unit/Walkers/Walkers", "show", "updateWalkerCacheAndRedraw()");
-addOnEvent("Survey_Unit/Walkers/Down",    "click", "ordinalWalkerDown()");
-addOnEvent("Survey_Unit/Walkers/Up",      "click", "ordinalWalkerUp()");
-addOnEvent("Survey_Unit/Walkers/Plus",    "click", "ordinalWalkerPlus()");
-addOnEvent("Survey_Unit/Walkers/Minus",   "click", "ordinalWalkerMinus()");
-addOnEvent("Survey_Unit/Walkers/Toggle_Selection", "click", "ordinalWalkerToggleSelection()");
-addOnEvent("Survey_Unit/Walkers/Save", "click", "ordinalWalkerSave()");
+addOnEvent("Control/Walkers/Walkers", "show", "updateWalkerCacheAndRedraw()"); // TODO: do this on module load and Walker save
+addOnEvent("Control/Walkers/Down",    "click", "ordinalWalkerDown()");
+addOnEvent("Control/Walkers/Up",      "click", "ordinalWalkerUp()");
+addOnEvent("Control/Walkers/Plus",    "click", "ordinalWalkerPlus()");
+addOnEvent("Control/Walkers/Minus",   "click", "ordinalWalkerMinus()");
+addOnEvent("Control/Walkers/Toggle_Selection", "click", "ordinalWalkerToggleSelection()");
+addOnEvent("Control/Walkers/Save", "click", "ordinalWalkerSave()");
+addOnEventCond("Control/Walkers/Add_New_Walker", "click", "ordinalWalkerValidateChanges()");
+addOnEvent("Control/Walkers", "leave", "ordinalWalkerValidateChanges()");
 
 /******************************************************************************/
 /*                                    INIT                                    */
