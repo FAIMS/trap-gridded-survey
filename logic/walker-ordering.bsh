@@ -1,4 +1,3 @@
-
 /****************************** WALKER ORDERING *******************************/
 final String REF_WALKER_ENT = "Walker";
 final String REF_WALKERS_WEBVIEW = "Control/Walkers/Walkers";
@@ -23,7 +22,7 @@ void updateWalkerCache(String callback) {
   q += " SELECT unformatted.uuid, response, unformatted.isSelected";
   q += "   FROM latestNonDeletedArchEntFormattedIdentifiers";
   q += "   JOIN (";
-  q += "       SELECT DISTINCT uuid, SUBSTR(value, 1, 1) AS isSelected, CAST(substr(value, 2, 999) AS decimal) AS ordering";
+  q += "       SELECT DISTINCT uuid, SUBSTR(value, 1, 1) AS isSelected, CAST(coalesce(substr(value, 2, 999), '999') AS decimal) AS ordering";
   q += "            FROM latestNonDeletedArchEntIdentifiers";
   q += "       LEFT JOIN localsettings ON latestNonDeletedArchEntIdentifiers.uuid = localsettings.key";
   q += "           WHERE aenttypename = '"+getArchEntType(REF_WALKER_ENT)+"'";
@@ -384,6 +383,10 @@ void ordinalWalkerSave() {
   };
 
   fetchOne(q, cb);
+}
+
+void ordinalWalkerDelete() {
+
 }
 
 makeLocalParentChildWithAttribs();

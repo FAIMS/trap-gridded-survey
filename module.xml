@@ -52,7 +52,10 @@
     <Shade t="radio" f="persist" vp="Survey_Unit/Survey_Unit/Shade"/>
   </Main>
   <Walkers f="noscroll">
-    <Add_New_Walker t="button" l="Walker"/>
+    <cols>
+      <Add_New_Walker         t="button" l="Walker"/>
+      <Delete_Selected_Walker t="button"/>
+    </cols>
     <cols>
       <col>
         <Up   t="button"/>
@@ -67,6 +70,11 @@
         <Save t="button"/>
       </col>
     </cols>
+    <Walker_Guide t="webview">
+      <markdown>
+Walkers which you select will be numbered. The lowest numbers correspond to the left-most walkers in the grid.
+      </markdown>
+    </Walker_Guide>
     <Walkers t="webview"/>
   </Walkers>
   <search/>
