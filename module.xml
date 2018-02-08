@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--TODO: Walker orderings must come from the Control tab group each time the grid is saved.-->
+<!--TODO: Walker orderings must come from the Control tab group each time the grid is saved.
+     Sub-task: You must save the orderings in the relationships' "Order" attribute-->
 
 <!--TODO: The issue with walkers I had - you have to enter the same people multiple times, instead of simply creating them once and the simply choosing from a list. You will see it if you log into the server and look for Walker Petra. IS there anything we could do with the design? Happy to chat when I am not jetlagged.-->
 <!--TODO: Verify done: Pushing the Next Survey Unit creates new Survey Unit with Survey Unit ID +1 as expected, but when I navigate out of the unit and return to the Walker Unit record later via the search list, the webview on the top does not show the Survey Unit ID at all and stays blank to all existing Walker Units.-->
@@ -70,7 +71,7 @@
         <Save t="button"/>
       </col>
     </cols>
-    <Walker_Guide t="webview">
+    <Walker_Guide f="nolabel" t="webview">
       <markdown>
 Walkers which you select will be numbered. The lowest numbers correspond to the left-most walkers in the grid.
       </markdown>

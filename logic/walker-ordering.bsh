@@ -7,7 +7,15 @@ int NUM_WALKERS = 0;
 
 Map[] WALKER_CACHE = null;
 Map[] WALKER_CACHE_CLEAN = null;
-int MAX_NUM_WALKERS = 100;
+int MAX_NUM_WALKERS = 256;
+
+void clipHighlightedOrdinalWalker() {
+  HIGHLIGHTED_ORDINAL_WALKER = clip(
+      HIGHLIGHTED_ORDINAL_WALKER,
+      0,
+      NUM_WALKERS-1
+  );
+}
 
 void initWalkerCache() {
   WALKER_CACHE = new HashMap[MAX_NUM_WALKERS];
@@ -61,6 +69,7 @@ void updateWalkerCache(List results) {
   }
 
   NUM_WALKERS = results.size();
+  clipHighlightedOrdinalWalker();
   ordinalWalkerSaveCleanCache();
 }
 
@@ -90,28 +99,6 @@ void updateWalkerCache(int i, String attribName, attribVal) {
   }
 
   cell.put(attribName, attribVal);
-}
-
-void makeLocalParentChildWithAttribs() {
-  fetchOne(
-      "DROP VIEW IF EXISTS parentChildWithAttribs"
-  );
-
-  fetchOne(
-      "CREATE VIEW parentChildWithAttribs AS "+
-      "           SELECT parent.uuid as parentuuid, child.uuid as childuuid, parent.participatesverb as parentparticipatesverb, parent.relationshipid, parent.aenttypename as parentaenttypename, child.participatesverb as childparticipatesverb, child.aenttypename as childaenttypename, createdat"+
-      "             FROM (SELECT uuid, participatesverb, aenttypename, relationshipid, relntimestamp as createdat"+
-      "                     FROM latestnondeletedaentreln "+
-      "                     JOIN relationship USING (relationshipid) "+
-      "                     JOIN latestnondeletedarchent USING (uuid) "+
-      "                     JOIN aenttype USING (aenttypeid)) parent "+
-      "             JOIN (SELECT uuid, relationshipid, participatesverb, aenttypename "+
-      "                     FROM latestnondeletedaentreln "+
-      "                     JOIN relationship USING (relationshipid) "+
-      "                     JOIN latestnondeletedarchent USING (uuid) "+
-      "                     JOIN aenttype USING (aenttypeid)) child "+
-      "               ON (parent.relationshipid = child.relationshipid AND parent.uuid != child.uuid)"
-  );
 }
 
 void redrawWalkers() {
@@ -159,10 +146,8 @@ void redrawWalkers() {
   html += "    <table>";
 
   int index = 0;
-  for (int i = 0; i < WALKER_CACHE.length; i++) {
+  for (int i = 0; i < NUM_WALKERS; i++) {
     walker = WALKER_CACHE[i];
-    if (walker == null)
-      break;
 
     Boolean isHighlighted = HIGHLIGHTED_ORDINAL_WALKER == i;
     Boolean isSelected    = walker.get("isSelected");
@@ -211,16 +196,14 @@ void updateWalkerCacheAndRedraw() {
 }
 
 void ordinalWalkerUp  () {
-  if (HIGHLIGHTED_ORDINAL_WALKER <= 0)
-    return;
   HIGHLIGHTED_ORDINAL_WALKER--;
+  clipHighlightedOrdinalWalker();
   redrawWalkers();
 }
 
 void ordinalWalkerDown() {
-  if (HIGHLIGHTED_ORDINAL_WALKER >= NUM_WALKERS - 1)
-    return;
   HIGHLIGHTED_ORDINAL_WALKER++;
+  clipHighlightedOrdinalWalker();
   redrawWalkers();
 }
 
@@ -385,12 +368,38 @@ void ordinalWalkerSave() {
   fetchOne(q, cb);
 }
 
-void ordinalWalkerDelete() {
+void ordinalWalkerDeleteSelected() {
+  String iden = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get("Identifier");
 
+  showAlert(
+      "Do You Really Want to Delete '" + iden + "'?",
+      "{Press_OK_to_Delete_this_Record}",
+      "ordinalWalkerReallyDelete()",
+      "doNotDelete()"
+  );
 }
 
-makeLocalParentChildWithAttribs();
-addOnEvent("Control/Walkers/Walkers", "show", "updateWalkerCacheAndRedraw()"); // TODO: do this on module load and Walker save
+void ordinalWalkerReallyDelete() {
+  String uuid = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get("UUID");
+
+  DeleteCallback callback = new DeleteCallback() {
+    onDelete(uuid) {
+      populateEntityListsOfArchEnt("Walker");
+      executeOnEvent("Walker", "delete");
+    }
+
+    onError(message) {
+      showToast(message);
+    }
+  };
+
+  deleteArchEnt(uuid, callback);
+}
+
+updateWalkerCacheAndRedraw();
+addOnEvent("Walker", "save",   "updateWalkerCacheAndRedraw()");
+addOnEvent("Walker", "delete", "updateWalkerCacheAndRedraw()");
+addOnEvent("Walker", "copy",   "updateWalkerCacheAndRedraw()");
 addOnEvent("Control/Walkers/Down",    "click", "ordinalWalkerDown()");
 addOnEvent("Control/Walkers/Up",      "click", "ordinalWalkerUp()");
 addOnEvent("Control/Walkers/Plus",    "click", "ordinalWalkerPlus()");
@@ -398,4 +407,5 @@ addOnEvent("Control/Walkers/Minus",   "click", "ordinalWalkerMinus()");
 addOnEvent("Control/Walkers/Toggle_Selection", "click", "ordinalWalkerToggleSelection()");
 addOnEvent("Control/Walkers/Save", "click", "ordinalWalkerSave()");
 addOnEventCond("Control/Walkers/Add_New_Walker", "click", "ordinalWalkerValidateChanges()");
+addOnEvent("Control/Walkers/Delete_Selected_Walker", "click", "ordinalWalkerDeleteSelected()");
 addOnEvent("Control/Walkers", "leave", "ordinalWalkerValidateChanges()");

@@ -354,13 +354,14 @@ void updateGridWalkers(Object result) {
 Set getWalkerUuids() {
   Set walkerUuids = new HashSet();
 
-  if (GRID_CACHE == null)
-      return walkerUuids;
+  for (int i = 0; i < NUM_WALKERS; i++) {
+    walker = WALKER_CACHE_CLEAN[i];
+    Boolean isSel = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get("isSelected");
 
-  for (int i = 0; i < GRID_MAX_WIDTH; i++) {
-    Map    cell = GRID_CACHE[0][i]; if (cell == null) continue;
-    String uuid = cell.get("UUID"); if (uuid == null) continue;
+    if (isSel == null) isSel = false;
+    if (!isSel)        continue;
 
+    String uuid = walker.get("UUID");
     walkerUuids.add(uuid);
   }
 
@@ -1057,7 +1058,6 @@ void saveWalkerUnit() {
 
 /**************************** MISC EVENT HANDLERS *****************************/
 boolean DO_REDIRECT_TO_WALKER_UNIT = false;
-Set     PREV_WALKER_UUIDS = null;
 
 inheritWalkerUnitFields() {
   setFieldValue(
@@ -1103,8 +1103,6 @@ boolean onClickSurveyUnitAddNewWalkerUnitCond() {
 }
 
 void onClickNextSurveyUnit() {
-  PREV_WALKER_UUIDS = getWalkerUuids();
-
   cancelTabGroup("Walker_Unit", false);
   cancelTabGroup("Survey_Unit", false);
 
@@ -1115,14 +1113,12 @@ void onClickNextSurveyUnit() {
 addOnEvent("Survey_Unit", "show", "triggerAutoSave()", PRECEDENCE_MID-1);
 
 void maybeRedirectToWalkerUnit() {
-  if (!DO_REDIRECT_TO_WALKER_UNIT)
-    return;
+  if (DO_REDIRECT_TO_WALKER_UNIT) {
+    DO_REDIRECT_TO_WALKER_UNIT = false;
+    onClickSurveyUnitAddNewWalkerUnit();
+  }
 
-  DO_REDIRECT_TO_WALKER_UNIT = false;
-  onClickSurveyUnitAddNewWalkerUnit();
-
-  // Copy Walker relationships. TODO: Ensure this works
-  WALKERS_TO_RELATE.addAll(PREV_WALKER_UUIDS);
+  WALKERS_TO_RELATE.addAll(getWalkerUuids());
   dequeWalkersToRelate();
 }
 
@@ -1141,7 +1137,7 @@ void dequeWalkersToRelate() {
 void dequeWalkersToRelateRec() {
   Log.d("dequeWalkersToRelateRec", "Recing");
   if (WALKERS_TO_RELATE.size() == 0) {
-    MUTEX_DEQUEUE_WALKER_UNITS.release();
+    MUTEX_DEQUEUE_WALKERS.release();
     updateGridWalkers();
     populateEntityListsOfArchEnt("Walker");
     return;

@@ -43,8 +43,15 @@
               <Shade/>
             </Main>
             <Walkers>
-              <Add_New_Walker/>
               <Colgroup_1>
+                <Col_1>
+                  <Add_New_Walker/>
+                </Col_1>
+                <Col_2>
+                  <Delete_Selected_Walker/>
+                </Col_2>
+              </Colgroup_1>
+              <Colgroup_2>
                 <Col_1>
                   <Up/>
                   <Down/>
@@ -57,7 +64,8 @@
                   <Toggle_Selection/>
                   <Save/>
                 </Col_3>
-              </Colgroup_1>
+              </Colgroup_2>
+              <Walker_Guide/>
               <Walkers/>
             </Walkers>
             <Search>
@@ -384,10 +392,22 @@
       </group>
       <group ref="Walkers" faims_scrollable="false">
         <label>{Walkers}</label>
-        <trigger ref="Add_New_Walker">
-          <label>{Add_New_Walker}</label>
-        </trigger>
         <group ref="Colgroup_1" faims_style="orientation">
+          <label/>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <trigger ref="Add_New_Walker">
+              <label>{Add_New_Walker}</label>
+            </trigger>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <trigger ref="Delete_Selected_Walker">
+              <label>{Delete_Selected_Walker}</label>
+            </trigger>
+          </group>
+        </group>
+        <group ref="Colgroup_2" faims_style="orientation">
           <label/>
           <group ref="Col_1" faims_style="even">
             <label/>
@@ -417,6 +437,9 @@
             </trigger>
           </group>
         </group>
+        <input faims_web="true" ref="Walker_Guide">
+          <label>{Walker_Guide}</label>
+        </input>
         <input faims_web="true" ref="Walkers">
           <label>{Walkers}</label>
         </input>

@@ -293,12 +293,14 @@ REF_TO_TYPE.put("Control/Main/Vegetation", "radio");
 REF_TO_TYPE.put("Control/Main/Stoniness", "radio");
 REF_TO_TYPE.put("Control/Main/Shade", "radio");
 REF_TO_TYPE.put("Control/Walkers/Add_New_Walker", "button");
+REF_TO_TYPE.put("Control/Walkers/Delete_Selected_Walker", "button");
 REF_TO_TYPE.put("Control/Walkers/Up", "button");
 REF_TO_TYPE.put("Control/Walkers/Down", "button");
 REF_TO_TYPE.put("Control/Walkers/Plus", "button");
 REF_TO_TYPE.put("Control/Walkers/Minus", "button");
 REF_TO_TYPE.put("Control/Walkers/Toggle_Selection", "button");
 REF_TO_TYPE.put("Control/Walkers/Save", "button");
+REF_TO_TYPE.put("Control/Walkers/Walker_Guide", "webview");
 REF_TO_TYPE.put("Control/Walkers/Walkers", "webview");
 REF_TO_TYPE.put("Control/Search/Search_Term", "input");
 REF_TO_TYPE.put("Control/Search/Search_Button", "button");
@@ -1499,19 +1501,19 @@ void timedPopulateCursorList(String ref, String q, int limit) {
 
 void setUpTypeHierarchy() {
   //- 
+  //  - Walker
   //  - Survey Unit
   //    - Walker Unit
-  //  - Walker
 
   n0 = Tree("", 1);
-  n1 = Tree("Survey Unit", 1);
-  n2 = Tree("Walker Unit", 1);
-  n3 = Tree("Walker", 1);
+  n1 = Tree("Walker", 1);
+  n2 = Tree("Survey Unit", 1);
+  n3 = Tree("Walker Unit", 1);
 
   n0.addChild(n1);
-  n0.addChild(n3);
+  n0.addChild(n2);
 
-  n1.addChild(n2);
+  n2.addChild(n3);
 
 
   PERF_TYPE_TREE = n0;
@@ -4065,6 +4067,7 @@ void incAutoNum(String destPath) {
 /******************************************************************************/
 /*                         POPULATION VIA <MARKDOWN>                          */
 /******************************************************************************/
+populateWebViewHtml("Control/Walkers/Walker_Guide", "<p>Walkers which you select will be numbered. The lowest numbers correspond to the left-most walkers in the grid.</p>\n");
 populateWebViewHtml("Walker/Walker/Help", "<p>The ‘Walker ID’ dictates the position of each walker in the grid. Numbers should start at 1, indicating the left-most walker.</p>\n<p><strong>Warning:</strong> If you created this Survey Unit by using the ‘Next Survey Unit’ button, deleting this Walker will disassociate it from all the Survey Units in which it appears.</p>\n");
 
 /******************************************************************************/
@@ -4825,13 +4828,14 @@ void updateGridWalkers(Object result) {
 Set getWalkerUuids() {
   Set walkerUuids = new HashSet();
 
-  if (GRID_CACHE == null)
-      return walkerUuids;
+  for (int i = 0; i < NUM_WALKERS; i++) {
+    walker = WALKER_CACHE_CLEAN[i];
+    Boolean isSel = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get("isSelected");
 
-  for (int i = 0; i < GRID_MAX_WIDTH; i++) {
-    Map    cell = GRID_CACHE[0][i]; if (cell == null) continue;
-    String uuid = cell.get("UUID"); if (uuid == null) continue;
+    if (isSel == null) isSel = false;
+    if (!isSel)        continue;
 
+    String uuid = walker.get("UUID");
     walkerUuids.add(uuid);
   }
 
@@ -5528,7 +5532,6 @@ void saveWalkerUnit() {
 
 /**************************** MISC EVENT HANDLERS *****************************/
 boolean DO_REDIRECT_TO_WALKER_UNIT = false;
-Set     PREV_WALKER_UUIDS = null;
 
 inheritWalkerUnitFields() {
   setFieldValue(
@@ -5574,8 +5577,6 @@ boolean onClickSurveyUnitAddNewWalkerUnitCond() {
 }
 
 void onClickNextSurveyUnit() {
-  PREV_WALKER_UUIDS = getWalkerUuids();
-
   cancelTabGroup("Walker_Unit", false);
   cancelTabGroup("Survey_Unit", false);
 
@@ -5586,14 +5587,12 @@ void onClickNextSurveyUnit() {
 addOnEvent("Survey_Unit", "show", "triggerAutoSave()", PRECEDENCE_MID-1);
 
 void maybeRedirectToWalkerUnit() {
-  if (!DO_REDIRECT_TO_WALKER_UNIT)
-    return;
+  if (DO_REDIRECT_TO_WALKER_UNIT) {
+    DO_REDIRECT_TO_WALKER_UNIT = false;
+    onClickSurveyUnitAddNewWalkerUnit();
+  }
 
-  DO_REDIRECT_TO_WALKER_UNIT = false;
-  onClickSurveyUnitAddNewWalkerUnit();
-
-  // Copy Walker relationships. TODO: Ensure this works
-  WALKERS_TO_RELATE.addAll(PREV_WALKER_UUIDS);
+  WALKERS_TO_RELATE.addAll(getWalkerUuids());
   dequeWalkersToRelate();
 }
 
@@ -5612,7 +5611,7 @@ void dequeWalkersToRelate() {
 void dequeWalkersToRelateRec() {
   Log.d("dequeWalkersToRelateRec", "Recing");
   if (WALKERS_TO_RELATE.size() == 0) {
-    MUTEX_DEQUEUE_WALKER_UNITS.release();
+    MUTEX_DEQUEUE_WALKERS.release();
     updateGridWalkers();
     populateEntityListsOfArchEnt("Walker");
     return;
@@ -5894,7 +5893,15 @@ int NUM_WALKERS = 0;
 
 Map[] WALKER_CACHE = null;
 Map[] WALKER_CACHE_CLEAN = null;
-int MAX_NUM_WALKERS = 100;
+int MAX_NUM_WALKERS = 256;
+
+void clipHighlightedOrdinalWalker() {
+  HIGHLIGHTED_ORDINAL_WALKER = clip(
+      HIGHLIGHTED_ORDINAL_WALKER,
+      0,
+      NUM_WALKERS-1
+  );
+}
 
 void initWalkerCache() {
   WALKER_CACHE = new HashMap[MAX_NUM_WALKERS];
@@ -5948,6 +5955,7 @@ void updateWalkerCache(List results) {
   }
 
   NUM_WALKERS = results.size();
+  clipHighlightedOrdinalWalker();
   ordinalWalkerSaveCleanCache();
 }
 
@@ -5977,28 +5985,6 @@ void updateWalkerCache(int i, String attribName, attribVal) {
   }
 
   cell.put(attribName, attribVal);
-}
-
-void makeLocalParentChildWithAttribs() {
-  fetchOne(
-      "DROP VIEW IF EXISTS parentChildWithAttribs"
-  );
-
-  fetchOne(
-      "CREATE VIEW parentChildWithAttribs AS "+
-      "           SELECT parent.uuid as parentuuid, child.uuid as childuuid, parent.participatesverb as parentparticipatesverb, parent.relationshipid, parent.aenttypename as parentaenttypename, child.participatesverb as childparticipatesverb, child.aenttypename as childaenttypename, createdat"+
-      "             FROM (SELECT uuid, participatesverb, aenttypename, relationshipid, relntimestamp as createdat"+
-      "                     FROM latestnondeletedaentreln "+
-      "                     JOIN relationship USING (relationshipid) "+
-      "                     JOIN latestnondeletedarchent USING (uuid) "+
-      "                     JOIN aenttype USING (aenttypeid)) parent "+
-      "             JOIN (SELECT uuid, relationshipid, participatesverb, aenttypename "+
-      "                     FROM latestnondeletedaentreln "+
-      "                     JOIN relationship USING (relationshipid) "+
-      "                     JOIN latestnondeletedarchent USING (uuid) "+
-      "                     JOIN aenttype USING (aenttypeid)) child "+
-      "               ON (parent.relationshipid = child.relationshipid AND parent.uuid != child.uuid)"
-  );
 }
 
 void redrawWalkers() {
@@ -6046,10 +6032,8 @@ void redrawWalkers() {
   html += "    <table>";
 
   int index = 0;
-  for (int i = 0; i < WALKER_CACHE.length; i++) {
+  for (int i = 0; i < NUM_WALKERS; i++) {
     walker = WALKER_CACHE[i];
-    if (walker == null)
-      break;
 
     Boolean isHighlighted = HIGHLIGHTED_ORDINAL_WALKER == i;
     Boolean isSelected    = walker.get("isSelected");
@@ -6098,16 +6082,14 @@ void updateWalkerCacheAndRedraw() {
 }
 
 void ordinalWalkerUp  () {
-  if (HIGHLIGHTED_ORDINAL_WALKER <= 0)
-    return;
   HIGHLIGHTED_ORDINAL_WALKER--;
+  clipHighlightedOrdinalWalker();
   redrawWalkers();
 }
 
 void ordinalWalkerDown() {
-  if (HIGHLIGHTED_ORDINAL_WALKER >= NUM_WALKERS - 1)
-    return;
   HIGHLIGHTED_ORDINAL_WALKER++;
+  clipHighlightedOrdinalWalker();
   redrawWalkers();
 }
 
@@ -6272,8 +6254,38 @@ void ordinalWalkerSave() {
   fetchOne(q, cb);
 }
 
-makeLocalParentChildWithAttribs();
-addOnEvent("Control/Walkers/Walkers", "show", "updateWalkerCacheAndRedraw()"); // TODO: do this on module load and Walker save
+void ordinalWalkerDeleteSelected() {
+  String iden = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get("Identifier");
+
+  showAlert(
+      "Do You Really Want to Delete '" + iden + "'?",
+      "{Press_OK_to_Delete_this_Record}",
+      "ordinalWalkerReallyDelete()",
+      "doNotDelete()"
+  );
+}
+
+void ordinalWalkerReallyDelete() {
+  String uuid = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get("UUID");
+
+  DeleteCallback callback = new DeleteCallback() {
+    onDelete(uuid) {
+      populateEntityListsOfArchEnt("Walker");
+      executeOnEvent("Walker", "delete");
+    }
+
+    onError(message) {
+      showToast(message);
+    }
+  };
+
+  deleteArchEnt(uuid, callback);
+}
+
+updateWalkerCacheAndRedraw();
+addOnEvent("Walker", "save",   "updateWalkerCacheAndRedraw()");
+addOnEvent("Walker", "delete", "updateWalkerCacheAndRedraw()");
+addOnEvent("Walker", "copy",   "updateWalkerCacheAndRedraw()");
 addOnEvent("Control/Walkers/Down",    "click", "ordinalWalkerDown()");
 addOnEvent("Control/Walkers/Up",      "click", "ordinalWalkerUp()");
 addOnEvent("Control/Walkers/Plus",    "click", "ordinalWalkerPlus()");
@@ -6281,7 +6293,9 @@ addOnEvent("Control/Walkers/Minus",   "click", "ordinalWalkerMinus()");
 addOnEvent("Control/Walkers/Toggle_Selection", "click", "ordinalWalkerToggleSelection()");
 addOnEvent("Control/Walkers/Save", "click", "ordinalWalkerSave()");
 addOnEventCond("Control/Walkers/Add_New_Walker", "click", "ordinalWalkerValidateChanges()");
+addOnEvent("Control/Walkers/Delete_Selected_Walker", "click", "ordinalWalkerDeleteSelected()");
 addOnEvent("Control/Walkers", "leave", "ordinalWalkerValidateChanges()");
+
 
 /******************************************************************************/
 /*                                    INIT                                    */
