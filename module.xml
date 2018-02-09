@@ -54,7 +54,7 @@
         <Down t="button"/>
       </col>
       <col>
-        <Plus  t="button"/> <!--TODO: Not correctly autogened-->
+        <Plus  t="button"/>
         <Minus t="button"/>
       </col>
       <col>
