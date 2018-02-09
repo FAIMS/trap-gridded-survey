@@ -699,15 +699,6 @@ public class ModuleUtil extends ModuleHelper {
 
     /*
         Type: input
-        Ref:  Walker/Walker/Walker_ID
-     */
-    public static EditText get_Walker_Walker_WalkerID(Solo solo) {
-        String ref = "Walker/Walker/Walker_ID";
-        return (android.widget.EditText) solo.getView((Object) ref);
-    }
-
-    /*
-        Type: input
         Ref:  Walker_Unit/Vars/Row_ID
      */
     public static View get_WalkerUnit_Vars_RowID(Solo solo) {

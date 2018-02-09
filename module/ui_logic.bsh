@@ -325,7 +325,6 @@ REF_TO_TYPE.put("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "button");
 REF_TO_TYPE.put("Survey_Unit/Vars/Highlighted_Row", "input");
 REF_TO_TYPE.put("Survey_Unit/Vars/Highlighted_Walker", "input");
 REF_TO_TYPE.put("Walker/Walker/Help", "webview");
-REF_TO_TYPE.put("Walker/Walker/Walker_ID", "input");
 REF_TO_TYPE.put("Walker/Walker/First_Name", "input");
 REF_TO_TYPE.put("Walker/Walker/Last_Name", "input");
 REF_TO_TYPE.put("Walker/Walker/Initials", "input");
@@ -394,7 +393,6 @@ DATA_REFS.add("Survey_Unit/Survey_Unit/Number_of_Rows");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Number_of_Walkers");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Row_Interval");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Walker_Interval");
-DATA_REFS.add("Walker/Walker/Walker_ID");
 DATA_REFS.add("Walker/Walker/First_Name");
 DATA_REFS.add("Walker/Walker/Last_Name");
 DATA_REFS.add("Walker/Walker/Initials");
@@ -448,8 +446,7 @@ TABS_AS_LIST.add("Walker_Unit/Walker_Unit");
 TABS_AS_LIST.add("Walker_Unit/Vars");
 TABS_AS_LIST.add("Saving/Saving");
 
-ATTRIB_NAMES_NON_STANDARD.put("Walker/Walker/Walker_ID", "Walker Walker ID");
-ATTRIB_NAMES_NON_STANDARD.put("Walker_Unit/Vars/Walker_ID", "Walker Unit Walker ID");
+
 
 String getType(String ref) {
   String type = REF_TO_TYPE.get(ref);
@@ -4068,7 +4065,7 @@ void incAutoNum(String destPath) {
 /*                         POPULATION VIA <MARKDOWN>                          */
 /******************************************************************************/
 populateWebViewHtml("Control/Walkers/Walker_Guide", "<p>Walkers which you select will be numbered. The lowest numbers correspond to the left-most walkers in the grid.</p>\n");
-populateWebViewHtml("Walker/Walker/Help", "<p>The ‘Walker ID’ dictates the position of each walker in the grid. Numbers should start at 1, indicating the left-most walker.</p>\n<p><strong>Warning:</strong> If you created this Survey Unit by using the ‘Next Survey Unit’ button, deleting this Walker will disassociate it from all the Survey Units in which it appears.</p>\n");
+populateWebViewHtml("Walker/Walker/Help", "<p><strong>Warning:</strong> Deleting this Walker will disassociate it from all the Survey Units in which it appears.</p>\n");
 
 /******************************************************************************/
 /*                POPULATION OF ENTITY AND CHILD ENTITY LISTS                 */
@@ -4472,6 +4469,7 @@ addOnEvent("Walker_Unit/Walker_Unit/Add_HM_M_2",      "click", "addHmM2()");
 addOnEvent("Walker_Unit/Walker_Unit/Add_Lithic_M_2",  "click", "addLithicM2()");
 addOnEvent("Walker_Unit/Walker_Unit/Add_Glass_M_2",   "click", "addGlassM2()");
 addOnEvent("Walker_Unit/Walker_Unit/Add_Other_M_2",   "click", "addOtherM2()");
+
 /************************************ GRID ************************************/
 /* Functions and variables related to the grid interface.                     */
 /******************************************************************************/
@@ -4523,7 +4521,7 @@ void updateGridCache(String callback) {
   q += " join (select uuid, measure as walkerID, valuetimestamp as footimestamp";
   q += "     from latestnondeletedaentvalue";
   q += "     join attributekey using (attributeid)";
-  q += "     where attributename = 'Walker Walker ID' or attributename = 'Walker Unit Walker ID') USING (uuid)";
+  q += "     where attributename = 'Walker ID') USING (uuid)";
   q += " join (select uuid, measure as rowID";
   q += "     from latestnondeletedaentvalue";
   q += "     join attributekey using (attributeid)";
@@ -4679,7 +4677,7 @@ void updateGridCacheFromUuid(String parentUuid, String uuid, String callback) {
   q += " join (select uuid, measure as walkerID, valuetimestamp as footimestamp";
   q += "     from latestnondeletedaentvalue";
   q += "     join attributekey using (attributeid)";
-  q += "     where attributename = 'Walker Walker ID' or attributename = 'Walker Unit Walker ID') USING (uuid)";
+  q += "     where attributename = 'Walker ID') USING (uuid)";
   q += " join (select uuid, measure as rowID";
   q += "     from latestnondeletedaentvalue";
   q += "     join attributekey using (attributeid)";
@@ -4828,9 +4826,10 @@ void updateGridWalkers(Object result) {
 List getWalkerRels() {
   List walkerRels = new ArrayList();
 
+  int orderInt = 1;
   for (int i = 0; i < NUM_WALKERS; i++) {
     walker = WALKER_CACHE_CLEAN[i];
-    Boolean isSel = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get("isSelected");
+    Boolean isSel = walker.get("isSelected");
 
     if (isSel == null) isSel = false;
     if (!isSel)        continue;
@@ -4838,7 +4837,7 @@ List getWalkerRels() {
     String parentEntityRef = "Survey_Unit";
     String parentUuid      = getUuid(parentEntityRef);
     String childUuid       = walker.get("UUID");
-    String order           = (i + 1) + "";
+    String order           = orderInt++ + "";
 
     List rel = new ArrayList();
     rel.add(parentUuid);
@@ -5353,8 +5352,8 @@ List createZeroedAttributeList(String rowId, String walkerId) {
   String cert = "1.0"; // Certainty, having the default value of 1.0
 
   // Set 'Walker ID' and 'Row ID' to given values
-  attribs.add(createEntityAttribute("Walker Unit Walker ID", null, null, walkerId, cert));
-  attribs.add(createEntityAttribute("Row ID",                null, null, rowId,    cert));
+  attribs.add(createEntityAttribute("Walker ID", null, null, walkerId, cert));
+  attribs.add(createEntityAttribute("Row ID",    null, null, rowId,    cert));
 
   // Set zeroable properties to zero
   for (String ref : getZeroableRefs()) {
@@ -5462,21 +5461,22 @@ void onShowWalkerUnit () {
 
 void saveWalkerUnit() {
   String  tabgroup            = "Walker_Unit";
-  String  callback            = "";
   Boolean enableAutosave      = true;
   String  id                  = getUuid(tabgroup);
   String  parentTabgroup_     = parentTabgroup;
   String  parentTabgroupUuid_ = getUuid(parentTabgroup_);
   Boolean userWasSet          = !username.equals("");
 
-  callback += "; " + fun2str("executeOnEvent", new Object[]{tabgroup, "save"});
-  callback += "; redrawGrid()";
 
   parentTabgroup = null;
 
   SaveCallback saveCallback  = new SaveCallback() {
     onSave(uuid, newRecord) {
       setUuid(tabgroup, uuid);
+
+      String callback = "";
+      callback += "; " + fun2str("executeOnEvent", new Object[]{tabgroup, "save"});
+      callback += "; redrawGrid()";
 
       callback = fun2str(
           "updateGridCacheFromUuid",
@@ -5724,11 +5724,11 @@ addOnEvent("Walker_Unit/Walker_Unit/Next_Survey_Unit", "click", "onClickNextSurv
 
 
 
-
 addOnEvent("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "click", "onClickSurveyUnitAddNewWalkerUnit()");
 addOnEventCond("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "click", "onClickSurveyUnitAddNewWalkerUnitCond()");
 addOnEvent("Walker_Unit/Walker_Unit/Load_Walker", "click",  "gridRandomAccessWalker()");
 addOnEvent("Walker_Unit/Walker_Unit/Load",       "click",  "loadOrMakeWalkerUnit()");
+
 /***************************** NAVIGATION DRAWER ******************************/
 delOnEvent("Walker_Unit", "show", "addNavigationButtons(\"Walker_Unit\")");
 /************************* SURVEY UNIT ID POPULATION **************************/
@@ -5773,7 +5773,7 @@ populateMenuWithEntities (
       "   JOIN (SELECT uuid, CAST(measure AS INTEGER) AS position" +
       "       FROM latestnondeletedaentvalue " +
       "       JOIN attributekey using (attributeid)" +
-      "       WHERE attributename = 'Walker Walker ID' or attributename = 'Walker Unit Walker ID') USING (uuid)" +
+      "       WHERE attributename = 'Walker ID') USING (uuid)" +
       "  WHERE relationshipid IN (SELECT relationshipid " +
       "                             FROM latestnondeletedrelationship JOIN relntype USING (relntypeid)" +
       "                            WHERE relntypename = '"+relType+"')" +
@@ -5979,6 +5979,8 @@ void updateWalkerCache(String callback) {
 
   FetchCallback updateWalkerCache = new FetchCallback() {
     onFetch(result) {
+      if (result == null)
+        result = new ArrayList();
       updateWalkerCache(result);
       execute(callback);
     }
@@ -6346,6 +6348,36 @@ addOnEvent("Control/Walkers/Save", "click", "ordinalWalkerSave()");
 addOnEventCond("Control/Walkers/Add_New_Walker", "click", "ordinalWalkerValidateChanges()");
 addOnEvent("Control/Walkers/Delete_Selected_Walker", "click", "ordinalWalkerDeleteSelected()");
 addOnEvent("Control/Walkers", "leave", "ordinalWalkerValidateChanges()");
+/****************************** WALKER INITIALS *******************************/
+final String REF_FIRST_NAME = "Walker/Walker/First_Name";
+final String REF_LAST_NAME  = "Walker/Walker/Last_Name";
+final String REF_INITIALS   = "Walker/Walker/Initials";
+
+boolean canUpdateInitials() {
+  String firstName = getFieldValue(REF_FIRST_NAME);
+  String lastName  = getFieldValue(REF_LAST_NAME);
+  String initials  = getFieldValue(REF_INITIALS);
+
+  return !isNull(firstName) &&
+         !isNull(lastName) &&
+          isNull(initials);
+}
+
+String deriveInitials() {
+  String firstName = getFieldValue(REF_FIRST_NAME);
+  String lastName  = getFieldValue(REF_LAST_NAME);
+
+  return firstName.charAt(0) + "" +
+         lastName .charAt(0);
+}
+
+void maybeUpdateInitials() {
+  if (canUpdateInitials())
+    setFieldValue(REF_INITIALS, deriveInitials());
+}
+
+addOnEvent(REF_FIRST_NAME, "blur", "maybeUpdateInitials()");
+addOnEvent(REF_LAST_NAME,  "blur", "maybeUpdateInitials()");
 
 
 /******************************************************************************/

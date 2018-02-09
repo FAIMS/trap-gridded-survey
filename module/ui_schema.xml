@@ -110,7 +110,6 @@
           <Walker>
             <Walker>
               <Help/>
-              <Walker_ID/>
               <First_Name/>
               <Last_Name/>
               <Initials/>
@@ -247,7 +246,6 @@
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Walker_Interval" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Row" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Walker" type="decimal"/>
-      <bind nodeset="/faims/Walker/Walker/Walker_ID" type="decimal"/>
       <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_4/Col_1/Ancient" type="decimal"/>
       <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_4/Col_3/HM" type="decimal"/>
       <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_5/Col_1/Modern" type="decimal"/>
@@ -590,9 +588,6 @@
         <input faims_web="true" ref="Help">
           <label/>
         </input>
-        <input faims_attribute_name="Walker Walker ID" faims_attribute_type="measure" ref="Walker_ID">
-          <label>{Walker_ID}</label>
-        </input>
         <input faims_attribute_name="First Name" faims_attribute_type="measure" ref="First_Name">
           <label>{First_Name}</label>
         </input>
@@ -844,7 +839,7 @@
         <input faims_attribute_name="Row ID" faims_attribute_type="measure" ref="Row_ID" faims_read_only="true">
           <label>{Row_ID}</label>
         </input>
-        <input faims_attribute_name="Walker Unit Walker ID" faims_attribute_type="measure" ref="Walker_ID" faims_read_only="true">
+        <input faims_attribute_name="Walker ID" faims_attribute_type="measure" ref="Walker_ID" faims_read_only="true">
           <label>{Walker_ID}</label>
         </input>
       </group>

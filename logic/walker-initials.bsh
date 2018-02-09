@@ -1,0 +1,30 @@
+/****************************** WALKER INITIALS *******************************/
+final String REF_FIRST_NAME = "Walker/Walker/First_Name";
+final String REF_LAST_NAME  = "Walker/Walker/Last_Name";
+final String REF_INITIALS   = "Walker/Walker/Initials";
+
+boolean canUpdateInitials() {
+  String firstName = getFieldValue(REF_FIRST_NAME);
+  String lastName  = getFieldValue(REF_LAST_NAME);
+  String initials  = getFieldValue(REF_INITIALS);
+
+  return !isNull(firstName) &&
+         !isNull(lastName) &&
+          isNull(initials);
+}
+
+String deriveInitials() {
+  String firstName = getFieldValue(REF_FIRST_NAME);
+  String lastName  = getFieldValue(REF_LAST_NAME);
+
+  return firstName.charAt(0) + "" +
+         lastName .charAt(0);
+}
+
+void maybeUpdateInitials() {
+  if (canUpdateInitials())
+    setFieldValue(REF_INITIALS, deriveInitials());
+}
+
+addOnEvent(REF_FIRST_NAME, "blur", "maybeUpdateInitials()");
+addOnEvent(REF_LAST_NAME,  "blur", "maybeUpdateInitials()");
