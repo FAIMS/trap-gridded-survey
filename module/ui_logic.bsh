@@ -4780,19 +4780,19 @@ void updateGridWalkers() {
   String parentUuid = getUuid("Survey_Unit");
 
   String q = "";
-  q += " SELECT walkerID, initials, uuid";
+  q += " SELECT `order`, initials, uuid";
   q += "         FROM (SELECT uuid, measure AS initials";
   q += "                 FROM parentchild";
   q += "                 JOIN latestnondeletedaentvalue on (childuuid = uuid)";
   q += "                 JOIN attributekey USING (attributeid)";
   q += "                WHERE parentuuid = {parentUuid}";
   q += "                  AND attributename IN ('Initials'))";
-  q += "         JOIN (SELECT uuid, measure AS walkerID";
+  q += "         JOIN (SELECT childuuid AS uuid, freetext AS `order`";
   q += "                 FROM parentchild";
-  q += "                 JOIN latestnondeletedaentvalue on (childuuid = uuid)";
+  q += "                 JOIN latestnondeletedrelnvalue USING (relationshipid)";
   q += "                 JOIN attributekey USING (attributeid)";
-  q += "                WHERE parentuuid = {parentUuid}";
-  q += "                  AND attributename IN ('Walker Walker ID', 'Walker Unit Walker ID')) USING (uuid);";
+  q += "                WHERE attributename = 'Order'";
+  q += "                  AND parentUuid = {parentUuid}) USING (uuid)";
   q  = replaceFirst(q, "{parentUuid}", parentUuid);
   q  = replaceFirst(q, "{parentUuid}", parentUuid);
 
@@ -4825,8 +4825,8 @@ void updateGridWalkers(Object result) {
   }
 }
 
-Set getWalkerUuids() {
-  Set walkerUuids = new HashSet();
+List getWalkerRels() {
+  List walkerRels = new ArrayList();
 
   for (int i = 0; i < NUM_WALKERS; i++) {
     walker = WALKER_CACHE_CLEAN[i];
@@ -4835,11 +4835,20 @@ Set getWalkerUuids() {
     if (isSel == null) isSel = false;
     if (!isSel)        continue;
 
-    String uuid = walker.get("UUID");
-    walkerUuids.add(uuid);
+    String parentEntityRef = "Survey_Unit";
+    String parentUuid      = getUuid(parentEntityRef);
+    String childUuid       = walker.get("UUID");
+    String order           = (i + 1) + "";
+
+    List rel = new ArrayList();
+    rel.add(parentUuid);
+    rel.add(childUuid);
+    rel.add(order);
+
+    walkerRels.add(rel);
   }
 
-  return walkerUuids;
+  return walkerRels;
 }
 
 /******************************* GRID - DRAWING *******************************/
@@ -5178,7 +5187,6 @@ void zeroRowAndNext() {
   // Start saving them, one at a time.
   dequeWalkerUnitsToZero();
 }
-
 
 /* Create 'Walker Unit' records listed in `WALKER_UNITS_TO_ZERO`.
  *
@@ -5586,13 +5594,54 @@ void onClickNextSurveyUnit() {
 
 addOnEvent("Survey_Unit", "show", "triggerAutoSave()", PRECEDENCE_MID-1);
 
+void saveWalkersToHierRel(String entity1, String entity2, String order, String callback) {
+  if (isNull(entity1) || isNull(entity2)) return;
+
+  SaveCallback execCallback = new SaveCallback() {
+    onSaveAssociation(entity_id, rel_id) {
+      if(!isNull(callback)) {
+         execute(callback);
+      }
+    }
+    onError(message) {
+      Log.e("saveEntitiesToHierRel", message);
+      showToast(message);
+    }
+  };
+
+  SaveCallback addMoreToRel = new SaveCallback() {
+    onSaveAssociation(entity_id, rel_id) {
+      addReln(entity2, rel_id, "Child Of", execCallback);
+    }
+    onError(message) {
+      Log.e("saveEntitiesToHierRel", message);
+      showToast(message);
+    }
+  };
+
+  SaveCallback addToRel = new SaveCallback() {
+    onSave(rel_id, newRecord) {
+      addReln(entity1, rel_id, "Parent Of", addMoreToRel);
+    }
+    onError(message) {
+      Log.e("saveEntitiesToHierRel", message);
+      showToast(message);
+    }
+  };
+
+  List attrs = createAttributeList();
+  attrs.add(createEntityAttribute("Order", order, "", "", "1.0"));
+
+  saveRel(null, "Survey Unit - Walker", null, attrs, addToRel);
+}
+
 void maybeRedirectToWalkerUnit() {
   if (DO_REDIRECT_TO_WALKER_UNIT) {
     DO_REDIRECT_TO_WALKER_UNIT = false;
     onClickSurveyUnitAddNewWalkerUnit();
   }
 
-  WALKERS_TO_RELATE.addAll(getWalkerUuids());
+  WALKERS_TO_RELATE.addAll(getWalkerRels());
   dequeWalkersToRelate();
 }
 
@@ -5617,18 +5666,20 @@ void dequeWalkersToRelateRec() {
     return;
   }
 
-  String parentEntityRef = "Survey_Unit";
-  String parentUuid      = getUuid(parentEntityRef);
-  String childUuid       = WALKERS_TO_RELATE.take();
+  List rel = WALKERS_TO_RELATE.take();
+  String parentUuid = rel.get(0);
+  String childUuid  = rel.get(1);
+  String order      = rel.get(2);
 
-  Log.d("dequeWalkersToRelateRec", "parent, child = " + parentUuid + ", " + childUuid);
+  Log.d(
+      "dequeWalkersToRelateRec",
+      "parent, child, order = " + parentUuid + ", " + childUuid + ", " + order
+  );
 
-  saveEntitiesToHierRel(
-    "Survey Unit - Walker",
+  saveWalkersToHierRel(
     parentUuid,
     childUuid,
-    "Parent Of",
-    "Child Of",
+    order,
     "dequeWalkersToRelateRec()"
   );
 }

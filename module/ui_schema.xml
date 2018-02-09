@@ -438,7 +438,7 @@
           </group>
         </group>
         <input faims_web="true" ref="Walker_Guide">
-          <label>{Walker_Guide}</label>
+          <label/>
         </input>
         <input faims_web="true" ref="Walkers">
           <label>{Walkers}</label>

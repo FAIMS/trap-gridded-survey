@@ -215,29 +215,16 @@ Walkers which you select will be numbered. The lowest numbers correspond to the 
 </Survey_Unit>
 
 <Walker>
-  <Walker>
+  <fmt>{{First_Name if $0 then " - $0"}}{{Last_Name if $0 then " $0"}}{{Initials if $0 then " ($0)"}}<Walker>
     <Help t="webview" f="nolabel">
       <markdown>
-The 'Walker ID' dictates the position of each walker in the grid. Numbers should
-start at 1, indicating the left-most walker.
-
-**Warning:** If you created this Survey Unit by using the 'Next Survey Unit'
-button, deleting this Walker will disassociate it from all the Survey Units in
-which it appears.
+**Warning:** Deleting this Walker will disassociate it from all the Survey Units
+in which it appears.
       </markdown>
     </Help>
-    <Walker_ID   f="id" b="decimal">
-      <str><fmt>$2</fmt></str>
-    </Walker_ID>
-    <First_Name f="id">
-      <str><fmt>{{if $2 then " - $2"}}</fmt></str>
-    </First_Name>
-    <Last_Name  f="id">
-      <str><fmt>{{if $2 then " $2"}}</fmt></str>
-    </Last_Name>
-    <Initials   f="id">
-      <str><fmt>{{if $2 then " ($2)"}}</fmt></str>
-    </Initials>
+    <First_Name/>
+    <Last_Name/>
+    <Initials/>
   </Walker>
 </Walker>
 
