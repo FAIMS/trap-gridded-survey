@@ -1,0 +1,413 @@
+/****************************** WALKER ORDERING *******************************/
+final String REF_WALKER_ENT = "Walker";
+final String REF_WALKERS_WEBVIEW = "Control/Walkers/Walkers";
+final String REF_WALKERS_TAB = "Control/Walkers";
+int HIGHLIGHTED_ORDINAL_WALKER = 0;
+int NUM_WALKERS = 0;
+
+Map[] WALKER_CACHE = null;
+Map[] WALKER_CACHE_CLEAN = null;
+int MAX_NUM_WALKERS = 256;
+
+void clipHighlightedOrdinalWalker() {
+  HIGHLIGHTED_ORDINAL_WALKER = clip(
+      HIGHLIGHTED_ORDINAL_WALKER,
+      0,
+      NUM_WALKERS-1
+  );
+}
+
+void initWalkerCache() {
+  WALKER_CACHE = new HashMap[MAX_NUM_WALKERS];
+}
+
+void updateWalkerCache() {
+  updateWalkerCache("");
+}
+
+void updateWalkerCache(String callback) {
+  String q = "";
+  q += " SELECT unformatted.uuid, response, unformatted.isSelected";
+  q += "   FROM latestNonDeletedArchEntFormattedIdentifiers";
+  q += "   JOIN (";
+  q += "       SELECT DISTINCT uuid, SUBSTR(value, 1, 1) AS isSelected, CAST(coalesce(substr(value, 2, 999), '999') AS decimal) AS ordering";
+  q += "            FROM latestNonDeletedArchEntIdentifiers";
+  q += "       LEFT JOIN localsettings ON latestNonDeletedArchEntIdentifiers.uuid = localsettings.key";
+  q += "           WHERE aenttypename = '"+getArchEntType(REF_WALKER_ENT)+"'";
+  q += "     ) unformatted";
+  q += "     ON (unformatted.uuid = latestNonDeletedArchEntFormattedIdentifiers.uuid)";
+  q += " ORDER BY";
+  q += "     unformatted.ordering,";
+  q += "     latestNonDeletedArchEntFormattedIdentifiers.response";
+
+  FetchCallback updateWalkerCache = new FetchCallback() {
+    onFetch(result) {
+      if (result == null)
+        result = new ArrayList();
+      updateWalkerCache(result);
+      execute(callback);
+    }
+    onError(message) {
+      showToast(message);
+    }
+  };
+
+  fetchAll(q, updateWalkerCache);
+}
+
+void updateWalkerCache(List results) {
+  if (WALKER_CACHE == null)
+    initWalkerCache();
+
+  for (int i = 0; i < results.size(); i++) {
+    String  uuid       =            results.get(i).get(0);
+    String  identifier =            results.get(i).get(1);
+    boolean isSelected = "1".equals(results.get(i).get(2));
+
+    updateWalkerCache(i, "Identifier",  identifier);
+    updateWalkerCache(i, "UUID",        uuid);
+    updateWalkerCache(i, "isConfirmed", true);
+    updateWalkerCache(i, "isSelected",  isSelected);
+  }
+
+  NUM_WALKERS = results.size();
+  clipHighlightedOrdinalWalker();
+  ordinalWalkerSaveCleanCache();
+}
+
+  // Clone WALKER_CACHE into WALKER_CACHE_CLEAN
+void ordinalWalkerSaveCleanCache() {
+  WALKER_CACHE_CLEAN = new HashMap[MAX_NUM_WALKERS];
+  for (int i = 0; i < MAX_NUM_WALKERS; i++)
+    if (WALKER_CACHE[i] == null)
+      WALKER_CACHE_CLEAN[i] = null;
+    else
+      WALKER_CACHE_CLEAN[i] = new HashMap(WALKER_CACHE[i]);
+}
+
+void updateWalkerCache(int i) {
+  updateWalkerCache(i, "", "");
+}
+
+void updateWalkerCache(int i, String attribName, attribVal) {
+  if (WALKER_CACHE == null)
+    initWalkerCache();
+
+  Map cell = WALKER_CACHE[i];
+
+  if (cell == null) {
+    cell = new HashMap();
+    WALKER_CACHE[i] = cell;
+  }
+
+  cell.put(attribName, attribVal);
+}
+
+void redrawWalkers() {
+  String html = "";
+  html += "<!DOCTYPE html>";
+  html += "<html>";
+  html += "  <head>";
+  html += "    <title>Grid</title>";
+  html += "    <style>";
+  html += "      table {";
+  html += "        table-layout: fixed;";
+  html += "        border-collapse: separate;";
+  html += "        border-spacing:  0px;";
+  html += "        width: 100%;";
+  html += "      }";
+  html += "      td {";
+  html += "        border: 1px solid #000000;";
+  html += "        font-weight: 100;";
+  html += "        padding: 2px;";
+  html += "        text-align: center;";
+  html += "      }";
+  html += "      td.highlighted {";
+  html += "        background-color: #CCCCCC;";
+  html += "        border:  3px double #000000;";
+  html += "        padding: 0px;";
+  html += "      }";
+  html += "      td.selected {";
+  html += "        background-color: #77FF77;";
+  html += "        color:            #000000;";
+  html += "      }";
+  html += "      td.row-index {";
+  html += "        white-space:nowrap;";
+  html += "        width: 20px;";
+  html += "      }";
+  html += "      td.side {";
+  html += "        border: none;";
+  html += "      }";
+  html += "      td.confirmed {";
+  html += "        text-shadow: 1px 0px #000;";
+  html += "        font-weight: 900;";
+  html += "      }";
+  html += "    </style>";
+  html += "  </head>";
+  html += "  <body>";
+  html += "    <table>";
+
+  int index = 0;
+  for (int i = 0; i < NUM_WALKERS; i++) {
+    walker = WALKER_CACHE[i];
+
+    Boolean isHighlighted = HIGHLIGHTED_ORDINAL_WALKER == i;
+    Boolean isSelected    = walker.get("isSelected");
+    Boolean isConfirmed   = walker.get("isConfirmed");
+
+    // Build the string of CSS classes to apply to this <li> element
+    String cssClass = "";
+    if (isHighlighted) cssClass += " highlighted";
+    if (isSelected   ) cssClass += " selected";
+    if (isConfirmed  ) cssClass += " confirmed";
+
+    // Increment index that numbers the selected walkers in the UI
+    String indexString = "";
+    if (isSelected) {
+      index++;
+      indexString = index + "";
+    }
+
+    // Get the <li> value
+    String identifier = walker.get("Identifier");
+
+    // Build the HTML string for this <li>
+    String htmlCell = "";
+    htmlCell += "      <tr>";
+    htmlCell += "        <td class=\"side row-index\">{indexString}</td>";
+    htmlCell += "        <td class=\"{cssClass}\">{identifier}</td>";
+    htmlCell += "      </tr>";
+    htmlCell  = replaceFirst(htmlCell, "{indexString}", indexString);
+    htmlCell  = replaceFirst(htmlCell, "{cssClass}",    cssClass);
+    htmlCell  = replaceFirst(htmlCell, "{identifier}",  identifier);
+
+    // Add the cell to the existing HTML
+    html += htmlCell;
+  }
+
+  html += "    </table>";
+  html += "  </body>";
+  html += "</html>";
+
+  populateWebViewHtml(REF_WALKERS_WEBVIEW, html);
+}
+
+void updateWalkerCacheAndRedraw() {
+  populateWebViewHtml(REF_WALKERS_WEBVIEW, "Loading...");
+  updateWalkerCache("redrawWalkers()");
+}
+
+void ordinalWalkerUp  () {
+  HIGHLIGHTED_ORDINAL_WALKER--;
+  clipHighlightedOrdinalWalker();
+  redrawWalkers();
+}
+
+void ordinalWalkerDown() {
+  HIGHLIGHTED_ORDINAL_WALKER++;
+  clipHighlightedOrdinalWalker();
+  redrawWalkers();
+}
+
+void ordinalWalkerPlus () {
+  if (HIGHLIGHTED_ORDINAL_WALKER == 0)
+    return;
+
+  // Swap
+  Map toSwap     = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER];
+  Map toSwapWith = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER-1];
+
+  WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER-1] = toSwap;
+  WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER]   = toSwapWith;
+
+  HIGHLIGHTED_ORDINAL_WALKER--;
+
+  computeConfirmedness();
+  redrawWalkers();
+}
+
+void ordinalWalkerMinus() {
+  if (HIGHLIGHTED_ORDINAL_WALKER >= NUM_WALKERS - 1)
+    return;
+
+  // Swap
+  Map toSwap     = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER];
+  Map toSwapWith = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER+1];
+
+  WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER+1] = toSwap;
+  WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER]   = toSwapWith;
+
+  HIGHLIGHTED_ORDINAL_WALKER++;
+
+  computeConfirmedness();
+  redrawWalkers();
+}
+
+void ordinalWalkerToggleSelection() {
+  // Toggle selection
+  Boolean val = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get("isSelected");
+  if (val == null)
+    val = false;
+  updateWalkerCache(HIGHLIGHTED_ORDINAL_WALKER, "isSelected", !val);
+
+  computeConfirmedness();
+  redrawWalkers();
+}
+
+void computeConfirmedness() {
+  // Reset walkers' isConfirmed property
+  for (int i = 0; i < NUM_WALKERS; i++) {
+    Map walker = WALKER_CACHE[i];
+    walker.put("isConfirmed", true);
+  }
+
+  for (int i = 0; i < NUM_WALKERS; i++) {
+    Map walker = WALKER_CACHE[i];
+    boolean isConfirmed = walker.equals(WALKER_CACHE_CLEAN[i]);
+    walker.put("isConfirmed", isConfirmed);
+  }
+}
+
+boolean ordinalWalkerHasChanges() {
+  for (int i = 0; i < NUM_WALKERS; i++) {
+    Map walker = WALKER_CACHE[i];
+    if (walker.get("isConfirmed") == false)
+      return true;
+  }
+  return false;
+}
+
+boolean ordinalWalkerValidateChanges() {
+  if (!isDisplayed("Control"))
+    return true;
+
+  boolean hasChanges = ordinalWalkerHasChanges();
+  if (hasChanges) {
+    String head;
+    String body;
+    String cbOk;
+    String cbBad;
+
+    // Head
+    head  = "Unsaved Changes";
+
+    // Body
+    body  = "There are unsaved changes to the ordering of the walkers. Do you ";
+    body += "really want to navigate away? Press 'OK' to navigate away ";
+    body += "away without saving changes, or 'Cancel' to return.";
+
+    // cbOk
+    if (isDisplayed("Control/Walkers"))
+      cbOk = getOnEventString(
+          "Control/Walkers/Add_New_Walker",
+          "click",
+          ON_EVT_STMTS,
+          "; ",
+          true
+      );
+    else
+      cbOk = "";
+
+    // cbBad
+    cbBad = "ordinalWalkerReturnToSaveChanges()";
+
+    // Show
+    showAlert(head, body, cbOk, cbBad);
+  }
+  return !hasChanges;
+}
+
+void ordinalWalkerReturnToSaveChanges() {
+  if (!isDisplayed("Control"))
+    return;
+
+  newTab(REF_WALKERS_TAB);
+}
+
+void ordinalWalkerSave() {
+  boolean hasChanges = ordinalWalkerHasChanges();
+  if (!hasChanges) {
+    showToast("No changes to save");
+    return;
+  }
+
+  // Build query string
+  String fmt = "('%s', '%s%s')";
+  String q = "REPLACE INTO localSettings(key, value) VALUES";
+  for (int i = 0; i < NUM_WALKERS; i++) {
+    Map walker = WALKER_CACHE[i];
+    boolean isSelected = walker.get("isSelected");
+    boolean isLastPart = i == NUM_WALKERS - 1;
+
+    String uuidStr       = walker.get("UUID");
+    String isSelectedStr = isSelected ? "1" : "0";
+    String orderStr      = i + "";
+
+    String qPart = fmt;
+    qPart = replaceFirst(qPart, uuidStr);
+    qPart = replaceFirst(qPart, isSelectedStr);
+    qPart = replaceFirst(qPart, orderStr);
+    if (!isLastPart)
+      qPart += ",\n";
+
+    q += qPart;
+  }
+
+  FetchCallback cb = new FetchCallback() {
+    onFetch(results) {
+      // Mark walkers as confirmed
+      for (int i = 0; i < NUM_WALKERS; i++) {
+        Map walker = WALKER_CACHE[i];
+        walker.put("isConfirmed", true);
+      }
+      ordinalWalkerSaveCleanCache();
+
+      redrawWalkers();
+      showToast("Saved");
+    }
+  };
+
+  fetchOne(q, cb);
+}
+
+void ordinalWalkerDeleteSelected() {
+  String iden = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get("Identifier");
+
+  showAlert(
+      "Do You Really Want to Delete '" + iden + "'?",
+      "{Press_OK_to_Delete_this_Record}",
+      "ordinalWalkerReallyDelete()",
+      "doNotDelete()"
+  );
+}
+
+void ordinalWalkerReallyDelete() {
+  String uuid = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get("UUID");
+
+  DeleteCallback callback = new DeleteCallback() {
+    onDelete(uuid) {
+      populateEntityListsOfArchEnt("Walker");
+      executeOnEvent("Walker", "delete");
+    }
+
+    onError(message) {
+      showToast(message);
+    }
+  };
+
+  deleteArchEnt(uuid, callback);
+}
+
+updateWalkerCacheAndRedraw();
+addOnEvent("Walker", "save",   "updateWalkerCacheAndRedraw()");
+addOnEvent("Walker", "delete", "updateWalkerCacheAndRedraw()");
+addOnEvent("Walker", "copy",   "updateWalkerCacheAndRedraw()");
+addOnEvent("Control/Walkers/Down",    "click", "ordinalWalkerDown()");
+addOnEvent("Control/Walkers/Up",      "click", "ordinalWalkerUp()");
+addOnEvent("Control/Walkers/Plus",    "click", "ordinalWalkerPlus()");
+addOnEvent("Control/Walkers/Minus",   "click", "ordinalWalkerMinus()");
+addOnEvent("Control/Walkers/Toggle_Selection", "click", "ordinalWalkerToggleSelection()");
+addOnEvent("Control/Walkers/Save", "click", "ordinalWalkerSave()");
+addOnEventCond("Control/Walkers/Add_New_Walker", "click", "ordinalWalkerValidateChanges()");
+addOnEvent("Control/Walkers/Delete_Selected_Walker", "click", "ordinalWalkerDeleteSelected()");
+addOnEvent("Control/Walkers", "leave", "ordinalWalkerValidateChanges()");

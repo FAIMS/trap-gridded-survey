@@ -1,3 +1,4 @@
+
 /************************************ GRID ************************************/
 /* Functions and variables related to the grid interface.                     */
 /******************************************************************************/
@@ -49,7 +50,7 @@ void updateGridCache(String callback) {
   q += " join (select uuid, measure as walkerID, valuetimestamp as footimestamp";
   q += "     from latestnondeletedaentvalue";
   q += "     join attributekey using (attributeid)";
-  q += "     where attributename = 'Walker Walker ID' or attributename = 'Walker Unit Walker ID') USING (uuid)";
+  q += "     where attributename = 'Walker ID') USING (uuid)";
   q += " join (select uuid, measure as rowID";
   q += "     from latestnondeletedaentvalue";
   q += "     join attributekey using (attributeid)";
@@ -205,7 +206,7 @@ void updateGridCacheFromUuid(String parentUuid, String uuid, String callback) {
   q += " join (select uuid, measure as walkerID, valuetimestamp as footimestamp";
   q += "     from latestnondeletedaentvalue";
   q += "     join attributekey using (attributeid)";
-  q += "     where attributename = 'Walker Walker ID' or attributename = 'Walker Unit Walker ID') USING (uuid)";
+  q += "     where attributename = 'Walker ID') USING (uuid)";
   q += " join (select uuid, measure as rowID";
   q += "     from latestnondeletedaentvalue";
   q += "     join attributekey using (attributeid)";
@@ -306,19 +307,19 @@ void updateGridWalkers() {
   String parentUuid = getUuid("Survey_Unit");
 
   String q = "";
-  q += " SELECT walkerID, initials, uuid";
+  q += " SELECT `order`, initials, uuid";
   q += "         FROM (SELECT uuid, measure AS initials";
   q += "                 FROM parentchild";
   q += "                 JOIN latestnondeletedaentvalue on (childuuid = uuid)";
   q += "                 JOIN attributekey USING (attributeid)";
   q += "                WHERE parentuuid = {parentUuid}";
   q += "                  AND attributename IN ('Initials'))";
-  q += "         JOIN (SELECT uuid, measure AS walkerID";
+  q += "         JOIN (SELECT childuuid AS uuid, freetext AS `order`";
   q += "                 FROM parentchild";
-  q += "                 JOIN latestnondeletedaentvalue on (childuuid = uuid)";
+  q += "                 JOIN latestnondeletedrelnvalue USING (relationshipid)";
   q += "                 JOIN attributekey USING (attributeid)";
-  q += "                WHERE parentuuid = {parentUuid}";
-  q += "                  AND attributename IN ('Walker Walker ID', 'Walker Unit Walker ID')) USING (uuid);";
+  q += "                WHERE attributename = 'Order'";
+  q += "                  AND parentUuid = {parentUuid}) USING (uuid)";
   q  = replaceFirst(q, "{parentUuid}", parentUuid);
   q  = replaceFirst(q, "{parentUuid}", parentUuid);
 
@@ -351,20 +352,31 @@ void updateGridWalkers(Object result) {
   }
 }
 
-Set getWalkerUuids() {
-  Set walkerUuids = new HashSet();
+List getWalkerRels() {
+  List walkerRels = new ArrayList();
 
-  if (GRID_CACHE == null)
-      return walkerUuids;
+  int orderInt = 1;
+  for (int i = 0; i < NUM_WALKERS; i++) {
+    walker = WALKER_CACHE_CLEAN[i];
+    Boolean isSel = walker.get("isSelected");
 
-  for (int i = 0; i < GRID_MAX_WIDTH; i++) {
-    Map    cell = GRID_CACHE[0][i]; if (cell == null) continue;
-    String uuid = cell.get("UUID"); if (uuid == null) continue;
+    if (isSel == null) isSel = false;
+    if (!isSel)        continue;
 
-    walkerUuids.add(uuid);
+    String parentEntityRef = "Survey_Unit";
+    String parentUuid      = getUuid(parentEntityRef);
+    String childUuid       = walker.get("UUID");
+    String order           = orderInt++ + "";
+
+    List rel = new ArrayList();
+    rel.add(parentUuid);
+    rel.add(childUuid);
+    rel.add(order);
+
+    walkerRels.add(rel);
   }
 
-  return walkerUuids;
+  return walkerRels;
 }
 
 /******************************* GRID - DRAWING *******************************/
@@ -406,7 +418,7 @@ void redrawGrid(boolean doRefreshCache) {
   html += "      td {";
   html += "        border: 1px solid #000000;";
   html += "        font-weight: 100;";
-  html += "        padding: 3px;";
+  html += "        padding: 2px;";
   html += "        text-align: center;";
   html += "      }";
   html += "      td.highlighted {";
@@ -415,8 +427,8 @@ void redrawGrid(boolean doRefreshCache) {
   html += "        padding: 0px;";
   html += "      }";
   html += "      td.selected {";
-  html += "        background-color: #00AA00;";
-  html += "        color:            #FFFFFF;";
+  html += "        background-color: #77FF77;";
+  html += "        color:            #000000;";
   html += "      }";
   html += "      td.row-index {";
   html += "        white-space:nowrap;";
@@ -431,10 +443,11 @@ void redrawGrid(boolean doRefreshCache) {
   html += "      }";
   html += "    </style>";
   html += "  </head>";
-  html += "  <table>";
+  html += "  <body>";
+  html += "    <table>";
 
   for (int i = numberOfRows; i >= 0; i--) {
-    html += "    <tr>";
+    html += "      <tr>";
     for (int j = 0; j <= numberOfWalkers; j++) {
       Boolean isHighlighted = GRID_CACHE[i][j].get("isHighlighted");
       Boolean isSelected    = GRID_CACHE[i][j].get("isSelected");
@@ -462,7 +475,7 @@ void redrawGrid(boolean doRefreshCache) {
 
       // Build the HTML string for this <td>
       String htmlCell = "";
-      htmlCell += "      <td class=\"{cssClass}\">";
+      htmlCell += "        <td class=\"{cssClass}\">";
       if (isRowIndex     ) htmlCell += i;
       if (isWalkerIndex  ) htmlCell += initials;
       if (isMain &&  isNa) htmlCell += na;
@@ -470,14 +483,15 @@ void redrawGrid(boolean doRefreshCache) {
       htmlCell  = replaceFirst(htmlCell, "{cssClass}", cssClass);
       htmlCell  = replaceFirst(htmlCell, "{anc}",      ancient );
       htmlCell  = replaceFirst(htmlCell, "{mod}",      modern  );
-      htmlCell += "      </td>";
+      htmlCell += "        </td>";
 
       // Add the cell to the existing HTML
       html += htmlCell;
     }
-    html += "    </tr>";
+    html += "      </tr>";
   }
-  html += "  </table>";
+  html += "    </table>";
+  html += "  </body>";
   html += "</html>";
 
   // Now that the html string has been built, we can populate the web view
@@ -702,7 +716,6 @@ void zeroRowAndNext() {
   dequeWalkerUnitsToZero();
 }
 
-
 /* Create 'Walker Unit' records listed in `WALKER_UNITS_TO_ZERO`.
  *
  * Notice that this function is essentially composed of two:
@@ -868,8 +881,8 @@ List createZeroedAttributeList(String rowId, String walkerId) {
   String cert = "1.0"; // Certainty, having the default value of 1.0
 
   // Set 'Walker ID' and 'Row ID' to given values
-  attribs.add(createEntityAttribute("Walker Unit Walker ID", null, null, walkerId, cert));
-  attribs.add(createEntityAttribute("Row ID",                null, null, rowId,    cert));
+  attribs.add(createEntityAttribute("Walker ID", null, null, walkerId, cert));
+  attribs.add(createEntityAttribute("Row ID",    null, null, rowId,    cert));
 
   // Set zeroable properties to zero
   for (String ref : getZeroableRefs()) {
@@ -977,21 +990,22 @@ void onShowWalkerUnit () {
 
 void saveWalkerUnit() {
   String  tabgroup            = "Walker_Unit";
-  String  callback            = "";
   Boolean enableAutosave      = true;
   String  id                  = getUuid(tabgroup);
   String  parentTabgroup_     = parentTabgroup;
   String  parentTabgroupUuid_ = getUuid(parentTabgroup_);
   Boolean userWasSet          = !username.equals("");
 
-  callback += "; " + fun2str("executeOnEvent", new Object[]{tabgroup, "save"});
-  callback += "; redrawGrid()";
 
   parentTabgroup = null;
 
   SaveCallback saveCallback  = new SaveCallback() {
     onSave(uuid, newRecord) {
       setUuid(tabgroup, uuid);
+
+      String callback = "";
+      callback += "; " + fun2str("executeOnEvent", new Object[]{tabgroup, "save"});
+      callback += "; redrawGrid()";
 
       callback = fun2str(
           "updateGridCacheFromUuid",
@@ -1055,7 +1069,6 @@ void saveWalkerUnit() {
 
 /**************************** MISC EVENT HANDLERS *****************************/
 boolean DO_REDIRECT_TO_WALKER_UNIT = false;
-Set     PREV_WALKER_UUIDS = null;
 
 inheritWalkerUnitFields() {
   setFieldValue(
@@ -1101,8 +1114,6 @@ boolean onClickSurveyUnitAddNewWalkerUnitCond() {
 }
 
 void onClickNextSurveyUnit() {
-  PREV_WALKER_UUIDS = getWalkerUuids();
-
   cancelTabGroup("Walker_Unit", false);
   cancelTabGroup("Survey_Unit", false);
 
@@ -1112,15 +1123,54 @@ void onClickNextSurveyUnit() {
 
 addOnEvent("Survey_Unit", "show", "triggerAutoSave()", PRECEDENCE_MID-1);
 
+void saveWalkersToHierRel(String entity1, String entity2, String order, String callback) {
+  if (isNull(entity1) || isNull(entity2)) return;
+
+  SaveCallback execCallback = new SaveCallback() {
+    onSaveAssociation(entity_id, rel_id) {
+      if(!isNull(callback)) {
+         execute(callback);
+      }
+    }
+    onError(message) {
+      Log.e("saveEntitiesToHierRel", message);
+      showToast(message);
+    }
+  };
+
+  SaveCallback addMoreToRel = new SaveCallback() {
+    onSaveAssociation(entity_id, rel_id) {
+      addReln(entity2, rel_id, "Child Of", execCallback);
+    }
+    onError(message) {
+      Log.e("saveEntitiesToHierRel", message);
+      showToast(message);
+    }
+  };
+
+  SaveCallback addToRel = new SaveCallback() {
+    onSave(rel_id, newRecord) {
+      addReln(entity1, rel_id, "Parent Of", addMoreToRel);
+    }
+    onError(message) {
+      Log.e("saveEntitiesToHierRel", message);
+      showToast(message);
+    }
+  };
+
+  List attrs = createAttributeList();
+  attrs.add(createEntityAttribute("Order", order, "", "", "1.0"));
+
+  saveRel(null, "Survey Unit - Walker", null, attrs, addToRel);
+}
+
 void maybeRedirectToWalkerUnit() {
-  if (!DO_REDIRECT_TO_WALKER_UNIT)
-    return;
+  if (DO_REDIRECT_TO_WALKER_UNIT) {
+    DO_REDIRECT_TO_WALKER_UNIT = false;
+    onClickSurveyUnitAddNewWalkerUnit();
+  }
 
-  DO_REDIRECT_TO_WALKER_UNIT = false;
-  onClickSurveyUnitAddNewWalkerUnit();
-
-  // Copy Walker relationships. TODO: Ensure this works
-  WALKERS_TO_RELATE.addAll(PREV_WALKER_UUIDS);
+  WALKERS_TO_RELATE.addAll(getWalkerRels());
   dequeWalkersToRelate();
 }
 
@@ -1139,24 +1189,26 @@ void dequeWalkersToRelate() {
 void dequeWalkersToRelateRec() {
   Log.d("dequeWalkersToRelateRec", "Recing");
   if (WALKERS_TO_RELATE.size() == 0) {
-    MUTEX_DEQUEUE_WALKER_UNITS.release();
+    MUTEX_DEQUEUE_WALKERS.release();
     updateGridWalkers();
     populateEntityListsOfArchEnt("Walker");
     return;
   }
 
-  String parentEntityRef = "Survey_Unit";
-  String parentUuid      = getUuid(parentEntityRef);
-  String childUuid       = WALKERS_TO_RELATE.take();
+  List rel = WALKERS_TO_RELATE.take();
+  String parentUuid = rel.get(0);
+  String childUuid  = rel.get(1);
+  String order      = rel.get(2);
 
-  Log.d("dequeWalkersToRelateRec", "parent, child = " + parentUuid + ", " + childUuid);
+  Log.d(
+      "dequeWalkersToRelateRec",
+      "parent, child, order = " + parentUuid + ", " + childUuid + ", " + order
+  );
 
-  saveEntitiesToHierRel(
-    "Survey Unit - Walker",
+  saveWalkersToHierRel(
     parentUuid,
     childUuid,
-    "Parent Of",
-    "Child Of",
+    order,
     "dequeWalkersToRelateRec()"
   );
 }
@@ -1201,8 +1253,8 @@ addOnEvent("Walker_Unit/Walker_Unit/Next_Survey_Unit", "click", "onClickNextSurv
 
 
 
-
 addOnEvent("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "click", "onClickSurveyUnitAddNewWalkerUnit()");
 addOnEventCond("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "click", "onClickSurveyUnitAddNewWalkerUnitCond()");
 addOnEvent("Walker_Unit/Walker_Unit/Load_Walker", "click",  "gridRandomAccessWalker()");
 addOnEvent("Walker_Unit/Walker_Unit/Load",       "click",  "loadOrMakeWalkerUnit()");
+

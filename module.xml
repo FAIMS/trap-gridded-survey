@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--TODO: The issue with walkers I had - you have to enter the same people multiple times, instead of simply creating them once and the simply choosing from a list. You will see it if you log into the server and look for Walker Petra. IS there anything we could do with the design? Happy to chat when I am not jetlagged.-->
-<!--TODO: Verify done: Pushing the Next Survey Unit creates new Survey Unit with Survey Unit ID +1 as expected, but when I navigate out of the unit and return to the Walker Unit record later via the search list, the webview on the top does not show the Survey Unit ID at all and stays blank to all existing Walker Units.-->
-<!--TODO: Verify done: When duplicating Survey Unit, it creates the Survey Unit ID +1 as expected, and on the device it appears to create duplicated walkers records and walker units, but when I look on the server, they don't exist.-->
-<!--TODO: Bug: Sometimes multiple Walker Units at the same position in the grid-->
-<!--can be made. Something somthing async.-->
-<!--@PREPROC:  ./preproc.sh -->
 <!--@POSTPROC: ./postproc.sh -->
 <module>
+
+<rels>
+  <RelationshipElement name="Survey Unit - Walker" type="hierarchical">
+    <description>A 1-to-n relationship between the parent and its children, respectively.</description>
+    <parent>Parent Of</parent>
+    <child>Child Of</child>
+    <property type="measure" name="Order" isIdentifier="true"/>
+  </RelationshipElement>
+</rels>
 
 <Login f="nodata">
   <Login f="noscroll">
@@ -40,6 +43,32 @@
     <Stoniness t="radio" f="persist" vp="Survey_Unit/Survey_Unit/Stoniness"/>
     <Shade t="radio" f="persist" vp="Survey_Unit/Survey_Unit/Shade"/>
   </Main>
+  <Walkers f="noscroll">
+    <cols>
+      <Add_New_Walker         t="button" l="Walker"/>
+      <Delete_Selected_Walker t="button"/>
+    </cols>
+    <cols>
+      <col>
+        <Up   t="button"/>
+        <Down t="button"/>
+      </col>
+      <col>
+        <Plus  t="button"/>
+        <Minus t="button"/>
+      </col>
+      <col>
+        <Toggle_Selection t="button"/>
+        <Save t="button"/>
+      </col>
+    </cols>
+    <Walker_Guide f="nolabel" t="webview">
+      <markdown>
+Walkers which you select will be numbered. The lowest numbers correspond to the left-most walkers in the grid.
+      </markdown>
+    </Walker_Guide>
+    <Walkers t="webview"/>
+  </Walkers>
   <search/>
 </Control>
 
@@ -165,10 +194,6 @@
     <Row_Interval       b="decimal" f="readonly" i="Control/Main/Row_Interval"/>
     <Walker_Interval    b="decimal" f="readonly" i="Control/Main/Walker_Interval"/>
   </Survey_Unit>
-  <Walkers f="noscroll">
-    <Add_New_Walker lc="Walker" t="button"/>
-    <Walkers        ec="Walker"/>
-  </Walkers>
   <Walker_Units f="noscroll">
     <Add_New_Walker_Unit lc="Walker_Unit" t="button"/>
     <!--Displaying this list is costly, so we just won't do it-->
@@ -181,29 +206,17 @@
 </Survey_Unit>
 
 <Walker>
+  <fmt>{{First_Name if $0 then "$0"}}{{Last_Name if $0 then " $0"}}{{Initials if $0 then " ($0)"}}</fmt>
   <Walker>
     <Help t="webview" f="nolabel">
       <markdown>
-The 'Walker ID' dictates the position of each walker in the grid. Numbers should
-start at 1, indicating the left-most walker.
-
-**Warning:** If you created this Survey Unit by using the 'Next Survey Unit'
-button, deleting this Walker will disassociate it from all the Survey Units in
-which it appears.
+**Warning:** Deleting this Walker will disassociate it from all the Survey Units
+in which it appears.
       </markdown>
     </Help>
-    <Walker_ID   f="id" b="decimal">
-      <str><fmt>$2</fmt></str>
-    </Walker_ID>
-    <First_Name f="id">
-      <str><fmt>{{if $2 then " - $2"}}</fmt></str>
-    </First_Name>
-    <Last_Name  f="id">
-      <str><fmt>{{if $2 then " $2"}}</fmt></str>
-    </Last_Name>
-    <Initials   f="id">
-      <str><fmt>{{if $2 then " ($2)"}}</fmt></str>
-    </Initials>
+    <First_Name/>
+    <Last_Name/>
+    <Initials/>
   </Walker>
 </Walker>
 
@@ -338,6 +351,8 @@ which it appears.
   <!--@SOURCE: logic/survey-unit-walker-population.bsh-->
   <!--@SOURCE: logic/validation.bsh-->
   <!--@SOURCE: logic/custom-search.bsh-->
+  <!--@SOURCE: logic/walker-ordering.bsh-->
+  <!--@SOURCE: logic/walker-initials.bsh-->
 ]]></logic>
 
 </module>

@@ -70,6 +70,15 @@ public class ModuleUtil extends ModuleHelper {
 
     /*
         Type: tab
+        Ref:  Control/Walkers
+     */
+    public static View get_Control_Walkers(Solo solo) {
+        String ref = "Control/Walkers";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: tab
         Ref:  Login/Login
      */
     public static View get_Login_Login(Solo solo) {
@@ -110,15 +119,6 @@ public class ModuleUtil extends ModuleHelper {
      */
     public static View get_SurveyUnit_WalkerUnits(Solo solo) {
         String ref = "Survey_Unit/Walker_Units";
-        return (android.view.View) solo.getView((Object) ref);
-    }
-
-    /*
-        Type: tab
-        Ref:  Survey_Unit/Walkers
-     */
-    public static View get_SurveyUnit_Walkers(Solo solo) {
-        String ref = "Survey_Unit/Walkers";
         return (android.view.View) solo.getView((Object) ref);
     }
 
@@ -168,19 +168,82 @@ public class ModuleUtil extends ModuleHelper {
 
     /*
         Type: button
-        Ref:  Survey_Unit/Walker_Units/Add_New_Walker_Unit
+        Ref:  Control/Walkers/Add_New_Walker
      */
-    public static View get_SurveyUnit_WalkerUnits_AddNewWalkerUnit(Solo solo) {
-        String ref = "Survey_Unit/Walker_Units/Add_New_Walker_Unit";
+    public static View get_Control_Walkers_AddNewWalker(Solo solo) {
+        String ref = "Control/Walkers/Add_New_Walker";
         return (android.view.View) solo.getView((Object) ref);
     }
 
     /*
         Type: button
-        Ref:  Survey_Unit/Walkers/Add_New_Walker
+        Ref:  Control/Walkers/Delete_Selected_Walker
      */
-    public static View get_SurveyUnit_Walkers_AddNewWalker(Solo solo) {
-        String ref = "Survey_Unit/Walkers/Add_New_Walker";
+    public static View get_Control_Walkers_DeleteSelectedWalker(Solo solo) {
+        String ref = "Control/Walkers/Delete_Selected_Walker";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: button
+        Ref:  Control/Walkers/Down
+     */
+    public static View get_Control_Walkers_Down(Solo solo) {
+        String ref = "Control/Walkers/Down";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: button
+        Ref:  Control/Walkers/Minus
+     */
+    public static View get_Control_Walkers_Minus(Solo solo) {
+        String ref = "Control/Walkers/Minus";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: button
+        Ref:  Control/Walkers/Plus
+     */
+    public static View get_Control_Walkers_Plus(Solo solo) {
+        String ref = "Control/Walkers/Plus";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: button
+        Ref:  Control/Walkers/Save
+     */
+    public static View get_Control_Walkers_Save(Solo solo) {
+        String ref = "Control/Walkers/Save";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: button
+        Ref:  Control/Walkers/Toggle_Selection
+     */
+    public static View get_Control_Walkers_ToggleSelection(Solo solo) {
+        String ref = "Control/Walkers/Toggle_Selection";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: button
+        Ref:  Control/Walkers/Up
+     */
+    public static View get_Control_Walkers_Up(Solo solo) {
+        String ref = "Control/Walkers/Up";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: button
+        Ref:  Survey_Unit/Walker_Units/Add_New_Walker_Unit
+     */
+    public static View get_SurveyUnit_WalkerUnits_AddNewWalkerUnit(Solo solo) {
+        String ref = "Survey_Unit/Walker_Units/Add_New_Walker_Unit";
         return (android.view.View) solo.getView((Object) ref);
     }
 
@@ -636,15 +699,6 @@ public class ModuleUtil extends ModuleHelper {
 
     /*
         Type: input
-        Ref:  Walker/Walker/Walker_ID
-     */
-    public static EditText get_Walker_Walker_WalkerID(Solo solo) {
-        String ref = "Walker/Walker/Walker_ID";
-        return (android.widget.EditText) solo.getView((Object) ref);
-    }
-
-    /*
-        Type: input
         Ref:  Walker_Unit/Vars/Row_ID
      */
     public static View get_WalkerUnit_Vars_RowID(Solo solo) {
@@ -761,15 +815,6 @@ public class ModuleUtil extends ModuleHelper {
     }
 
     /*
-        Type: list
-        Ref:  Survey_Unit/Walkers/Walkers
-     */
-    public static View get_SurveyUnit_Walkers_Walkers(Solo solo) {
-        String ref = "Survey_Unit/Walkers/Walkers";
-        return (android.view.View) solo.getView((Object) ref);
-    }
-
-    /*
         Type: radio
         Ref:  Control/Main/Drainage
      */
@@ -865,6 +910,24 @@ public class ModuleUtil extends ModuleHelper {
      */
     public static View get_WalkerUnit_WalkerUnit_LoadWalker(Solo solo) {
         String ref = "Walker_Unit/Walker_Unit/Load_Walker";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: webview
+        Ref:  Control/Walkers/Walker_Guide
+     */
+    public static View get_Control_Walkers_WalkerGuide(Solo solo) {
+        String ref = "Control/Walkers/Walker_Guide";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: webview
+        Ref:  Control/Walkers/Walkers
+     */
+    public static View get_Control_Walkers_Walkers(Solo solo) {
+        String ref = "Control/Walkers/Walkers";
         return (android.view.View) solo.getView((Object) ref);
     }
 
