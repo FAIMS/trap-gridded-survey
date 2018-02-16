@@ -27,6 +27,7 @@
             <Main>
               <Add_New_Survey_Unit/>
               <Next_Survey_Unit_ID/>
+              <Guide_Defaults/>
               <Number_of_Rows/>
               <Number_of_Walkers/>
               <Row_Interval/>
@@ -152,6 +153,7 @@
                   <Next_Walker_Unit_1/>
                 </Col_3>
               </Colgroup_3>
+              <Guide_Counts/>
               <Colgroup_4>
                 <Col_1>
                   <Ancient/>
@@ -219,7 +221,7 @@
               </Colgroup_8>
               <Load_Walker/>
               <Chronology/>
-              <Fragment/>
+              <Fragmentation/>
               <Wear/>
               <Next_Survey_Unit/>
             </Walker_Unit>
@@ -304,6 +306,9 @@
         </trigger>
         <input ref="Next_Survey_Unit_ID" faims_style_class="required">
           <label>{Next_Survey_Unit_ID}</label>
+        </input>
+        <input faims_web="true" ref="Guide_Defaults">
+          <label/>
         </input>
         <input ref="Number_of_Rows" faims_style_class="required">
           <label>{Starting_Number_of_Rows}</label>
@@ -401,7 +406,7 @@
           <group ref="Col_2" faims_style="even">
             <label/>
             <trigger ref="Delete_Selected_Walker">
-              <label>{Delete_Selected_Walker}</label>
+              <label>{Delete_Walker}</label>
             </trigger>
           </group>
         </group>
@@ -419,16 +424,16 @@
           <group ref="Col_2" faims_style="even">
             <label/>
             <trigger ref="Plus">
-              <label>{Plus}</label>
+              <label>{Move_Up}</label>
             </trigger>
             <trigger ref="Minus">
-              <label>{Minus}</label>
+              <label>{Move_Down}</label>
             </trigger>
           </group>
           <group ref="Col_3" faims_style="even">
             <label/>
             <trigger ref="Toggle_Selection">
-              <label>{Toggle_Selection}</label>
+              <label>{_De_select}</label>
             </trigger>
             <trigger ref="Save">
               <label>{Save}</label>
@@ -568,7 +573,7 @@
       <group ref="Walker_Units" faims_scrollable="false">
         <label>{Walker_Units}</label>
         <trigger ref="Add_New_Walker_Unit">
-          <label>{Add_New_Walker_Unit}</label>
+          <label>{View_Walker_Grid}</label>
         </trigger>
       </group>
       <group ref="Vars" faims_hidden="true">
@@ -600,9 +605,9 @@
       </group>
     </group>
     <group ref="Walker_Unit" faims_archent_type="Walker Unit">
-      <label>{Walker_Unit}</label>
+      <label>{Walker_Grid}</label>
       <group ref="Walker_Unit">
-        <label>{Walker_Unit}</label>
+        <label>{Walker_Grid}</label>
         <input faims_web="true" ref="Survey_Unit_ID">
           <label/>
         </input>
@@ -676,6 +681,9 @@
             </trigger>
           </group>
         </group>
+        <input faims_web="true" ref="Guide_Counts">
+          <label/>
+        </input>
         <group ref="Colgroup_4" faims_style="orientation">
           <label/>
           <group ref="Col_1" faims_style="even">
@@ -816,20 +824,20 @@
             <value>Options not loaded</value>
           </item>
         </select>
-        <select faims_attribute_name="Fragment" faims_attribute_type="vocab" ref="Fragment">
-          <label>{Fragment}</label>
+        <select1 appearance="full" faims_attribute_name="Fragmentation" faims_attribute_type="vocab" ref="Fragmentation">
+          <label>{Fragmentation}</label>
           <item>
             <label>Options not loaded</label>
             <value>Options not loaded</value>
           </item>
-        </select>
-        <select faims_attribute_name="Wear" faims_attribute_type="vocab" ref="Wear">
+        </select1>
+        <select1 appearance="full" faims_attribute_name="Wear" faims_attribute_type="vocab" ref="Wear">
           <label>{Wear}</label>
           <item>
             <label>Options not loaded</label>
             <value>Options not loaded</value>
           </item>
-        </select>
+        </select1>
         <trigger ref="Next_Survey_Unit">
           <label>{Next_Survey_Unit}</label>
         </trigger>

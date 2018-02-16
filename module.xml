@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--TODO: Walker Unit (Grid) > the counts: Count together Anc + HM + Daub / All-->
 <!--@POSTPROC: ./postproc.sh -->
 <module>
 
@@ -21,6 +22,9 @@
   <Main>
     <Add_New_Survey_Unit t="button" l="Survey_Unit"/>
     <autonum/>
+    <Guide_Defaults t="webview" f="nolabel">
+      <markdown>Enter below the daily defaults - the dominant environmental characteristics of study area</markdown>
+    </Guide_Defaults>
     <Number_of_Rows    b="decimal" f="notnull persist">
       Starting Number of Rows
     </Number_of_Rows>
@@ -33,7 +37,9 @@
       Walker Interval (m)
     </Walker_Interval>
     <Land_Use t="dropdown" f="persist" vp="Survey_Unit/Survey_Unit/Land_Use"/>
-    <Agricultural_Condition t="dropdown" f="persist" vp="Survey_Unit/Survey_Unit/Agricultural_Condition"/>
+    <Agricultural_Condition t="dropdown" vp="Survey_Unit/Survey_Unit/Agricultural_Condition">
+      <!-- custom logic: f="persist" -->
+    </Agricultural_Condition>
     <Topography t="dropdown" f="persist" vp="Survey_Unit/Survey_Unit/Topography"/>
     <Slope t="dropdown" f="persist" vp="Survey_Unit/Survey_Unit/Slope"/>
     <Visibility t="dropdown" f="persist" vp="Survey_Unit/Survey_Unit/Visibility"/>
@@ -46,7 +52,9 @@
   <Walkers f="noscroll">
     <cols>
       <Add_New_Walker         t="button" l="Walker"/>
-      <Delete_Selected_Walker t="button"/>
+      <Delete_Selected_Walker t="button">
+        Delete Walker
+      </Delete_Selected_Walker>
     </cols>
     <cols>
       <col>
@@ -54,17 +62,19 @@
         <Down t="button"/>
       </col>
       <col>
-        <Plus  t="button"/>
-        <Minus t="button"/>
+        <Plus  t="button">Move Up</Plus>
+        <Minus t="button">Move Down</Minus>
       </col>
       <col>
-        <Toggle_Selection t="button"/>
+        <Toggle_Selection t="button">
+          (De)select
+        </Toggle_Selection>
         <Save t="button"/>
       </col>
     </cols>
-    <Walker_Guide f="nolabel" t="webview">
+    <Walker_Guide t="webview" f="nolabel">
       <markdown>
-Walkers which you select will be numbered. The lowest numbers correspond to the left-most walkers in the grid.
+Use the '▲', '▼' and '(De)select' buttons to choose walkers for your team. Selected walkers will be numbered and in green. Walker no.1 is left-most.
       </markdown>
     </Walker_Guide>
     <Walkers t="webview"/>
@@ -95,6 +105,7 @@ Walkers which you select will be numbered. The lowest numbers correspond to the 
     <Agricultural_Condition i="Control/Main/Agricultural_Condition">
       <desc>Agricultural condition of fields in use.</desc>
       <opts>
+        <opt>N/A</opt>
         <opt>Ploughed</opt>
         <opt>Harrowed</opt>
         <opt>Seedlings</opt>
@@ -111,11 +122,12 @@ Walkers which you select will be numbered. The lowest numbers correspond to the 
       <desc>Topography of the surveyed area.</desc>
       <opts>
         <opt>N/A</opt>
-        <opt>Valley Bottom</opt>
         <opt>Hillside</opt>
+        <opt>Reservoir Slope</opt>
         <opt>Ridgeline</opt>
         <opt>River Terrace</opt>
-        <opt>Reservoir Slope</opt>
+        <opt>Undulating Landscape</opt>
+        <opt>Valley Bottom</opt>
         <opt>Other</opt>
       </opts>
     </Topography>
@@ -195,7 +207,9 @@ Walkers which you select will be numbered. The lowest numbers correspond to the 
     <Walker_Interval    b="decimal" f="readonly" i="Control/Main/Walker_Interval"/>
   </Survey_Unit>
   <Walker_Units f="noscroll">
-    <Add_New_Walker_Unit lc="Walker_Unit" t="button"/>
+    <Add_New_Walker_Unit lc="Walker_Unit" t="button">
+      View Walker Grid
+    </Add_New_Walker_Unit>
     <!--Displaying this list is costly, so we just won't do it-->
     <!--<Walker_Units        ec="Walker_Unit"/>-->
   </Walker_Units>
@@ -221,7 +235,9 @@ in which it appears.
 </Walker>
 
 <Walker_Unit>
+  Walker Grid
   <Walker_Unit>
+    Walker Grid
     <Survey_Unit_ID t="webview" f="nolabel"/>
     <Grid           t="webview" f="nolabel"/>
     <!--D-Pad-->
@@ -251,6 +267,11 @@ in which it appears.
     </cols>
     <!--Buttons-->
     <!--Primary recording fields-->
+    <Guide_Counts t="webview" f="nolabel">
+      <markdown>
+Enter **raw count** or click the m^2^ button to enter **density** per square m.
+      </markdown>
+    </Guide_Counts>
     <cols>
       <Ancient b="decimal"/>
       <Add_Ancient_M_2 t="button">
@@ -313,14 +334,22 @@ in which it appears.
         <opt>Ottoman</opt>
       </opts>
     </Chronology>
-    <Fragment t="checkbox">
+    <Fragmentation t="radio">
       <opts>
-        <opt>Fragment</opt>
+        <opt>1</opt>
+        <opt>2</opt>
+        <opt>3</opt>
+        <opt>4</opt>
+        <opt>5</opt>
       </opts>
-    </Fragment>
-    <Wear t="checkbox">
+    </Fragmentation>
+    <Wear t="radio">
       <opts>
-        <opt>Wear</opt>
+        <opt>1</opt>
+        <opt>2</opt>
+        <opt>3</opt>
+        <opt>4</opt>
+        <opt>5</opt>
       </opts>
     </Wear>
     <Next_Survey_Unit t="button"/>
@@ -353,6 +382,7 @@ in which it appears.
   <!--@SOURCE: logic/custom-search.bsh-->
   <!--@SOURCE: logic/walker-ordering.bsh-->
   <!--@SOURCE: logic/walker-initials.bsh-->
+  <!--@SOURCE: logic/persistence.bsh-->
 ]]></logic>
 
 </module>

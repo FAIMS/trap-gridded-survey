@@ -1,0 +1,15 @@
+/******************************** PERSISTENCE *********************************/
+final String REF_CULTURAL_COND = "Control/Main/Agricultural_Condition";
+
+// Overrides FAIMS' definition
+setFieldValue(String ref, Object value){
+  if (
+      REF_CULTURAL_COND.equals(ref) &&
+      setMenuValue(REF_CULTURAL_COND, value)
+  )
+    return;
+
+  linker.setFieldValue(ref, value);
+}
+
+persistOverSessions(REF_CULTURAL_COND, false, "{N_A}");

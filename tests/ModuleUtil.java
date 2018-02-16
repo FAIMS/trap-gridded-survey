@@ -429,28 +429,10 @@ public class ModuleUtil extends ModuleHelper {
 
     /*
         Type: checkbox
-        Ref:  Walker_Unit/Walker_Unit/Fragment
-     */
-    public static View get_WalkerUnit_WalkerUnit_Fragment(Solo solo) {
-        String ref = "Walker_Unit/Walker_Unit/Fragment";
-        return (android.view.View) solo.getView((Object) ref);
-    }
-
-    /*
-        Type: checkbox
         Ref:  Walker_Unit/Walker_Unit/N_A
      */
     public static View get_WalkerUnit_WalkerUnit_NA(Solo solo) {
         String ref = "Walker_Unit/Walker_Unit/N_A";
-        return (android.view.View) solo.getView((Object) ref);
-    }
-
-    /*
-        Type: checkbox
-        Ref:  Walker_Unit/Walker_Unit/Wear
-     */
-    public static View get_WalkerUnit_WalkerUnit_Wear(Solo solo) {
-        String ref = "Walker_Unit/Walker_Unit/Wear";
         return (android.view.View) solo.getView((Object) ref);
     }
 
@@ -906,10 +888,37 @@ public class ModuleUtil extends ModuleHelper {
 
     /*
         Type: radio
+        Ref:  Walker_Unit/Walker_Unit/Fragmentation
+     */
+    public static View get_WalkerUnit_WalkerUnit_Fragmentation(Solo solo) {
+        String ref = "Walker_Unit/Walker_Unit/Fragmentation";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: radio
         Ref:  Walker_Unit/Walker_Unit/Load_Walker
      */
     public static View get_WalkerUnit_WalkerUnit_LoadWalker(Solo solo) {
         String ref = "Walker_Unit/Walker_Unit/Load_Walker";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: radio
+        Ref:  Walker_Unit/Walker_Unit/Wear
+     */
+    public static View get_WalkerUnit_WalkerUnit_Wear(Solo solo) {
+        String ref = "Walker_Unit/Walker_Unit/Wear";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: webview
+        Ref:  Control/Main/Guide_Defaults
+     */
+    public static View get_Control_Main_GuideDefaults(Solo solo) {
+        String ref = "Control/Main/Guide_Defaults";
         return (android.view.View) solo.getView((Object) ref);
     }
 
@@ -955,6 +964,15 @@ public class ModuleUtil extends ModuleHelper {
      */
     public static View get_WalkerUnit_WalkerUnit_Grid(Solo solo) {
         String ref = "Walker_Unit/Walker_Unit/Grid";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: webview
+        Ref:  Walker_Unit/Walker_Unit/Guide_Counts
+     */
+    public static View get_WalkerUnit_WalkerUnit_GuideCounts(Solo solo) {
+        String ref = "Walker_Unit/Walker_Unit/Guide_Counts";
         return (android.view.View) solo.getView((Object) ref);
     }
 

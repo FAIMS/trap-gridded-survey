@@ -278,6 +278,7 @@ NODATA_TAB_GROUPS.add("Login");
 REF_TO_TYPE.put("Login/Login/User", "list");
 REF_TO_TYPE.put("Control/Main/Add_New_Survey_Unit", "button");
 REF_TO_TYPE.put("Control/Main/Next_Survey_Unit_ID", "input");
+REF_TO_TYPE.put("Control/Main/Guide_Defaults", "webview");
 REF_TO_TYPE.put("Control/Main/Number_of_Rows", "input");
 REF_TO_TYPE.put("Control/Main/Number_of_Walkers", "input");
 REF_TO_TYPE.put("Control/Main/Row_Interval", "input");
@@ -339,6 +340,7 @@ REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Right", "button");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/N_A", "checkbox");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Down", "button");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Next_Walker_Unit_1", "button");
+REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Guide_Counts", "webview");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Ancient", "input");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Add_Ancient_M_2", "button");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/HM", "input");
@@ -360,8 +362,8 @@ REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Zero_Row_And_Next_2", "button");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Next_Walker_Unit_2", "button");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Load_Walker", "radio");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Chronology", "checkbox");
-REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Fragment", "checkbox");
-REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Wear", "checkbox");
+REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Fragmentation", "radio");
+REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Wear", "radio");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Next_Survey_Unit", "button");
 REF_TO_TYPE.put("Walker_Unit/Vars/Row_ID", "input");
 REF_TO_TYPE.put("Walker_Unit/Vars/Walker_ID", "input");
@@ -407,7 +409,7 @@ DATA_REFS.add("Walker_Unit/Walker_Unit/Daub");
 DATA_REFS.add("Walker_Unit/Walker_Unit/Other");
 DATA_REFS.add("Walker_Unit/Walker_Unit/Notes");
 DATA_REFS.add("Walker_Unit/Walker_Unit/Chronology");
-DATA_REFS.add("Walker_Unit/Walker_Unit/Fragment");
+DATA_REFS.add("Walker_Unit/Walker_Unit/Fragmentation");
 DATA_REFS.add("Walker_Unit/Walker_Unit/Wear");
 DATA_REFS.add("Walker_Unit/Vars/Row_ID");
 DATA_REFS.add("Walker_Unit/Vars/Walker_ID");
@@ -2178,7 +2180,6 @@ persistOverSessions("Control/Main/Number_of_Walkers", false);
 persistOverSessions("Control/Main/Row_Interval", false);
 persistOverSessions("Control/Main/Walker_Interval", false);
 persistOverSessions("Control/Main/Land_Use", false);
-persistOverSessions("Control/Main/Agricultural_Condition", false);
 persistOverSessions("Control/Main/Topography", false);
 persistOverSessions("Control/Main/Slope", false);
 persistOverSessions("Control/Main/Visibility", false);
@@ -3791,7 +3792,7 @@ entityTypes = new ArrayList();
 entityTypes.add(new NameValuePair("{All}", ""));
 entityTypes.add(new NameValuePair("{Survey_Unit}", "Survey Unit"));
 entityTypes.add(new NameValuePair("{Walker}", "Walker"));
-entityTypes.add(new NameValuePair("{Walker_Unit}", "Walker Unit"));
+entityTypes.add(new NameValuePair("{Walker_Grid}", "Walker Unit"));
 populateDropDown("Control/Search/Entity_Types", entityTypes);
 
 void clearSearch(){
@@ -4064,8 +4065,10 @@ void incAutoNum(String destPath) {
 /******************************************************************************/
 /*                         POPULATION VIA <MARKDOWN>                          */
 /******************************************************************************/
-populateWebViewHtml("Control/Walkers/Walker_Guide", "<p>Walkers which you select will be numbered. The lowest numbers correspond to the left-most walkers in the grid.</p>\n");
+populateWebViewHtml("Control/Main/Guide_Defaults", "<p>Enter below the daily defaults - the dominant environmental characteristics of study area</p>\n");
+populateWebViewHtml("Control/Walkers/Walker_Guide", "<p>Use the ‘▲’, ‘▼’ and ‘(De)select’ buttons to choose walkers for your team. Selected walkers will be numbered and in green. Walker no.1 is left-most.</p>\n");
 populateWebViewHtml("Walker/Walker/Help", "<p><strong>Warning:</strong> Deleting this Walker will disassociate it from all the Survey Units in which it appears.</p>\n");
+populateWebViewHtml("Walker_Unit/Walker_Unit/Guide_Counts", "<p>Enter <strong>raw count</strong> or click the m<sup>2</sup> button to enter <strong>density</strong> per square m.</p>\n");
 
 /******************************************************************************/
 /*                POPULATION OF ENTITY AND CHILD ENTITY LISTS                 */
@@ -6378,6 +6381,21 @@ void maybeUpdateInitials() {
 
 addOnEvent(REF_FIRST_NAME, "blur", "maybeUpdateInitials()");
 addOnEvent(REF_LAST_NAME,  "blur", "maybeUpdateInitials()");
+/******************************** PERSISTENCE *********************************/
+final String REF_CULTURAL_COND = "Control/Main/Agricultural_Condition";
+
+// Overrides FAIMS' definition
+setFieldValue(String ref, Object value){
+  if (
+      REF_CULTURAL_COND.equals(ref) &&
+      setMenuValue(REF_CULTURAL_COND, value)
+  )
+    return;
+
+  linker.setFieldValue(ref, value);
+}
+
+persistOverSessions(REF_CULTURAL_COND, false, "{N_A}");
 
 
 /******************************************************************************/

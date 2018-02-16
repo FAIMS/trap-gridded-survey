@@ -18,12 +18,4 @@ string="Right=Right"
 replacement="Right=▶"
 perl -0777 -i.original -pe "s/\\Q$string/$replacement/igs" english.0.properties
 
-string="Plus=Plus"
-replacement="Plus=+"
-perl -0777 -i.original -pe "s/\\Q$string/$replacement/igs" english.0.properties
-
-string="Minus=Minus"
-replacement="Minus=-"
-perl -0777 -i.original -pe "s/\\Q$string/$replacement/igs" english.0.properties
-
 rm english.0.properties.original
