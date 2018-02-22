@@ -4482,6 +4482,7 @@ MUTEX_WALKER_UNIT_ROWS = new Semaphore(1);
 
 final String ATTRIB_ANCIENT         = "Ancient";
 final String ATTRIB_HAS_INITIALS    = "hasInitials";
+final String ATTRIB_IDENTIFIER      = "Identifier";
 final String ATTRIB_INITIALS        = "Initials";
 final String ATTRIB_IS_CONFIRMED    = "isConfirmed";
 final String ATTRIB_IS_HIGHLIGHTED  = "isHighlighted";
@@ -4493,14 +4494,7 @@ final String ATTRIB_IS_SIDE         = "isSide";
 final String ATTRIB_IS_WALKER_INDEX = "isWalkerIndex";
 final String ATTRIB_MODERN          = "Modern";
 final String ATTRIB_NA              = "N A";
-
-void initCountAttribs() {
-  COUNT_ATTRIBS_1.add("Ancient");
-  COUNT_ATTRIBS_1.add("Daub");
-  COUNT_ATTRIBS_1.add("HM");
-
-  COUNT_ATTRIBS_2.addAll(getZeroableAttribNames());
-}
+final String ATTRIB_UUID            = "UUID";
 
 List getCountAttribs1() {
   List l = new ArrayList();
@@ -4624,10 +4618,10 @@ void updateGridCache(Object result) {
     if (   iRowId < 1) continue;
     if (iWalkerId < 1) continue;
 
-    updateGridCache(iRowId, iWalkerId, "UUID",    uuid);
-    updateGridCache(iRowId, iWalkerId, "Ancient", ancient);
-    updateGridCache(iRowId, iWalkerId, "Modern",  modern);
-    updateGridCache(iRowId, iWalkerId, "N A",     na);
+    updateGridCache(iRowId, iWalkerId, ATTRIB_UUID,    uuid);
+    updateGridCache(iRowId, iWalkerId, ATTRIB_ANCIENT, ancient);
+    updateGridCache(iRowId, iWalkerId, ATTRIB_MODERN,  modern);
+    updateGridCache(iRowId, iWalkerId, ATTRIB_NA,      na);
   }
 }
 
@@ -4724,7 +4718,7 @@ void updateGridCacheFromUuid(String parentUuid, String uuid, String callback) {
           int rowId    = stringToInt(r.get(1));
           int walkerId = stringToInt(r.get(2));
 
-          updateGridCache(rowId, walkerId, "N A", "");
+          updateGridCache(rowId, walkerId, ATTRIB_NA, "");
           continue;
         }
 
@@ -4752,11 +4746,11 @@ void unhighlightAll() {
 }
 
 void deselectAll(int I, int J) {
-  setGridInRange(I, J, "isSelected", false);
+  setGridInRange(I, J, ATTRIB_IS_SELECTED, false);
 }
 
 void unhighlightAll(int I, int J) {
-  setGridInRange(I, J, "isHighlighted", false);
+  setGridInRange(I, J, ATTRIB_IS_HIGHLIGHTED, false);
 }
 
 void setGridInRange(int I, int J, String attribName, attribVal) {
@@ -4801,7 +4795,7 @@ void updateGridWalkers() {
 void updateGridWalkers(Object result) {
   // 1. Clear walkers
   for (int i = 0; i < GRID_MAX_WIDTH; i++) {
-    updateGridCache(0, i, "Initials", "");
+    updateGridCache(0, i, ATTRIB_INITIALS, "");
   }
 
   // 2. Insert new walkers
@@ -4811,8 +4805,8 @@ void updateGridWalkers(Object result) {
     String initials  =             dbRow.get(1);
     String uuid      =             dbRow.get(2);
 
-    updateGridCache(0, iWalkerId, "Initials", initials);
-    updateGridCache(0, iWalkerId, "UUID",     uuid    );
+    updateGridCache(0, iWalkerId, ATTRIB_INITIALS, initials);
+    updateGridCache(0, iWalkerId, ATTRIB_UUID,       uuid    );
   }
 }
 
@@ -4822,14 +4816,14 @@ List getWalkerRels() {
   int orderInt = 1;
   for (int i = 0; i < NUM_WALKERS; i++) {
     walker = WALKER_CACHE_CLEAN[i];
-    Boolean isSel = walker.get("isSelected");
+    Boolean isSel = walker.get(ATTRIB_IS_SELECTED);
 
     if (isSel == null) isSel = false;
     if (!isSel)        continue;
 
     String parentEntityRef = "Survey_Unit";
     String parentUuid      = getUuid(parentEntityRef);
-    String childUuid       = walker.get("UUID");
+    String childUuid       = walker.get(ATTRIB_UUID);
     String order           = orderInt++ + "";
 
     List rel = new ArrayList();
@@ -4915,15 +4909,15 @@ void redrawGrid(boolean doRefreshCache) {
     for (int j = 0; j <= numberOfWalkers; j++) {
       HashMap cell = GRID_CACHE[i][j];
 
-      Boolean isHighlighted = cell.get("isHighlighted");
-      Boolean isSelected    = cell.get("isSelected");
-      Boolean isRowIndex    = cell.get("isRowIndex");
-      Boolean isWalkerIndex = cell.get("isWalkerIndex");
-      Boolean isSide        = cell.get("isSide");
-      Boolean isMain        = cell.get("isMain");
-      Boolean isConfirmed   = cell.get("isConfirmed");
-      Boolean isNa          = cell.get("isNa");
-      Boolean hasInitials   = cell.get("hasInitials");
+      Boolean hasInitials   = cell.get(ATTRIB_HAS_INITIALS);
+      Boolean isConfirmed   = cell.get(ATTRIB_IS_CONFIRMED);
+      Boolean isHighlighted = cell.get(ATTRIB_IS_HIGHLIGHTED);
+      Boolean isMain        = cell.get(ATTRIB_IS_MAIN);
+      Boolean isNa          = cell.get(ATTRIB_IS_NA);
+      Boolean isRowIndex    = cell.get(ATTRIB_IS_ROW_INDEX);
+      Boolean isSelected    = cell.get(ATTRIB_IS_SELECTED);
+      Boolean isSide        = cell.get(ATTRIB_IS_SIDE);
+      Boolean isWalkerIndex = cell.get(ATTRIB_IS_WALKER_INDEX);
 
       // Build the string of CSS classes to apply to this <td> element
       String  cssClass = "";
@@ -4934,10 +4928,10 @@ void redrawGrid(boolean doRefreshCache) {
       if (isConfirmed  ) cssClass += " confirmed";
 
       // Get the <td> values ('Modern', 'Ancient', 'N/A', ...?)
-      na       = cell.get("N A");
-      ancient  = cell.get("Ancient");
-      modern   = cell.get("Modern");
-      initials = cell.get("Initials");
+      na       = cell.get(ATTRIB_NA);
+      ancient  = cell.get(ATTRIB_ANCIENT);
+      modern   = cell.get(ATTRIB_MODERN);
+      initials = cell.get(ATTRIB_INITIALS);
 
       // Build the HTML string for this <td>
       String htmlCell = "";
@@ -5043,7 +5037,7 @@ void highlightedRow(int newVal) {
   setFieldValue(ref, sNewVal);
 
   unhighlightAll();
-  updateGridCache(iNewVal, highlightedWalker, "isHighlighted", true);
+  updateGridCache(iNewVal, highlightedWalker, ATTRIB_IS_HIGHLIGHTED, true);
 }
 
 int selectedRow() {
@@ -5079,7 +5073,7 @@ void highlightedWalker(int newVal) {
   setFieldValue(ref, sNewVal);
 
   unhighlightAll();
-  updateGridCache(highlightedRow, iNewVal, "isHighlighted", true);
+  updateGridCache(highlightedRow, iNewVal, ATTRIB_IS_HIGHLIGHTED, true);
 }
 
 int selectedWalker() {
@@ -5150,7 +5144,7 @@ void zeroRowAndNext() {
   // Populate `unsavedWalkerIds`
   for (int i = 1; i <= numberOfWalkers(); i++) {
     // We take "isConfirmed" to be synonymous with "is saved".
-    Boolean isConfirmed = GRID_CACHE[selectedRow][i].get("isConfirmed");
+    Boolean isConfirmed = GRID_CACHE[selectedRow][i].get(ATTRIB_IS_CONFIRMED);
     if (isConfirmed != null && isConfirmed == true) continue;
 
     String walkerId = String.valueOf(i);
@@ -5240,7 +5234,7 @@ void dequeWalkerUnitsToZeroRec() {
   // Save 'Walker Unit'. This should create a new record as opposed to
   // overwriting an existing one.
   saveArchEnt(uuid, entityType, geometry, attributes, relate);
-  updateGridCache(iRowId, iWalkerId, "isConfirmed", true);
+  updateGridCache(iRowId, iWalkerId, ATTRIB_IS_CONFIRMED, true);
 }
 
 String getSavingHtml() {
@@ -5432,7 +5426,7 @@ void loadOrMakeWalkerUnit() {
   highlightedWalker(highlightedWalker);
 
   // Load or make walker unit
-  String uuid = GRID_CACHE[highlightedRow][highlightedWalker].get("UUID");
+  String uuid = GRID_CACHE[highlightedRow][highlightedWalker].get(ATTRIB_UUID);
   if (uuid == null) {
     parentTabgroup = "Survey_Unit";
     newWalkerUnit();
@@ -5443,13 +5437,13 @@ void loadOrMakeWalkerUnit() {
 
 void onLoadWalkerUnit() {
   deselectAll();
-  updateGridCache(selectedRow(), selectedWalker(), "isSelected", true);
+  updateGridCache(selectedRow(), selectedWalker(), ATTRIB_IS_SELECTED, true);
   redrawGrid();
 }
 
 void onCreateWalkerUnit() {
   deselectAll();
-  updateGridCache(highlightedRow(), highlightedWalker(), "isSelected",  true);
+  updateGridCache(highlightedRow(), highlightedWalker(), ATTRIB_IS_SELECTED,  true);
   redrawGrid();
 }
 
@@ -6000,10 +5994,10 @@ void updateWalkerCache(List results) {
     String  identifier =            results.get(i).get(1);
     boolean isSelected = "1".equals(results.get(i).get(2));
 
-    updateWalkerCache(i, "Identifier",  identifier);
-    updateWalkerCache(i, "UUID",        uuid);
-    updateWalkerCache(i, "isConfirmed", true);
-    updateWalkerCache(i, "isSelected",  isSelected);
+    updateWalkerCache(i, ATTRIB_IDENTIFIER,   identifier);
+    updateWalkerCache(i, ATTRIB_UUID,         uuid);
+    updateWalkerCache(i, ATTRIB_IS_CONFIRMED, true);
+    updateWalkerCache(i, ATTRIB_IS_SELECTED,  isSelected);
   }
 
   NUM_WALKERS = results.size();
@@ -6078,6 +6072,26 @@ void redrawWalkers() {
   html += "        text-shadow: 1px 0px #000;";
   html += "        font-weight: 900;";
   html += "      }";
+  html += "      .no-walkers-text, .centering {";
+  html += "        width:  500px;";
+  html += "        height: 500px;";
+  html += "      }";
+  html += "      .no-walkers-text {";
+  html += "        display: table-cell;";
+  html += "        vertical-align: middle;";
+  html += "        text-align: center;";
+  html += "        font-family: Arial;";
+  html += "        padding-left: 25%;";
+  html += "        padding-right: 25%;";
+  html += "        text-shadow: 0px 1px 1px white;";
+  html += "      }";
+  html += "      .centering {";
+  html += "        position: absolute;";
+  html += "        left: 0;";
+  html += "        right: 0;";
+  html += "        margin: auto;";
+  html += "        background: radial-gradient(circle, #6bf, white, white);";
+  html += "      }";
   html += "    </style>";
   html += "  </head>";
   html += "  <body>";
@@ -6088,8 +6102,8 @@ void redrawWalkers() {
     walker = WALKER_CACHE[i];
 
     Boolean isHighlighted = HIGHLIGHTED_ORDINAL_WALKER == i;
-    Boolean isSelected    = walker.get("isSelected");
-    Boolean isConfirmed   = walker.get("isConfirmed");
+    Boolean isSelected    = walker.get(ATTRIB_IS_SELECTED);
+    Boolean isConfirmed   = walker.get(ATTRIB_IS_CONFIRMED);
 
     // Build the string of CSS classes to apply to this <li> element
     String cssClass = "";
@@ -6105,7 +6119,7 @@ void redrawWalkers() {
     }
 
     // Get the <li> value
-    String identifier = walker.get("Identifier");
+    String identifier = walker.get(ATTRIB_IDENTIFIER);
 
     // Build the HTML string for this <li>
     String htmlCell = "";
@@ -6120,8 +6134,17 @@ void redrawWalkers() {
     // Add the cell to the existing HTML
     html += htmlCell;
   }
-
   html += "    </table>";
+
+  if (NUM_WALKERS == 0) {
+    html += "    <div class=\"centering\">";
+    html += "      <div class=\"no-walkers-text\">";
+    html += "        Tap the 'Add New Walker' button to define the";
+    html += "        walkers participating in this survey";
+    html += "      </div>";
+    html += "    </div>";
+  }
+
   html += "  </body>";
   html += "</html>";
 
@@ -6181,10 +6204,10 @@ void ordinalWalkerMinus() {
 
 void ordinalWalkerToggleSelection() {
   // Toggle selection
-  Boolean val = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get("isSelected");
+  Boolean val = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get(ATTRIB_IS_SELECTED);
   if (val == null)
     val = false;
-  updateWalkerCache(HIGHLIGHTED_ORDINAL_WALKER, "isSelected", !val);
+  updateWalkerCache(HIGHLIGHTED_ORDINAL_WALKER, ATTRIB_IS_SELECTED, !val);
 
   computeConfirmedness();
   redrawWalkers();
@@ -6194,20 +6217,20 @@ void computeConfirmedness() {
   // Reset walkers' isConfirmed property
   for (int i = 0; i < NUM_WALKERS; i++) {
     Map walker = WALKER_CACHE[i];
-    walker.put("isConfirmed", true);
+    walker.put(ATTRIB_IS_CONFIRMED, true);
   }
 
   for (int i = 0; i < NUM_WALKERS; i++) {
     Map walker = WALKER_CACHE[i];
     boolean isConfirmed = walker.equals(WALKER_CACHE_CLEAN[i]);
-    walker.put("isConfirmed", isConfirmed);
+    walker.put(ATTRIB_IS_CONFIRMED, isConfirmed);
   }
 }
 
 boolean ordinalWalkerHasChanges() {
   for (int i = 0; i < NUM_WALKERS; i++) {
     Map walker = WALKER_CACHE[i];
-    if (walker.get("isConfirmed") == false)
+    if (walker.get(ATTRIB_IS_CONFIRMED) == false)
       return true;
   }
   return false;
@@ -6272,10 +6295,10 @@ void ordinalWalkerSave() {
   String q = "REPLACE INTO localSettings(key, value) VALUES";
   for (int i = 0; i < NUM_WALKERS; i++) {
     Map walker = WALKER_CACHE[i];
-    boolean isSelected = walker.get("isSelected");
+    boolean isSelected = walker.get(ATTRIB_IS_SELECTED);
     boolean isLastPart = i == NUM_WALKERS - 1;
 
-    String uuidStr       = walker.get("UUID");
+    String uuidStr       = walker.get(ATTRIB_UUID);
     String isSelectedStr = isSelected ? "1" : "0";
     String orderStr      = i + "";
 
@@ -6294,7 +6317,7 @@ void ordinalWalkerSave() {
       // Mark walkers as confirmed
       for (int i = 0; i < NUM_WALKERS; i++) {
         Map walker = WALKER_CACHE[i];
-        walker.put("isConfirmed", true);
+        walker.put(ATTRIB_IS_CONFIRMED, true);
       }
       ordinalWalkerSaveCleanCache();
 
@@ -6307,7 +6330,7 @@ void ordinalWalkerSave() {
 }
 
 void ordinalWalkerDeleteSelected() {
-  String iden = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get("Identifier");
+  String iden = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get(ATTRIB_IDENTIFIER);
 
   showAlert(
       "Do You Really Want to Delete '" + iden + "'?",
@@ -6318,7 +6341,7 @@ void ordinalWalkerDeleteSelected() {
 }
 
 void ordinalWalkerReallyDelete() {
-  String uuid = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get("UUID");
+  String uuid = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get(ATTRIB_UUID);
 
   DeleteCallback callback = new DeleteCallback() {
     onDelete(uuid) {
