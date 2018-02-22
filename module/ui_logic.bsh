@@ -4480,6 +4480,40 @@ addOnEvent("Walker_Unit/Walker_Unit/Add_Other_M_2",   "click", "addOtherM2()");
 // the 'Add Row' and 'Delete Row' buttons.
 MUTEX_WALKER_UNIT_ROWS = new Semaphore(1);
 
+final String ATTRIB_ANCIENT         = "Ancient";
+final String ATTRIB_HAS_INITIALS    = "hasInitials";
+final String ATTRIB_INITIALS        = "Initials";
+final String ATTRIB_IS_CONFIRMED    = "isConfirmed";
+final String ATTRIB_IS_HIGHLIGHTED  = "isHighlighted";
+final String ATTRIB_IS_MAIN         = "isMain";
+final String ATTRIB_IS_NA           = "isNa";
+final String ATTRIB_IS_ROW_INDEX    = "isRowIndex";
+final String ATTRIB_IS_SELECTED     = "isSelected";
+final String ATTRIB_IS_SIDE         = "isSide";
+final String ATTRIB_IS_WALKER_INDEX = "isWalkerIndex";
+final String ATTRIB_MODERN          = "Modern";
+final String ATTRIB_NA              = "N A";
+
+void initCountAttribs() {
+  COUNT_ATTRIBS_1.add("Ancient");
+  COUNT_ATTRIBS_1.add("Daub");
+  COUNT_ATTRIBS_1.add("HM");
+
+  COUNT_ATTRIBS_2.addAll(getZeroableAttribNames());
+}
+
+List getCountAttribs1() {
+  List l = new ArrayList();
+  l.add("Ancient");
+  l.add("Daub");
+  l.add("HM");
+  return l;
+}
+
+List getCountAttribs2() {
+  return getZeroableAttribNames();
+}
+
 /******************************* GRID - CACHING *******************************/
 // `GRID_CACHE` is a 2-d array. The first two dimensions are the rows and
 // walkers, respectively. Each element accessed by an index, (row, walker),
@@ -4503,6 +4537,44 @@ void initGridCache() {
   }
 }
 
+String getGridCacheUpdateQuery(String uuid, boolean byParentUuid) {
+  String parentJoin = byParentUuid ?
+    " join parentchild on (childuuid = uuid)" :
+    "";
+
+  String whereClause = byParentUuid ?
+    " where parentuuid = {uuid}" :
+    " where uuid       = {uuid}";
+
+  String q = "";
+  q += " select";
+  q += "     uuid,";
+  q += "     rowID,";
+  q += "     walkerID,";
+  q += "     SUM(CASE WHEN attributename IN {cnt_attrs_1} THEN measure ELSE 0 END),";
+  q += "     SUM(CASE WHEN attributename IN {cnt_attrs_2} THEN measure ELSE 0 END),";
+  q += "     MAX(CASE WHEN attributename = 'N A' AND vocabid IS NOT NULL THEN 1 ELSE NULL END)";
+  q += " from latestnondeletedaentvalue join attributekey using (attributeid)";
+  q += parentJoin;
+  q += " join (select uuid, measure as walkerID, valuetimestamp as footimestamp";
+  q += "     from latestnondeletedaentvalue";
+  q += "     join attributekey using (attributeid)";
+  q += "     where attributename = 'Walker ID') USING (uuid)";
+  q += " join (select uuid, measure as rowID";
+  q += "     from latestnondeletedaentvalue";
+  q += "     join attributekey using (attributeid)";
+  q += "     where attributename = 'Row ID') USING (uuid)";
+  q += whereClause;
+  q += " group by uuid, rowID, walkerID";
+  q += " order by footimestamp, rowID, walkerID, attributename";
+
+  q  = replaceFirst(q, "{cnt_attrs_1}", listToSqlString(getCountAttribs1()));
+  q  = replaceFirst(q, "{cnt_attrs_2}", listToSqlString(getCountAttribs2()));
+  q  = replaceFirst(q, "{uuid}", uuid);
+
+  return q;
+}
+
 /* The grid is a 2-d array. The first two dimensions are the rows and walkers,
  * respectively. Each element accessed by an index, (row, walker), contains a
  * map of statistics. In other words, `GRID_CACHE.get(0).get(0)` is a Map.
@@ -4517,25 +4589,11 @@ void updateGridCache(String callback) {
   String parentTabGroup = "Survey_Unit";
   String parentUuid     = getUuid(parentTabGroup);
 
-  String q = "";
-  q += " select uuid, rowID, walkerID, attributename, coalesce(measure, vocabid)";
-  q += " from latestnondeletedaentvalue join attributekey using (attributeid)";
-  q += " join parentchild on (childuuid = uuid)";
-  q += " join (select uuid, measure as walkerID, valuetimestamp as footimestamp";
-  q += "     from latestnondeletedaentvalue";
-  q += "     join attributekey using (attributeid)";
-  q += "     where attributename = 'Walker ID') USING (uuid)";
-  q += " join (select uuid, measure as rowID";
-  q += "     from latestnondeletedaentvalue";
-  q += "     join attributekey using (attributeid)";
-  q += "     where attributename = 'Row ID') USING (uuid)";
-  q += " where parentuuid = {parentUuid}";
-  q += " and attributename in ('Modern', 'Ancient', 'N A')";
-  q += " order by footimestamp, rowID, walkerID, attributename;";
-  q  = replaceFirst(q, "{parentUuid}", parentUuid);
+  String q = getGridCacheUpdateQuery(parentUuid, true);
 
   FetchCallback updateGridCache = new FetchCallback() {
     onFetch(result) {
+      initGridCache();
       updateGridCache(result);
       NUM_RUNNING_GRID_UPDATES.decrementAndGet();
       execute(callback);
@@ -4555,8 +4613,9 @@ void updateGridCache(Object result) {
     int        iRowId = stringToInt(dbRow.get(1));
     String  sWalkerId =             dbRow.get(2) ;
     int     iWalkerId = stringToInt(dbRow.get(2));
-    String attribName =             dbRow.get(3) ;
-    String attribVal  =             dbRow.get(4) ;
+    String ancient    =             dbRow.get(3) ;
+    String modern     =             dbRow.get(4) ;
+    String na         =             dbRow.get(5) ;
 
     if (!isValidInt(   sRowId)) continue;
     if (!isValidInt(sWalkerId)) continue;
@@ -4565,8 +4624,10 @@ void updateGridCache(Object result) {
     if (   iRowId < 1) continue;
     if (iWalkerId < 1) continue;
 
-    updateGridCache(iRowId, iWalkerId, "UUID",     uuid     );
-    updateGridCache(iRowId, iWalkerId, attribName, attribVal);
+    updateGridCache(iRowId, iWalkerId, "UUID",    uuid);
+    updateGridCache(iRowId, iWalkerId, "Ancient", ancient);
+    updateGridCache(iRowId, iWalkerId, "Modern",  modern);
+    updateGridCache(iRowId, iWalkerId, "N A",     na);
   }
 }
 
@@ -4582,89 +4643,62 @@ void updateGridCache(int i, int j, String attribName, attribVal) {
   if (GRID_CACHE == null)
     initGridCache();
 
-  String attribNameNa       = "N A";
-  String attribNameInitials = "Initials";
+  final Boolean TRUE = new Boolean(true);
 
-  String defaultInitials = "&mdash;";
-  String defaultNa       = "N/A";
-  String defaultAncient  = "0";
-  String defaultModern   = "0";
+  final String DEFAULT_ANCIENT  = "0";
+  final String DEFAULT_INITIALS = "&mdash;";
+  final String DEFAULT_MODERN   = "0";
+  final String DEFAULT_NA       = "N/A";
 
   // 1. Get the  `cell` from `GRID_CACHE`.
   Map cell = GRID_CACHE[i][j];
-
-  // 2. Pre-compute some useful facts.
-  Boolean isHighlighted = false;
-  Boolean isSelected    = false;
-  Boolean isRowIndex    = (i >  0 && j == 0);
-  Boolean isWalkerIndex = (i == 0 && j >  0);
-  Boolean isSide        = (i == 0 || j == 0);
-  Boolean isMain        = !isSide;
-  Boolean isConfirmed   = isMain && (cell != null && cell.get("isConfirmed"))
-                                 || attribName.equals("Ancient")
-                                 || attribName.equals("Modern");
-  Boolean isNa          = false;
-  Boolean hasInitials   = false;
-  // 2.1 Compute `isNa`
-  if (cell != null && cell.get(attribNameNa) != null) {
-    String oldVal = cell.get(attribNameNa);
-    isNa = !isNull(oldVal);
-  }
-  if (attribName.equals(attribNameNa)) isNa = !isNull(attribVal);
-  // 2.2 Compute `hasInitials`
-  if (cell != null && cell.get(attribNameInitials) != null) {
-    String oldVal = cell.get(attribNameInitials);
-    hasInitials = !isNull(oldVal) && !oldVal.equals(defaultInitials);
-  }
-  if (attribName.equals(attribNameInitials)) hasInitials = !isNull(attribVal);
-  // 2.3 Compute `isHighlighted`
-  if (cell != null && cell.get("isHighlighted") != null) {
-    Boolean oldVal = cell.get("isHighlighted");
-    isHighlighted = oldVal;
-  }
-  if (attribName.equals("isHighlighted")) isHighlighted = attribVal;
-  // 2.4 Compute `isSelected`
-  if (cell != null && cell.get("isSelected") != null) {
-    Boolean oldVal = cell.get("isSelected");
-    isSelected = oldVal;
-  }
-  if (attribName.equals("isSelected")) isSelected = attribVal;
-  // 2.5 Compute `isConfirmed`
-  if (attribName.equals("isConfirmed")) isConfirmed = attribVal;
-
-  // 3. If no `cell` could be retrieved in step 1, make one.
   if (cell == null) {
-    //cell = Collections.synchronizedMap(new HashMap());
     cell = new HashMap();
     GRID_CACHE[i][j] = cell;
   }
 
-  // 4. Put the (attribName, attribVal) pair.
-  if (!isNull(attribName)) cell.put(attribName, attribVal);
+  if (!isNull(attribName))
+    cell.put(attribName, attribVal);
 
-  // 5. Put the facts which were pre-computed facts in step 2.
-  String na       = "";
-  String ancient  = "0";
-  String modern   = "0";
-  String initials = "&mdash;";
-  if (isNa)        na       = "N/A";
-  if (isConfirmed) ancient  = GRID_CACHE[i][j].get("Ancient");
-  if (isConfirmed) modern   = GRID_CACHE[i][j].get("Modern");
-  if (hasInitials) initials = GRID_CACHE[i][j].get("Initials");
+  // 2. Compute old/default attribute values
+  Boolean isHighlighted = TRUE.equals(cell.get(ATTRIB_IS_HIGHLIGHTED));
+  Boolean isSelected    = TRUE.equals(cell.get(ATTRIB_IS_SELECTED));
+  Boolean isRowIndex    = (i >  0 && j == 0);
+  Boolean isWalkerIndex = (i == 0 && j >  0);
+  Boolean isSide        = (i == 0 || j == 0);
+  Boolean isMain        = !isSide;
+  Boolean isConfirmed   = isMain && TRUE.equals(cell.get(ATTRIB_IS_CONFIRMED))
+                                 || attribName.equals(ATTRIB_ANCIENT)
+                                 || attribName.equals(ATTRIB_MODERN);
+  Boolean isNa          =
+      !ATTRIB_NA.equals(attribName) && TRUE.equals(cell.get(ATTRIB_IS_NA)) ||
+       ATTRIB_NA.equals(attribName) && !isNull(attribVal);
+  Boolean hasInitials   = !isNull(cell.get(ATTRIB_INITIALS)) &&
+                          !DEFAULT_INITIALS.equals(
+                                  cell.get(ATTRIB_INITIALS));
 
-  GRID_CACHE[i][j].put("Ancient"       , ancient      );
-  GRID_CACHE[i][j].put("Initials"      , initials     );
-  GRID_CACHE[i][j].put("Modern"        , modern       );
-  GRID_CACHE[i][j].put("N A"           , na           );
-  GRID_CACHE[i][j].put("hasInitials"   , hasInitials  );
-  GRID_CACHE[i][j].put("isConfirmed"   , isConfirmed  );
-  GRID_CACHE[i][j].put("isHighlighted" , isHighlighted);
-  GRID_CACHE[i][j].put("isMain"        , isMain       );
-  GRID_CACHE[i][j].put("isNa"          , isNa         );
-  GRID_CACHE[i][j].put("isRowIndex"    , isRowIndex   );
-  GRID_CACHE[i][j].put("isSelected"    , isSelected   );
-  GRID_CACHE[i][j].put("isSide"        , isSide       );
-  GRID_CACHE[i][j].put("isWalkerIndex" , isWalkerIndex);
+  String na             = isNa ? DEFAULT_NA : "";
+  String ancient        = cell.get(ATTRIB_ANCIENT) != null ?
+                          cell.get(ATTRIB_ANCIENT) : DEFAULT_ANCIENT;
+  String modern         = cell.get(ATTRIB_MODERN) != null ?
+                          cell.get(ATTRIB_MODERN) : DEFAULT_MODERN;
+  String initials       = hasInitials ? cell.get(ATTRIB_INITIALS) :
+                          DEFAULT_INITIALS;
+
+  // 6. `put` the computed values
+  cell.put(ATTRIB_ANCIENT         , ancient      );
+  cell.put(ATTRIB_HAS_INITIALS    , hasInitials  );
+  cell.put(ATTRIB_INITIALS        , initials     );
+  cell.put(ATTRIB_IS_CONFIRMED    , isConfirmed  );
+  cell.put(ATTRIB_IS_HIGHLIGHTED  , isHighlighted);
+  cell.put(ATTRIB_IS_MAIN         , isMain       );
+  cell.put(ATTRIB_IS_NA           , isNa         );
+  cell.put(ATTRIB_IS_ROW_INDEX    , isRowIndex   );
+  cell.put(ATTRIB_IS_SELECTED     , isSelected   );
+  cell.put(ATTRIB_IS_SIDE         , isSide       );
+  cell.put(ATTRIB_IS_WALKER_INDEX , isWalkerIndex);
+  cell.put(ATTRIB_MODERN          , modern       );
+  cell.put(ATTRIB_NA              , na           );
 }
 
 void updateGridCacheFromUuid(String uuid) {
@@ -4674,21 +4708,7 @@ void updateGridCacheFromUuid(String uuid) {
 void updateGridCacheFromUuid(String parentUuid, String uuid, String callback) {
   NUM_RUNNING_GRID_UPDATES.incrementAndGet();
 
-  String q = "";
-  q += " select uuid, rowID, walkerID, attributename, coalesce(measure, vocabid)";
-  q += " from latestnondeletedaentvalue join attributekey using (attributeid)";
-  q += " join (select uuid, measure as walkerID, valuetimestamp as footimestamp";
-  q += "     from latestnondeletedaentvalue";
-  q += "     join attributekey using (attributeid)";
-  q += "     where attributename = 'Walker ID') USING (uuid)";
-  q += " join (select uuid, measure as rowID";
-  q += "     from latestnondeletedaentvalue";
-  q += "     join attributekey using (attributeid)";
-  q += "     where attributename = 'Row ID') USING (uuid)";
-  q += " where uuid = {uuid}";
-  q += " and attributename in ('Modern', 'Ancient', 'N A')";
-  q += " order by footimestamp, rowID, walkerID, attributename;";
-  q  = replaceFirst(q, "{uuid}", uuid);
+  String q = getGridCacheUpdateQuery(uuid, false);
 
   FetchCallback updateGridCache = new FetchCallback() {
     onFetch(result) {
@@ -4703,7 +4723,9 @@ void updateGridCacheFromUuid(String parentUuid, String uuid, String callback) {
         for (r : result) {
           int rowId    = stringToInt(r.get(1));
           int walkerId = stringToInt(r.get(2));
+
           updateGridCache(rowId, walkerId, "N A", "");
+          continue;
         }
 
         updateGridCache(result);
@@ -4742,38 +4764,6 @@ void setGridInRange(int I, int J, String attribName, attribVal) {
   for   (int i = 0; i <= I; i++)
     for (int j = 0; j <= J; j++)
       GRID_CACHE[i][j].put(attribName, attribVal);
-}
-
-void updateGridCacheNa() {
-  String ref = "Walker_Unit/Walker_Unit/N_A";
-  List   val = getFieldValue(ref);
-
-  String attribName = "N A";
-  String attribVal;
-  if (val.isEmpty()) attribVal = "";
-  else               attribVal = "N/A";
-
-  updateGridCache(selectedRow(), selectedWalker(), attribName, attribVal);
-}
-
-void updateGridCacheAncient() {
-  String ref = "Walker_Unit/Walker_Unit/Ancient";
-  String val = getFieldValue(ref);
-
-  String attribName = "Ancient";
-  String attribVal  = val;
-
-  updateGridCache(selectedRow(), selectedWalker(), attribName, attribVal);
-}
-
-void updateGridCacheModern() {
-  String ref = "Walker_Unit/Walker_Unit/Modern";
-  String val = getFieldValue(ref);
-
-  String attribName = "Modern";
-  String attribVal  = val;
-
-  updateGridCache(selectedRow(), selectedWalker(), attribName, attribVal);
 }
 
 void updateGridWalkers() {
@@ -4923,15 +4913,17 @@ void redrawGrid(boolean doRefreshCache) {
   for (int i = numberOfRows; i >= 0; i--) {
     html += "      <tr>";
     for (int j = 0; j <= numberOfWalkers; j++) {
-      Boolean isHighlighted = GRID_CACHE[i][j].get("isHighlighted");
-      Boolean isSelected    = GRID_CACHE[i][j].get("isSelected");
-      Boolean isRowIndex    = GRID_CACHE[i][j].get("isRowIndex");
-      Boolean isWalkerIndex = GRID_CACHE[i][j].get("isWalkerIndex");
-      Boolean isSide        = GRID_CACHE[i][j].get("isSide");
-      Boolean isMain        = GRID_CACHE[i][j].get("isMain");
-      Boolean isConfirmed   = GRID_CACHE[i][j].get("isConfirmed");
-      Boolean isNa          = GRID_CACHE[i][j].get("isNa");
-      Boolean hasInitials   = GRID_CACHE[i][j].get("hasInitials");
+      HashMap cell = GRID_CACHE[i][j];
+
+      Boolean isHighlighted = cell.get("isHighlighted");
+      Boolean isSelected    = cell.get("isSelected");
+      Boolean isRowIndex    = cell.get("isRowIndex");
+      Boolean isWalkerIndex = cell.get("isWalkerIndex");
+      Boolean isSide        = cell.get("isSide");
+      Boolean isMain        = cell.get("isMain");
+      Boolean isConfirmed   = cell.get("isConfirmed");
+      Boolean isNa          = cell.get("isNa");
+      Boolean hasInitials   = cell.get("hasInitials");
 
       // Build the string of CSS classes to apply to this <td> element
       String  cssClass = "";
@@ -4942,10 +4934,10 @@ void redrawGrid(boolean doRefreshCache) {
       if (isConfirmed  ) cssClass += " confirmed";
 
       // Get the <td> values ('Modern', 'Ancient', 'N/A', ...?)
-      na       = GRID_CACHE[i][j].get("N A");
-      ancient  = GRID_CACHE[i][j].get("Ancient");
-      modern   = GRID_CACHE[i][j].get("Modern");
-      initials = GRID_CACHE[i][j].get("Initials");
+      na       = cell.get("N A");
+      ancient  = cell.get("Ancient");
+      modern   = cell.get("Modern");
+      initials = cell.get("Initials");
 
       // Build the HTML string for this <td>
       String htmlCell = "";
@@ -4971,10 +4963,6 @@ void redrawGrid(boolean doRefreshCache) {
   // Now that the html string has been built, we can populate the web view
   populateWebViewHtml(refGridWebView, html);
 }
-
-void redrawGridNa()      { updateGridCacheNa();      redrawGrid(); }
-void redrawGridAncient() { updateGridCacheAncient(); redrawGrid(); }
-void redrawGridModern()  { updateGridCacheModern();  redrawGrid(); }
 
 int numberOfRows() {
   String ref = "Survey_Unit/Survey_Unit/Number_of_Rows";
@@ -5142,7 +5130,7 @@ void gridRandomAccessWalker() {
   loadOrMakeWalkerUnit();
 }
 
-/******************************** ROW ZEROING *********************************/
+/***************************** GRID - ROW ZEROING *****************************/
 // A queue of the 'Walker Unit' entities which require creation and
 // initialisation to zero.
 WALKER_UNITS_TO_ZERO = new LinkedBlockingQueue();
@@ -5349,6 +5337,17 @@ List getZeroableRefs() {
   return refs;
 }
 
+List getZeroableAttribNames() {
+  List refs = getZeroableRefs();
+  List attribNames = new ArrayList();
+
+  for (String ref : refs) {
+    attribNames.add(getAttributeName(ref));
+  }
+
+  return attribNames;
+}
+
 List createZeroedAttributeList(String rowId, String walkerId) {
   List attribs = createAttributeList();
 
@@ -5404,8 +5403,7 @@ for (ref : getZeroableRefs()) {
   addOnEvent(ref, "blur",  blur );
 }
 
-/********************************** LOADING ***********************************/
-
+/******************************* GRID - LOADING *******************************/
 void loadOrMakeWalkerUnit() {
   int highlightedRow    = highlightedRow   ();
   int highlightedWalker = highlightedWalker();
@@ -5539,9 +5537,7 @@ void saveWalkerUnit() {
   autoSaveAttrs = null;
 }
 
-/*********************************** SAVING ***********************************/
-
-/**************************** MISC EVENT HANDLERS *****************************/
+/************************* GRID - MISC EVENT HANDLERS *************************/
 boolean DO_REDIRECT_TO_WALKER_UNIT = false;
 
 inheritWalkerUnitFields() {
@@ -5689,7 +5685,7 @@ void dequeWalkersToRelateRec() {
 
 addOnEvent("Survey_Unit", "save", "maybeRedirectToWalkerUnit()");
 
-/******************************* EVENT BINDINGS *******************************/
+/*************************** GRID - EVENT BINDINGS ****************************/
 addOnEvent("Walker_Unit/Walker_Unit/Zero_Row_And_Next_1", "click", "zeroRowAndNext()");
 addOnEvent("Walker_Unit/Walker_Unit/Zero_Row_And_Next_2", "click", "zeroRowAndNext()");
 
