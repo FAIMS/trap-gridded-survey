@@ -19,9 +19,15 @@ boolean validateControlMain() {
   String maxGridHeight = "" + (GRID_MAX_HEIGHT - 1);
   String maxGridWidth  = "" + (GRID_MAX_WIDTH  - 1);
 
-  String    head = "Invalid Input(s)";
+  String head       = "Invalid Input(s)";
   String fmtBodyNum = "'{name}' must be an integer between 1 and {max} inclusive.";
   String fmtBodyInt = "'{name}' must be an integer greater than 0.";
+
+  String fmtBodyNumWalkers = "The 'Number of Walkers' field must equal the " +
+    "number of walkers selected in the 'Walkers' tab, however the field is " +
+    "set to {num_w} and the number of selected walkers is {num_s}. Please " +
+    "change the 'Number of Walkers' field or (de)select walkers in the " +
+    "'Walkers' tab.";
 
   if (getFieldValueAsInt(refNumberOfRows) <= 0) {
     String body = replaceFirst(fmtBodyNum, "{name}", archNumberOfRows);
@@ -45,6 +51,14 @@ boolean validateControlMain() {
 
   if (getFieldValueAsInt(refWalkerInterval) <= 0) {
     String body = replaceFirst(fmtBodyInt, "{name}", archWalkerInterval);
+    showWarning(head, body);
+    return false;
+  }
+
+  if (getFieldValueAsInt(refNumberOfWalkers) != getNumCleanWalkersSelected()) {
+    String body = fmtBodyNumWalkers;
+    body = replaceFirst(body, "{num_w}", getFieldValue(refNumberOfWalkers));
+    body = replaceFirst(body, "{num_s}", "" + getNumCleanWalkersSelected());
     showWarning(head, body);
     return false;
   }

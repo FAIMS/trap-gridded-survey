@@ -609,10 +609,10 @@ public class ModuleUtil extends ModuleHelper {
 
     /*
         Type: input
-        Ref:  Survey_Unit/Survey_Unit/Row_Interval
+        Ref:  Survey_Unit/Survey_Unit/Row_Interval_m
      */
-    public static View get_SurveyUnit_SurveyUnit_RowInterval(Solo solo) {
-        String ref = "Survey_Unit/Survey_Unit/Row_Interval";
+    public static View get_SurveyUnit_SurveyUnit_RowIntervalm(Solo solo) {
+        String ref = "Survey_Unit/Survey_Unit/Row_Interval_m";
         return (android.view.View) solo.getView((Object) ref);
     }
 
@@ -627,10 +627,10 @@ public class ModuleUtil extends ModuleHelper {
 
     /*
         Type: input
-        Ref:  Survey_Unit/Survey_Unit/Walker_Interval
+        Ref:  Survey_Unit/Survey_Unit/Walker_Interval_m
      */
-    public static View get_SurveyUnit_SurveyUnit_WalkerInterval(Solo solo) {
-        String ref = "Survey_Unit/Survey_Unit/Walker_Interval";
+    public static View get_SurveyUnit_SurveyUnit_WalkerIntervalm(Solo solo) {
+        String ref = "Survey_Unit/Survey_Unit/Walker_Interval_m";
         return (android.view.View) solo.getView((Object) ref);
     }
 

@@ -97,8 +97,8 @@
               <Shade/>
               <Number_of_Rows/>
               <Number_of_Walkers/>
-              <Row_Interval/>
-              <Walker_Interval/>
+              <Row_Interval_m/>
+              <Walker_Interval_m/>
             </Survey_Unit>
             <Walker_Units>
               <Add_New_Walker_Unit/>
@@ -244,8 +244,8 @@
       <bind nodeset="/faims/Control/Main/Walker_Interval" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Number_of_Rows" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Number_of_Walkers" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Row_Interval" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Walker_Interval" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Row_Interval_m" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Walker_Interval_m" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Row" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Walker" type="decimal"/>
       <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_4/Col_1/Ancient" type="decimal"/>
@@ -563,11 +563,11 @@
         <input faims_attribute_name="Number of Walkers" faims_attribute_type="measure" ref="Number_of_Walkers" faims_read_only="true">
           <label>{Number_of_Walkers}</label>
         </input>
-        <input faims_attribute_name="Row Interval" faims_attribute_type="measure" ref="Row_Interval" faims_read_only="true">
-          <label>{Row_Interval}</label>
+        <input faims_attribute_name="Row Interval m" faims_attribute_type="measure" ref="Row_Interval_m" faims_read_only="true">
+          <label>{Row_Interval__m_}</label>
         </input>
-        <input faims_attribute_name="Walker Interval" faims_attribute_type="measure" ref="Walker_Interval" faims_read_only="true">
-          <label>{Walker_Interval}</label>
+        <input faims_attribute_name="Walker Interval m" faims_attribute_type="measure" ref="Walker_Interval_m" faims_read_only="true">
+          <label>{Walker_Interval__m_}</label>
         </input>
       </group>
       <group ref="Walker_Units" faims_scrollable="false">

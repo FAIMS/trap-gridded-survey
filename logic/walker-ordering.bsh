@@ -64,10 +64,10 @@ void updateWalkerCache(List results) {
     String  identifier =            results.get(i).get(1);
     boolean isSelected = "1".equals(results.get(i).get(2));
 
-    updateWalkerCache(i, "Identifier",  identifier);
-    updateWalkerCache(i, "UUID",        uuid);
-    updateWalkerCache(i, "isConfirmed", true);
-    updateWalkerCache(i, "isSelected",  isSelected);
+    updateWalkerCache(i, ATTRIB_IDENTIFIER,   identifier);
+    updateWalkerCache(i, ATTRIB_UUID,         uuid);
+    updateWalkerCache(i, ATTRIB_IS_CONFIRMED, true);
+    updateWalkerCache(i, ATTRIB_IS_SELECTED,  isSelected);
   }
 
   NUM_WALKERS = results.size();
@@ -75,7 +75,7 @@ void updateWalkerCache(List results) {
   ordinalWalkerSaveCleanCache();
 }
 
-  // Clone WALKER_CACHE into WALKER_CACHE_CLEAN
+// Clone WALKER_CACHE into WALKER_CACHE_CLEAN
 void ordinalWalkerSaveCleanCache() {
   WALKER_CACHE_CLEAN = new HashMap[MAX_NUM_WALKERS];
   for (int i = 0; i < MAX_NUM_WALKERS; i++)
@@ -142,6 +142,24 @@ void redrawWalkers() {
   html += "        text-shadow: 1px 0px #000;";
   html += "        font-weight: 900;";
   html += "      }";
+  html += "      .no-walkers-text, .centering {";
+  html += "        width: 500px;";
+  html += "      }";
+  html += "      .no-walkers-text {";
+  html += "        display: table-cell;";
+  html += "        vertical-align: middle;";
+  html += "        text-align: center;";
+  html += "        font-family: Arial;";
+  html += "        padding: 10% 15%;";
+  html += "        text-shadow: 0px 1px 1px white;";
+  html += "      }";
+  html += "      .centering {";
+  html += "        position: absolute;";
+  html += "        left: 0;";
+  html += "        right: 0;";
+  html += "        margin: auto;";
+  html += "        background: radial-gradient(#adf, white, white);";
+  html += "      }";
   html += "    </style>";
   html += "  </head>";
   html += "  <body>";
@@ -152,8 +170,8 @@ void redrawWalkers() {
     walker = WALKER_CACHE[i];
 
     Boolean isHighlighted = HIGHLIGHTED_ORDINAL_WALKER == i;
-    Boolean isSelected    = walker.get("isSelected");
-    Boolean isConfirmed   = walker.get("isConfirmed");
+    Boolean isSelected    = walker.get(ATTRIB_IS_SELECTED);
+    Boolean isConfirmed   = walker.get(ATTRIB_IS_CONFIRMED);
 
     // Build the string of CSS classes to apply to this <li> element
     String cssClass = "";
@@ -169,7 +187,7 @@ void redrawWalkers() {
     }
 
     // Get the <li> value
-    String identifier = walker.get("Identifier");
+    String identifier = walker.get(ATTRIB_IDENTIFIER);
 
     // Build the HTML string for this <li>
     String htmlCell = "";
@@ -184,8 +202,18 @@ void redrawWalkers() {
     // Add the cell to the existing HTML
     html += htmlCell;
   }
-
   html += "    </table>";
+
+  if (NUM_WALKERS == 0) {
+    html += "    <div class=\"centering\">";
+    html += "      <div class=\"no-walkers-text\">";
+    html += "        Tap the 'Add New Walker' button to define the walkers";
+    html += "        participating in this survey. Walkers you define will";
+    html += "        appear here, in a list.";
+    html += "      </div>";
+    html += "    </div>";
+  }
+
   html += "  </body>";
   html += "</html>";
 
@@ -245,33 +273,47 @@ void ordinalWalkerMinus() {
 
 void ordinalWalkerToggleSelection() {
   // Toggle selection
-  Boolean val = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get("isSelected");
+  Boolean val = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get(ATTRIB_IS_SELECTED);
   if (val == null)
     val = false;
-  updateWalkerCache(HIGHLIGHTED_ORDINAL_WALKER, "isSelected", !val);
+  updateWalkerCache(HIGHLIGHTED_ORDINAL_WALKER, ATTRIB_IS_SELECTED, !val);
 
   computeConfirmedness();
   redrawWalkers();
+}
+
+// Gets the number of selected walkers in the last saved walker list
+int getNumCleanWalkersSelected() {
+  int num = 0;
+  for (int i = 0; i < NUM_WALKERS; i++) {
+    Boolean TRUE = new Boolean(true);
+    Map walker = WALKER_CACHE_CLEAN[i];
+    Boolean isSelected = walker.get(ATTRIB_IS_SELECTED);
+
+    if (TRUE.equals(isSelected))
+      num++;
+  }
+  return num;
 }
 
 void computeConfirmedness() {
   // Reset walkers' isConfirmed property
   for (int i = 0; i < NUM_WALKERS; i++) {
     Map walker = WALKER_CACHE[i];
-    walker.put("isConfirmed", true);
+    walker.put(ATTRIB_IS_CONFIRMED, true);
   }
 
   for (int i = 0; i < NUM_WALKERS; i++) {
     Map walker = WALKER_CACHE[i];
     boolean isConfirmed = walker.equals(WALKER_CACHE_CLEAN[i]);
-    walker.put("isConfirmed", isConfirmed);
+    walker.put(ATTRIB_IS_CONFIRMED, isConfirmed);
   }
 }
 
 boolean ordinalWalkerHasChanges() {
   for (int i = 0; i < NUM_WALKERS; i++) {
     Map walker = WALKER_CACHE[i];
-    if (walker.get("isConfirmed") == false)
+    if (walker.get(ATTRIB_IS_CONFIRMED) == false)
       return true;
   }
   return false;
@@ -336,10 +378,10 @@ void ordinalWalkerSave() {
   String q = "REPLACE INTO localSettings(key, value) VALUES";
   for (int i = 0; i < NUM_WALKERS; i++) {
     Map walker = WALKER_CACHE[i];
-    boolean isSelected = walker.get("isSelected");
+    boolean isSelected = walker.get(ATTRIB_IS_SELECTED);
     boolean isLastPart = i == NUM_WALKERS - 1;
 
-    String uuidStr       = walker.get("UUID");
+    String uuidStr       = walker.get(ATTRIB_UUID);
     String isSelectedStr = isSelected ? "1" : "0";
     String orderStr      = i + "";
 
@@ -358,7 +400,7 @@ void ordinalWalkerSave() {
       // Mark walkers as confirmed
       for (int i = 0; i < NUM_WALKERS; i++) {
         Map walker = WALKER_CACHE[i];
-        walker.put("isConfirmed", true);
+        walker.put(ATTRIB_IS_CONFIRMED, true);
       }
       ordinalWalkerSaveCleanCache();
 
@@ -371,7 +413,7 @@ void ordinalWalkerSave() {
 }
 
 void ordinalWalkerDeleteSelected() {
-  String iden = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get("Identifier");
+  String iden = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get(ATTRIB_IDENTIFIER);
 
   showAlert(
       "Do You Really Want to Delete '" + iden + "'?",
@@ -382,7 +424,7 @@ void ordinalWalkerDeleteSelected() {
 }
 
 void ordinalWalkerReallyDelete() {
-  String uuid = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get("UUID");
+  String uuid = WALKER_CACHE[HIGHLIGHTED_ORDINAL_WALKER].get(ATTRIB_UUID);
 
   DeleteCallback callback = new DeleteCallback() {
     onDelete(uuid) {

@@ -7,6 +7,7 @@ MUTEX_WALKER_UNIT_ROWS = new Semaphore(1);
 
 final String ATTRIB_ANCIENT         = "Ancient";
 final String ATTRIB_HAS_INITIALS    = "hasInitials";
+final String ATTRIB_IDENTIFIER      = "Identifier";
 final String ATTRIB_INITIALS        = "Initials";
 final String ATTRIB_IS_CONFIRMED    = "isConfirmed";
 final String ATTRIB_IS_HIGHLIGHTED  = "isHighlighted";
@@ -18,14 +19,7 @@ final String ATTRIB_IS_SIDE         = "isSide";
 final String ATTRIB_IS_WALKER_INDEX = "isWalkerIndex";
 final String ATTRIB_MODERN          = "Modern";
 final String ATTRIB_NA              = "N A";
-
-void initCountAttribs() {
-  COUNT_ATTRIBS_1.add("Ancient");
-  COUNT_ATTRIBS_1.add("Daub");
-  COUNT_ATTRIBS_1.add("HM");
-
-  COUNT_ATTRIBS_2.addAll(getZeroableAttribNames());
-}
+final String ATTRIB_UUID            = "UUID";
 
 List getCountAttribs1() {
   List l = new ArrayList();
@@ -149,10 +143,10 @@ void updateGridCache(Object result) {
     if (   iRowId < 1) continue;
     if (iWalkerId < 1) continue;
 
-    updateGridCache(iRowId, iWalkerId, "UUID",    uuid);
-    updateGridCache(iRowId, iWalkerId, "Ancient", ancient);
-    updateGridCache(iRowId, iWalkerId, "Modern",  modern);
-    updateGridCache(iRowId, iWalkerId, "N A",     na);
+    updateGridCache(iRowId, iWalkerId, ATTRIB_UUID,    uuid);
+    updateGridCache(iRowId, iWalkerId, ATTRIB_ANCIENT, ancient);
+    updateGridCache(iRowId, iWalkerId, ATTRIB_MODERN,  modern);
+    updateGridCache(iRowId, iWalkerId, ATTRIB_NA,      na);
   }
 }
 
@@ -249,7 +243,7 @@ void updateGridCacheFromUuid(String parentUuid, String uuid, String callback) {
           int rowId    = stringToInt(r.get(1));
           int walkerId = stringToInt(r.get(2));
 
-          updateGridCache(rowId, walkerId, "N A", "");
+          updateGridCache(rowId, walkerId, ATTRIB_NA, "");
           continue;
         }
 
@@ -277,11 +271,11 @@ void unhighlightAll() {
 }
 
 void deselectAll(int I, int J) {
-  setGridInRange(I, J, "isSelected", false);
+  setGridInRange(I, J, ATTRIB_IS_SELECTED, false);
 }
 
 void unhighlightAll(int I, int J) {
-  setGridInRange(I, J, "isHighlighted", false);
+  setGridInRange(I, J, ATTRIB_IS_HIGHLIGHTED, false);
 }
 
 void setGridInRange(int I, int J, String attribName, attribVal) {
@@ -326,7 +320,7 @@ void updateGridWalkers() {
 void updateGridWalkers(Object result) {
   // 1. Clear walkers
   for (int i = 0; i < GRID_MAX_WIDTH; i++) {
-    updateGridCache(0, i, "Initials", "");
+    updateGridCache(0, i, ATTRIB_INITIALS, "");
   }
 
   // 2. Insert new walkers
@@ -336,8 +330,8 @@ void updateGridWalkers(Object result) {
     String initials  =             dbRow.get(1);
     String uuid      =             dbRow.get(2);
 
-    updateGridCache(0, iWalkerId, "Initials", initials);
-    updateGridCache(0, iWalkerId, "UUID",     uuid    );
+    updateGridCache(0, iWalkerId, ATTRIB_INITIALS, initials);
+    updateGridCache(0, iWalkerId, ATTRIB_UUID,       uuid    );
   }
 }
 
@@ -347,14 +341,14 @@ List getWalkerRels() {
   int orderInt = 1;
   for (int i = 0; i < NUM_WALKERS; i++) {
     walker = WALKER_CACHE_CLEAN[i];
-    Boolean isSel = walker.get("isSelected");
+    Boolean isSel = walker.get(ATTRIB_IS_SELECTED);
 
     if (isSel == null) isSel = false;
     if (!isSel)        continue;
 
     String parentEntityRef = "Survey_Unit";
     String parentUuid      = getUuid(parentEntityRef);
-    String childUuid       = walker.get("UUID");
+    String childUuid       = walker.get(ATTRIB_UUID);
     String order           = orderInt++ + "";
 
     List rel = new ArrayList();
@@ -440,15 +434,15 @@ void redrawGrid(boolean doRefreshCache) {
     for (int j = 0; j <= numberOfWalkers; j++) {
       HashMap cell = GRID_CACHE[i][j];
 
-      Boolean isHighlighted = cell.get("isHighlighted");
-      Boolean isSelected    = cell.get("isSelected");
-      Boolean isRowIndex    = cell.get("isRowIndex");
-      Boolean isWalkerIndex = cell.get("isWalkerIndex");
-      Boolean isSide        = cell.get("isSide");
-      Boolean isMain        = cell.get("isMain");
-      Boolean isConfirmed   = cell.get("isConfirmed");
-      Boolean isNa          = cell.get("isNa");
-      Boolean hasInitials   = cell.get("hasInitials");
+      Boolean hasInitials   = cell.get(ATTRIB_HAS_INITIALS);
+      Boolean isConfirmed   = cell.get(ATTRIB_IS_CONFIRMED);
+      Boolean isHighlighted = cell.get(ATTRIB_IS_HIGHLIGHTED);
+      Boolean isMain        = cell.get(ATTRIB_IS_MAIN);
+      Boolean isNa          = cell.get(ATTRIB_IS_NA);
+      Boolean isRowIndex    = cell.get(ATTRIB_IS_ROW_INDEX);
+      Boolean isSelected    = cell.get(ATTRIB_IS_SELECTED);
+      Boolean isSide        = cell.get(ATTRIB_IS_SIDE);
+      Boolean isWalkerIndex = cell.get(ATTRIB_IS_WALKER_INDEX);
 
       // Build the string of CSS classes to apply to this <td> element
       String  cssClass = "";
@@ -459,10 +453,10 @@ void redrawGrid(boolean doRefreshCache) {
       if (isConfirmed  ) cssClass += " confirmed";
 
       // Get the <td> values ('Modern', 'Ancient', 'N/A', ...?)
-      na       = cell.get("N A");
-      ancient  = cell.get("Ancient");
-      modern   = cell.get("Modern");
-      initials = cell.get("Initials");
+      na       = cell.get(ATTRIB_NA);
+      ancient  = cell.get(ATTRIB_ANCIENT);
+      modern   = cell.get(ATTRIB_MODERN);
+      initials = cell.get(ATTRIB_INITIALS);
 
       // Build the HTML string for this <td>
       String htmlCell = "";
@@ -568,7 +562,7 @@ void highlightedRow(int newVal) {
   setFieldValue(ref, sNewVal);
 
   unhighlightAll();
-  updateGridCache(iNewVal, highlightedWalker, "isHighlighted", true);
+  updateGridCache(iNewVal, highlightedWalker, ATTRIB_IS_HIGHLIGHTED, true);
 }
 
 int selectedRow() {
@@ -604,7 +598,7 @@ void highlightedWalker(int newVal) {
   setFieldValue(ref, sNewVal);
 
   unhighlightAll();
-  updateGridCache(highlightedRow, iNewVal, "isHighlighted", true);
+  updateGridCache(highlightedRow, iNewVal, ATTRIB_IS_HIGHLIGHTED, true);
 }
 
 int selectedWalker() {
@@ -675,7 +669,7 @@ void zeroRowAndNext() {
   // Populate `unsavedWalkerIds`
   for (int i = 1; i <= numberOfWalkers(); i++) {
     // We take "isConfirmed" to be synonymous with "is saved".
-    Boolean isConfirmed = GRID_CACHE[selectedRow][i].get("isConfirmed");
+    Boolean isConfirmed = GRID_CACHE[selectedRow][i].get(ATTRIB_IS_CONFIRMED);
     if (isConfirmed != null && isConfirmed == true) continue;
 
     String walkerId = String.valueOf(i);
@@ -765,7 +759,7 @@ void dequeWalkerUnitsToZeroRec() {
   // Save 'Walker Unit'. This should create a new record as opposed to
   // overwriting an existing one.
   saveArchEnt(uuid, entityType, geometry, attributes, relate);
-  updateGridCache(iRowId, iWalkerId, "isConfirmed", true);
+  updateGridCache(iRowId, iWalkerId, ATTRIB_IS_CONFIRMED, true);
 }
 
 String getSavingHtml() {
@@ -916,7 +910,7 @@ void blankIfZero(String ref) {
 }
 
 float rowInterval() {
-  String ref = "Survey_Unit/Survey_Unit/Row_Interval";
+  String ref = "Survey_Unit/Survey_Unit/Row_Interval_m";
   return getFieldValueAsFloat(ref);
 }
 
@@ -957,7 +951,7 @@ void loadOrMakeWalkerUnit() {
   highlightedWalker(highlightedWalker);
 
   // Load or make walker unit
-  String uuid = GRID_CACHE[highlightedRow][highlightedWalker].get("UUID");
+  String uuid = GRID_CACHE[highlightedRow][highlightedWalker].get(ATTRIB_UUID);
   if (uuid == null) {
     parentTabgroup = "Survey_Unit";
     newWalkerUnit();
@@ -968,13 +962,13 @@ void loadOrMakeWalkerUnit() {
 
 void onLoadWalkerUnit() {
   deselectAll();
-  updateGridCache(selectedRow(), selectedWalker(), "isSelected", true);
+  updateGridCache(selectedRow(), selectedWalker(), ATTRIB_IS_SELECTED, true);
   redrawGrid();
 }
 
 void onCreateWalkerUnit() {
   deselectAll();
-  updateGridCache(highlightedRow(), highlightedWalker(), "isSelected",  true);
+  updateGridCache(highlightedRow(), highlightedWalker(), ATTRIB_IS_SELECTED,  true);
   redrawGrid();
 }
 

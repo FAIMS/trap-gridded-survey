@@ -202,8 +202,8 @@ Use the '▲', '▼' and '(De)select' buttons to choose walkers for your team. S
     </Shade>
     <Number_of_Rows     b="decimal" f="readonly" i="Control/Main/Number_of_Rows"/>
     <Number_of_Walkers  b="decimal" f="readonly" i="Control/Main/Number_of_Walkers"/>
-    <Row_Interval       b="decimal" f="readonly" i="Control/Main/Row_Interval"/>
-    <Walker_Interval    b="decimal" f="readonly" i="Control/Main/Walker_Interval"/>
+    <Row_Interval_m     b="decimal" f="readonly" i="Control/Main/Row_Interval">Row Interval (m)</Row_Interval_m>
+    <Walker_Interval_m  b="decimal" f="readonly" i="Control/Main/Walker_Interval">Walker Interval (m)</Walker_Interval_m>
   </Survey_Unit>
   <Walker_Units f="noscroll">
     <Add_New_Walker_Unit lc="Walker_Unit" t="button">
