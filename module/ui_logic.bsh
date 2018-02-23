@@ -5842,9 +5842,15 @@ boolean validateControlMain() {
   String maxGridHeight = "" + (GRID_MAX_HEIGHT - 1);
   String maxGridWidth  = "" + (GRID_MAX_WIDTH  - 1);
 
-  String    head = "Invalid Input(s)";
+  String head       = "Invalid Input(s)";
   String fmtBodyNum = "'{name}' must be an integer between 1 and {max} inclusive.";
   String fmtBodyInt = "'{name}' must be an integer greater than 0.";
+
+  String fmtBodyNumWalkers = "The 'Number of Walkers' field must equal the " +
+    "number of walkers selected in the 'Walkers' tab, however the field is " +
+    "set to {num_w} and the number of selected walkers is {num_s}. Please " +
+    "change the 'Number of Walkers' field or (de)select walkers in the " +
+    "'Walkers' tab.";
 
   if (getFieldValueAsInt(refNumberOfRows) <= 0) {
     String body = replaceFirst(fmtBodyNum, "{name}", archNumberOfRows);
@@ -5868,6 +5874,14 @@ boolean validateControlMain() {
 
   if (getFieldValueAsInt(refWalkerInterval) <= 0) {
     String body = replaceFirst(fmtBodyInt, "{name}", archWalkerInterval);
+    showWarning(head, body);
+    return false;
+  }
+
+  if (getFieldValueAsInt(refNumberOfWalkers) != getNumCleanWalkersSelected()) {
+    String body = fmtBodyNumWalkers;
+    body = replaceFirst(body, "{num_w}", getFieldValue(refNumberOfWalkers));
+    body = replaceFirst(body, "{num_s}", "" + getNumCleanWalkersSelected());
     showWarning(head, body);
     return false;
   }
@@ -6005,7 +6019,7 @@ void updateWalkerCache(List results) {
   ordinalWalkerSaveCleanCache();
 }
 
-  // Clone WALKER_CACHE into WALKER_CACHE_CLEAN
+// Clone WALKER_CACHE into WALKER_CACHE_CLEAN
 void ordinalWalkerSaveCleanCache() {
   WALKER_CACHE_CLEAN = new HashMap[MAX_NUM_WALKERS];
   for (int i = 0; i < MAX_NUM_WALKERS; i++)
@@ -6073,16 +6087,14 @@ void redrawWalkers() {
   html += "        font-weight: 900;";
   html += "      }";
   html += "      .no-walkers-text, .centering {";
-  html += "        width:  500px;";
-  html += "        height: 500px;";
+  html += "        width: 500px;";
   html += "      }";
   html += "      .no-walkers-text {";
   html += "        display: table-cell;";
   html += "        vertical-align: middle;";
   html += "        text-align: center;";
   html += "        font-family: Arial;";
-  html += "        padding-left: 25%;";
-  html += "        padding-right: 25%;";
+  html += "        padding: 10% 15%;";
   html += "        text-shadow: 0px 1px 1px white;";
   html += "      }";
   html += "      .centering {";
@@ -6090,7 +6102,7 @@ void redrawWalkers() {
   html += "        left: 0;";
   html += "        right: 0;";
   html += "        margin: auto;";
-  html += "        background: radial-gradient(circle, #6bf, white, white);";
+  html += "        background: radial-gradient(#adf, white, white);";
   html += "      }";
   html += "    </style>";
   html += "  </head>";
@@ -6139,8 +6151,9 @@ void redrawWalkers() {
   if (NUM_WALKERS == 0) {
     html += "    <div class=\"centering\">";
     html += "      <div class=\"no-walkers-text\">";
-    html += "        Tap the 'Add New Walker' button to define the";
-    html += "        walkers participating in this survey";
+    html += "        Tap the 'Add New Walker' button to define the walkers";
+    html += "        participating in this survey. Walkers you define will";
+    html += "        appear here, in a list.";
     html += "      </div>";
     html += "    </div>";
   }
@@ -6211,6 +6224,20 @@ void ordinalWalkerToggleSelection() {
 
   computeConfirmedness();
   redrawWalkers();
+}
+
+// Gets the number of selected walkers in the last saved walker list
+int getNumCleanWalkersSelected() {
+  int num = 0;
+  for (int i = 0; i < NUM_WALKERS; i++) {
+    Boolean TRUE = new Boolean(true);
+    Map walker = WALKER_CACHE_CLEAN[i];
+    Boolean isSelected = walker.get(ATTRIB_IS_SELECTED);
+
+    if (TRUE.equals(isSelected))
+      num++;
+  }
+  return num;
 }
 
 void computeConfirmedness() {

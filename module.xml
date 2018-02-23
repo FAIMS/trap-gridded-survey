@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--TODO: The 'Walkers' webview needs to say something nice when there aren't any walkers-->
-<!--TODO: Upon clicking "Add New Survey Unit', if the 'Number of Walkers' doesn't match the number of selected walkers, there should be a warning-->
-<!--TODO: Use final globals instead of "isRowIndex", etc-->
 <!--@POSTPROC: ./postproc.sh -->
 <module>
 
