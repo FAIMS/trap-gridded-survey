@@ -73,7 +73,7 @@
     </cols>
     <Walker_Guide t="webview" f="nolabel">
       <markdown>
-Use the '▲', '▼' and '(De)select' buttons to choose walkers for your team. Selected walkers will be numbered and in green. Walker no.1 is left-most.
+Use the '▲', '▼' and '(De)select' buttons to choose walkers for your team. Selected walkers will be numbered and in green. Walker no.1 is the left-most.
       </markdown>
     </Walker_Guide>
     <Walkers t="webview"/>

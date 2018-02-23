@@ -4066,7 +4066,7 @@ void incAutoNum(String destPath) {
 /*                         POPULATION VIA <MARKDOWN>                          */
 /******************************************************************************/
 populateWebViewHtml("Control/Main/Guide_Defaults", "<p>Enter below the daily defaults - the dominant environmental characteristics of study area</p>\n");
-populateWebViewHtml("Control/Walkers/Walker_Guide", "<p>Use the ‘▲’, ‘▼’ and ‘(De)select’ buttons to choose walkers for your team. Selected walkers will be numbered and in green. Walker no.1 is left-most.</p>\n");
+populateWebViewHtml("Control/Walkers/Walker_Guide", "<p>Use the ‘▲’, ‘▼’ and ‘(De)select’ buttons to choose walkers for your team. Selected walkers will be numbered and in green. Walker no.1 is the left-most.</p>\n");
 populateWebViewHtml("Walker/Walker/Help", "<p><strong>Warning:</strong> Deleting this Walker will disassociate it from all the Survey Units in which it appears.</p>\n");
 populateWebViewHtml("Walker_Unit/Walker_Unit/Guide_Counts", "<p>Enter <strong>raw count</strong> or click the m<sup>2</sup> button to enter <strong>density</strong> per square m.</p>\n");
 
