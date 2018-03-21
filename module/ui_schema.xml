@@ -162,27 +162,13 @@
                   <Add_Ancient_M_2/>
                 </Col_2>
                 <Col_3>
-                  <HM/>
+                  <Modern/>
                 </Col_3>
                 <Col_4>
-                  <Add_HM_M_2/>
+                  <Add_Modern_M_2/>
                 </Col_4>
               </Colgroup_4>
               <Colgroup_5>
-                <Col_1>
-                  <Modern/>
-                </Col_1>
-                <Col_2>
-                  <Add_Modern_M_2/>
-                </Col_2>
-                <Col_3>
-                  <Lithic/>
-                </Col_3>
-                <Col_4>
-                  <Add_Lithic_M_2/>
-                </Col_4>
-              </Colgroup_5>
-              <Colgroup_6>
                 <Col_1>
                   <A_C/>
                 </Col_1>
@@ -190,18 +176,32 @@
                   <Add_A_C_M_2/>
                 </Col_2>
                 <Col_3>
-                  <Glass/>
+                  <HM/>
                 </Col_3>
                 <Col_4>
-                  <Add_Glass_M_2/>
+                  <Add_HM_M_2/>
+                </Col_4>
+              </Colgroup_5>
+              <Colgroup_6>
+                <Col_1>
+                  <Lithic/>
+                </Col_1>
+                <Col_2>
+                  <Add_Lithic_M_2/>
+                </Col_2>
+                <Col_3>
+                  <Daub/>
+                </Col_3>
+                <Col_4>
+                  <Add_Daub_M_2/>
                 </Col_4>
               </Colgroup_6>
               <Colgroup_7>
                 <Col_1>
-                  <Daub/>
+                  <Glass/>
                 </Col_1>
                 <Col_2>
-                  <Add_Daub_M_2/>
+                  <Add_Glass_M_2/>
                 </Col_2>
                 <Col_3>
                   <Other/>
@@ -249,12 +249,12 @@
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Row" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Walker" type="decimal"/>
       <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_4/Col_1/Ancient" type="decimal"/>
-      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_4/Col_3/HM" type="decimal"/>
-      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_5/Col_1/Modern" type="decimal"/>
-      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_5/Col_3/Lithic" type="decimal"/>
-      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_6/Col_1/A_C" type="decimal"/>
-      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_6/Col_3/Glass" type="decimal"/>
-      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_7/Col_1/Daub" type="decimal"/>
+      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_4/Col_3/Modern" type="decimal"/>
+      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_5/Col_1/A_C" type="decimal"/>
+      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_5/Col_3/HM" type="decimal"/>
+      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_6/Col_1/Lithic" type="decimal"/>
+      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_6/Col_3/Daub" type="decimal"/>
+      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_7/Col_1/Glass" type="decimal"/>
       <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_7/Col_3/Other" type="decimal"/>
       <bind nodeset="/faims/Walker_Unit/Vars/Row_ID" type="decimal"/>
       <bind nodeset="/faims/Walker_Unit/Vars/Walker_ID" type="decimal"/>
@@ -700,45 +700,18 @@
           </group>
           <group ref="Col_3" faims_style="even">
             <label/>
-            <input faims_attribute_name="HM" faims_attribute_type="measure" ref="HM">
-              <label>{HM}</label>
-            </input>
-          </group>
-          <group ref="Col_4" faims_style="even">
-            <label/>
-            <trigger ref="Add_HM_M_2">
-              <label>{HM_m_}</label>
-            </trigger>
-          </group>
-        </group>
-        <group ref="Colgroup_5" faims_style="orientation">
-          <label/>
-          <group ref="Col_1" faims_style="even">
-            <label/>
             <input faims_attribute_name="Modern" faims_attribute_type="measure" ref="Modern">
               <label>{Modern}</label>
             </input>
           </group>
-          <group ref="Col_2" faims_style="even">
+          <group ref="Col_4" faims_style="even">
             <label/>
             <trigger ref="Add_Modern_M_2">
               <label>{Mod__m_}</label>
             </trigger>
           </group>
-          <group ref="Col_3" faims_style="even">
-            <label/>
-            <input faims_attribute_name="Lithic" faims_attribute_type="measure" ref="Lithic">
-              <label>{Lithic}</label>
-            </input>
-          </group>
-          <group ref="Col_4" faims_style="even">
-            <label/>
-            <trigger ref="Add_Lithic_M_2">
-              <label>{Lit__m_}</label>
-            </trigger>
-          </group>
         </group>
-        <group ref="Colgroup_6" faims_style="orientation">
+        <group ref="Colgroup_5" faims_style="orientation">
           <label/>
           <group ref="Col_1" faims_style="even">
             <label/>
@@ -754,14 +727,41 @@
           </group>
           <group ref="Col_3" faims_style="even">
             <label/>
-            <input faims_attribute_name="Glass" faims_attribute_type="measure" ref="Glass">
-              <label>{Glass}</label>
+            <input faims_attribute_name="HM" faims_attribute_type="measure" ref="HM">
+              <label>{HM}</label>
             </input>
           </group>
           <group ref="Col_4" faims_style="even">
             <label/>
-            <trigger ref="Add_Glass_M_2">
-              <label>{Gla__m_}</label>
+            <trigger ref="Add_HM_M_2">
+              <label>{HM_m_}</label>
+            </trigger>
+          </group>
+        </group>
+        <group ref="Colgroup_6" faims_style="orientation">
+          <label/>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Lithic" faims_attribute_type="measure" ref="Lithic">
+              <label>{Lithic}</label>
+            </input>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <trigger ref="Add_Lithic_M_2">
+              <label>{Lit__m_}</label>
+            </trigger>
+          </group>
+          <group ref="Col_3" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Daub" faims_attribute_type="measure" ref="Daub">
+              <label>{Daub}</label>
+            </input>
+          </group>
+          <group ref="Col_4" faims_style="even">
+            <label/>
+            <trigger ref="Add_Daub_M_2">
+              <label>{Dau__m_}</label>
             </trigger>
           </group>
         </group>
@@ -769,14 +769,14 @@
           <label/>
           <group ref="Col_1" faims_style="even">
             <label/>
-            <input faims_attribute_name="Daub" faims_attribute_type="measure" ref="Daub">
-              <label>{Daub}</label>
+            <input faims_attribute_name="Glass" faims_attribute_type="measure" ref="Glass">
+              <label>{Glass}</label>
             </input>
           </group>
           <group ref="Col_2" faims_style="even">
             <label/>
-            <trigger ref="Add_Daub_M_2">
-              <label>{Dau__m_}</label>
+            <trigger ref="Add_Glass_M_2">
+              <label>{Gla__m_}</label>
             </trigger>
           </group>
           <group ref="Col_3" faims_style="even">

@@ -1,5 +1,5 @@
 /*
- * GENERATED WITH FAIMS-TOOLS, SHA1: 41e3fa0c7da4b8f4f5f85e8bcf5b9b2d1375c7b4
+ * GENERATED WITH FAIMS-TOOLS, SHA1: 7e894f9d56640030959176b1292b187fe1a547b7
  */
 import android.util.Log;
 import android.os.Build.MODEL;
@@ -343,18 +343,18 @@ REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Next_Walker_Unit_1", "button");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Guide_Counts", "webview");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Ancient", "input");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Add_Ancient_M_2", "button");
-REF_TO_TYPE.put("Walker_Unit/Walker_Unit/HM", "input");
-REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Add_HM_M_2", "button");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Modern", "input");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Add_Modern_M_2", "button");
-REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Lithic", "input");
-REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Add_Lithic_M_2", "button");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/A_C", "input");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Add_A_C_M_2", "button");
-REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Glass", "input");
-REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Add_Glass_M_2", "button");
+REF_TO_TYPE.put("Walker_Unit/Walker_Unit/HM", "input");
+REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Add_HM_M_2", "button");
+REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Lithic", "input");
+REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Add_Lithic_M_2", "button");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Daub", "input");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Add_Daub_M_2", "button");
+REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Glass", "input");
+REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Add_Glass_M_2", "button");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Other", "input");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Add_Other_M_2", "button");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Notes", "input");
@@ -400,12 +400,12 @@ DATA_REFS.add("Walker/Walker/Last_Name");
 DATA_REFS.add("Walker/Walker/Initials");
 DATA_REFS.add("Walker_Unit/Walker_Unit/N_A");
 DATA_REFS.add("Walker_Unit/Walker_Unit/Ancient");
-DATA_REFS.add("Walker_Unit/Walker_Unit/HM");
 DATA_REFS.add("Walker_Unit/Walker_Unit/Modern");
-DATA_REFS.add("Walker_Unit/Walker_Unit/Lithic");
 DATA_REFS.add("Walker_Unit/Walker_Unit/A_C");
-DATA_REFS.add("Walker_Unit/Walker_Unit/Glass");
+DATA_REFS.add("Walker_Unit/Walker_Unit/HM");
+DATA_REFS.add("Walker_Unit/Walker_Unit/Lithic");
 DATA_REFS.add("Walker_Unit/Walker_Unit/Daub");
+DATA_REFS.add("Walker_Unit/Walker_Unit/Glass");
 DATA_REFS.add("Walker_Unit/Walker_Unit/Other");
 DATA_REFS.add("Walker_Unit/Walker_Unit/Notes");
 DATA_REFS.add("Walker_Unit/Walker_Unit/Chronology");

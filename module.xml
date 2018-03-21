@@ -276,20 +276,10 @@ Enter **raw count** or click the m^2^ button to enter **density** per square m.
       <Add_Ancient_M_2 t="button">
         Anc. m&#178;
       </Add_Ancient_M_2>
-      <HM     b="decimal"/>
-      <Add_HM_M_2 t="button">
-        HM m&#178;
-      </Add_HM_M_2>
-    </cols>
-    <cols>
       <Modern  b="decimal"/>
       <Add_Modern_M_2  t="button">
         Mod. m&#178;
       </Add_Modern_M_2>
-      <Lithic b="decimal"/>
-      <Add_Lithic_M_2 t="button">
-        Lit. m&#178;
-      </Add_Lithic_M_2>
     </cols>
     <cols>
       <A_C     b="decimal">
@@ -298,16 +288,26 @@ Enter **raw count** or click the m^2^ button to enter **density** per square m.
       <Add_A_C_M_2     t="button">
         A/C m&#178;
       </Add_A_C_M_2>
-      <Glass  b="decimal"/>
-      <Add_Glass_M_2     t="button">
-        Gla. m&#178;
-      </Add_Glass_M_2>
+      <HM     b="decimal"/>
+      <Add_HM_M_2 t="button">
+        HM m&#178;
+      </Add_HM_M_2>
     </cols>
     <cols>
+      <Lithic b="decimal"/>
+      <Add_Lithic_M_2 t="button">
+        Lit. m&#178;
+      </Add_Lithic_M_2>
       <Daub b="decimal"/>
       <Add_Daub_M_2 t="button">
         Dau. m&#178;
       </Add_Daub_M_2>
+    </cols>
+    <cols>
+      <Glass  b="decimal"/>
+      <Add_Glass_M_2     t="button">
+        Gla. m&#178;
+      </Add_Glass_M_2>
       <Other  b="decimal"/>
       <Add_Other_M_2 t="button">
         Oth. m&#178;
