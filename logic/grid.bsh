@@ -1158,7 +1158,9 @@ void maybeRedirectToWalkerUnit() {
     DO_REDIRECT_TO_WALKER_UNIT = false;
     onClickSurveyUnitAddNewWalkerUnit();
   }
+}
 
+void enqueueWalkersToRelate() {
   WALKERS_TO_RELATE.addAll(getWalkerRels());
   dequeWalkersToRelate();
 }
@@ -1203,6 +1205,7 @@ void dequeWalkersToRelateRec() {
 }
 
 addOnEvent("Survey_Unit", "save", "maybeRedirectToWalkerUnit()");
+addOnEvent("Survey_Unit", "firstsave", "enqueueWalkersToRelate()");
 
 /*************************** GRID - EVENT BINDINGS ****************************/
 addOnEvent("Walker_Unit/Walker_Unit/Zero_Row_And_Next_1", "click", "zeroRowAndNext()");

@@ -1,5 +1,5 @@
 /*
- * GENERATED WITH FAIMS-TOOLS, SHA1: 7e894f9d56640030959176b1292b187fe1a547b7
+ * GENERATED WITH FAIMS-TOOLS, SHA1: d5f821b3e1be6c33ac2b2d62711b35f809d0d8c7
  */
 import android.util.Log;
 import android.os.Build.MODEL;
@@ -785,7 +785,8 @@ String getRefMatching(String pattern) {
 /*         events more consistent.                                            */
 /*   - "copy" --- Triggered as a record is duplicated, immediately before it  */
 /*         is first saved.                                                    */
-/*   - "create" --- Triggered after a record is first created.                */
+/*   - "create" --- Triggered after a savable, auto-generated tab group is    */
+/*         shown (but possibly before the "show" event is triggered).         */
 /*   - "delete" --- Triggered after a record is deleted.                      */
 /*   - "prefetch" --- Triggered before the "fetch" event. More specifically,  */
 /*         this event is triggered before a tab group is fetched and          */
@@ -800,6 +801,9 @@ String getRefMatching(String pattern) {
 /*   - "save" --- Triggered each time a tab group is saved. This includes the */
 /*         first time the tab group is saved as well as subsequent            */
 /*         onSave(String, Boolean) calls.                                     */
+/*   - "firstsave" --- Similar to "save", but only triggered upon the first   */
+/*         save (i.e. the save which creates the arch ent). When this event   */
+/*         is triggered, it occurs immediately before the "save" event.       */
 /*                                                                            */
 /* Additionally, the binding accumulator augments the "load" event so that    */
 /* the `statement` in addOnEvent("module", "load", statement) gets executed   */
@@ -836,6 +840,7 @@ CUSTOM_EVENTS.add("focus");
 CUSTOM_EVENTS.add("leave");
 CUSTOM_EVENTS.add("prefetch");
 CUSTOM_EVENTS.add("save");
+CUSTOM_EVENTS.add("firstsave");
 
 List getPrioritised(String statement, int priority) {
   List prioritised = new ArrayList();
@@ -3077,12 +3082,18 @@ void saveTabGroup(String tabgroup, String callback) {
   Boolean userWasSet          = !username.equals("");
 
   callback += "; " + fun2str("executeOnEvent", new Object[]{tabgroup, "save"});
+  callbackFirstSave =
+    fun2str("executeOnEvent", new Object[]{tabgroup, "firstsave"}) + "; " +
+    callback;
 
   parentTabgroup = null;
 
   SaveCallback saveCallback  = new SaveCallback() {
     onSave(uuid, newRecord) {
       setUuid(tabgroup, uuid);
+
+      String cb = newRecord ? callbackFirstSave : callback;
+
       // Make a child-parent relationship if need be.
       if (
           newRecord &&
@@ -3099,10 +3110,10 @@ void saveTabGroup(String tabgroup, String callback) {
           uuid,
           "Parent Of",
           "Child Of",
-          callback
+          cb
         );
       } else {
-        execute(callback);
+        execute(cb);
       }
 
       // This fixes an interesting bug. Without this, if a user was not set
@@ -3113,7 +3124,7 @@ void saveTabGroup(String tabgroup, String callback) {
       // Adding this allows subsequent saves to succeed. Presumably it plays
       // some role in helping FAIMS associate the correct user with a record.
       if (!userWasSet) {
-        saveTabGroup(tabgroup, callback);
+        saveTabGroup(tabgroup, cb);
       }
 
     }
@@ -5632,7 +5643,9 @@ void maybeRedirectToWalkerUnit() {
     DO_REDIRECT_TO_WALKER_UNIT = false;
     onClickSurveyUnitAddNewWalkerUnit();
   }
+}
 
+void enqueueWalkersToRelate() {
   WALKERS_TO_RELATE.addAll(getWalkerRels());
   dequeWalkersToRelate();
 }
@@ -5677,6 +5690,7 @@ void dequeWalkersToRelateRec() {
 }
 
 addOnEvent("Survey_Unit", "save", "maybeRedirectToWalkerUnit()");
+addOnEvent("Survey_Unit", "firstsave", "enqueueWalkersToRelate()");
 
 /*************************** GRID - EVENT BINDINGS ****************************/
 addOnEvent("Walker_Unit/Walker_Unit/Zero_Row_And_Next_1", "click", "zeroRowAndNext()");
