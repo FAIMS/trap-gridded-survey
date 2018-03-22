@@ -354,8 +354,8 @@ Enter **raw count** or click the m^2^ button to enter **density** per square m.
     <Next_Survey_Unit t="button"/>
   </Walker_Unit>
   <Vars f="hidden">
-    <Row_ID    b="decimal" f="id readonly"/>
-    <Walker_ID b="decimal" f="id readonly"/>
+    <Row_Number    b="decimal" f="id readonly"/>
+    <Walker_Number b="decimal" f="id readonly"/>
   </Vars>
 </Walker_Unit>
 

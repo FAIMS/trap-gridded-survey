@@ -681,19 +681,19 @@ public class ModuleUtil extends ModuleHelper {
 
     /*
         Type: input
-        Ref:  Walker_Unit/Vars/Row_ID
+        Ref:  Walker_Unit/Vars/Row_Number
      */
-    public static View get_WalkerUnit_Vars_RowID(Solo solo) {
-        String ref = "Walker_Unit/Vars/Row_ID";
+    public static View get_WalkerUnit_Vars_RowNumber(Solo solo) {
+        String ref = "Walker_Unit/Vars/Row_Number";
         return (android.view.View) solo.getView((Object) ref);
     }
 
     /*
         Type: input
-        Ref:  Walker_Unit/Vars/Walker_ID
+        Ref:  Walker_Unit/Vars/Walker_Number
      */
-    public static View get_WalkerUnit_Vars_WalkerID(Solo solo) {
-        String ref = "Walker_Unit/Vars/Walker_ID";
+    public static View get_WalkerUnit_Vars_WalkerNumber(Solo solo) {
+        String ref = "Walker_Unit/Vars/Walker_Number";
         return (android.view.View) solo.getView((Object) ref);
     }
 

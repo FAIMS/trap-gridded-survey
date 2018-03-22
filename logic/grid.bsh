@@ -68,24 +68,24 @@ String getGridCacheUpdateQuery(String uuid, boolean byParentUuid) {
   String q = "";
   q += " select";
   q += "     uuid,";
-  q += "     rowID,";
-  q += "     walkerID,";
+  q += "     rowNumber,";
+  q += "     walkerNumber,";
   q += "     SUM(CASE WHEN attributename IN {cnt_attrs_1} THEN measure ELSE 0 END),";
   q += "     SUM(CASE WHEN attributename IN {cnt_attrs_2} THEN measure ELSE 0 END),";
   q += "     MAX(CASE WHEN attributename = 'N A' AND vocabid IS NOT NULL THEN 1 ELSE NULL END)";
   q += " from latestnondeletedaentvalue join attributekey using (attributeid)";
   q += parentJoin;
-  q += " join (select uuid, measure as walkerID, valuetimestamp as footimestamp";
+  q += " join (select uuid, measure as walkerNumber, valuetimestamp as footimestamp";
   q += "     from latestnondeletedaentvalue";
   q += "     join attributekey using (attributeid)";
-  q += "     where attributename = 'Walker ID') USING (uuid)";
-  q += " join (select uuid, measure as rowID";
+  q += "     where attributename = 'Walker Number') USING (uuid)";
+  q += " join (select uuid, measure as rowNumber";
   q += "     from latestnondeletedaentvalue";
   q += "     join attributekey using (attributeid)";
-  q += "     where attributename = 'Row ID') USING (uuid)";
+  q += "     where attributename = 'Row Number') USING (uuid)";
   q += whereClause;
-  q += " group by uuid, rowID, walkerID";
-  q += " order by footimestamp, rowID, walkerID, attributename";
+  q += " group by uuid, rowNumber, walkerNumber";
+  q += " order by footimestamp, rowNumber, walkerNumber, attributename";
 
   q  = replaceFirst(q, "{cnt_attrs_1}", listToSqlString(getCountAttribs1()));
   q  = replaceFirst(q, "{cnt_attrs_2}", listToSqlString(getCountAttribs2()));
@@ -127,26 +127,26 @@ void updateGridCache(Object result) {
 
   // Insert 'Walker Unit' data from database
   for (dbRow : result) {
-    String       uuid =             dbRow.get(0) ;
-    String     sRowId =             dbRow.get(1) ;
-    int        iRowId = stringToInt(dbRow.get(1));
-    String  sWalkerId =             dbRow.get(2) ;
-    int     iWalkerId = stringToInt(dbRow.get(2));
-    String ancient    =             dbRow.get(3) ;
-    String modern     =             dbRow.get(4) ;
-    String na         =             dbRow.get(5) ;
+    String       uuid     =             dbRow.get(0) ;
+    String     sRowNumber =             dbRow.get(1) ;
+    int        iRowNumber = stringToInt(dbRow.get(1));
+    String  sWalkerNumber =             dbRow.get(2) ;
+    int     iWalkerNumber = stringToInt(dbRow.get(2));
+    String ancient        =             dbRow.get(3) ;
+    String modern         =             dbRow.get(4) ;
+    String na             =             dbRow.get(5) ;
 
-    if (!isValidInt(   sRowId)) continue;
-    if (!isValidInt(sWalkerId)) continue;
-    if (   iRowId > GRID_MAX_HEIGHT) continue;
-    if (iWalkerId > GRID_MAX_WIDTH ) continue;
-    if (   iRowId < 1) continue;
-    if (iWalkerId < 1) continue;
+    if (!isValidInt(   sRowNumber)) continue;
+    if (!isValidInt(sWalkerNumber)) continue;
+    if (   iRowNumber > GRID_MAX_HEIGHT) continue;
+    if (iWalkerNumber > GRID_MAX_WIDTH ) continue;
+    if (   iRowNumber < 1) continue;
+    if (iWalkerNumber < 1) continue;
 
-    updateGridCache(iRowId, iWalkerId, ATTRIB_UUID,    uuid);
-    updateGridCache(iRowId, iWalkerId, ATTRIB_ANCIENT, ancient);
-    updateGridCache(iRowId, iWalkerId, ATTRIB_MODERN,  modern);
-    updateGridCache(iRowId, iWalkerId, ATTRIB_NA,      na);
+    updateGridCache(iRowNumber, iWalkerNumber, ATTRIB_UUID,    uuid);
+    updateGridCache(iRowNumber, iWalkerNumber, ATTRIB_ANCIENT, ancient);
+    updateGridCache(iRowNumber, iWalkerNumber, ATTRIB_MODERN,  modern);
+    updateGridCache(iRowNumber, iWalkerNumber, ATTRIB_NA,      na);
   }
 }
 
@@ -240,10 +240,10 @@ void updateGridCacheFromUuid(String parentUuid, String uuid, String callback) {
       if (gridIsCurrent) {
         // Reset "isNa" to its default value
         for (r : result) {
-          int rowId    = stringToInt(r.get(1));
-          int walkerId = stringToInt(r.get(2));
+          int rowNumber    = stringToInt(r.get(1));
+          int walkerNumber = stringToInt(r.get(2));
 
-          updateGridCache(rowId, walkerId, ATTRIB_NA, "");
+          updateGridCache(rowNumber, walkerNumber, ATTRIB_NA, "");
           continue;
         }
 
@@ -325,13 +325,13 @@ void updateGridWalkers(Object result) {
 
   // 2. Insert new walkers
   for (dbRow : result) {
-    String sWalkerId =             dbRow.get(0);
-    int    iWalkerId = stringToInt(dbRow.get(0));
-    String initials  =             dbRow.get(1);
-    String uuid      =             dbRow.get(2);
+    String sWalkerNumber =             dbRow.get(0);
+    int    iWalkerNumber = stringToInt(dbRow.get(0));
+    String initials      =             dbRow.get(1);
+    String uuid          =             dbRow.get(2);
 
-    updateGridCache(0, iWalkerId, ATTRIB_INITIALS, initials);
-    updateGridCache(0, iWalkerId, ATTRIB_UUID,       uuid    );
+    updateGridCache(0, iWalkerNumber, ATTRIB_INITIALS, initials);
+    updateGridCache(0, iWalkerNumber, ATTRIB_UUID,       uuid    );
   }
 }
 
@@ -566,7 +566,7 @@ void highlightedRow(int newVal) {
 }
 
 int selectedRow() {
-  String ref = "Walker_Unit/Vars/Row_ID";
+  String ref = "Walker_Unit/Vars/Row_Number";
   int    val = getFieldValueAsInt(ref);
 
   return max(1, val);
@@ -602,7 +602,7 @@ void highlightedWalker(int newVal) {
 }
 
 int selectedWalker() {
-  String ref = "Walker_Unit/Vars/Walker_ID";
+  String ref = "Walker_Unit/Vars/Walker_Number";
   int    val = getFieldValueAsInt(ref);
 
   return max(1, val);
@@ -642,10 +642,10 @@ void gridDown () { moveHighlightedRow   (-1); redrawGrid(); }
 void gridLeft () { moveHighlightedWalker(-1); redrawGrid(); }
 void gridRight() { moveHighlightedWalker(+1); redrawGrid(); }
 void gridRandomAccessWalker() {
-  String ref      = "Walker_Unit/Walker_Unit/Load_Walker";
-  int    walkerId = getFieldValueAsInt(ref);
+  String ref          = "Walker_Unit/Walker_Unit/Load_Walker";
+  int    walkerNumber = getFieldValueAsInt(ref);
 
-  highlightedWalker(walkerId);
+  highlightedWalker(walkerNumber);
   loadOrMakeWalkerUnit();
 }
 
@@ -664,31 +664,31 @@ void zeroRowAndNext() {
   int selectedWalker  = selectedWalker();
   int selectedRow     = selectedRow();
 
-  Set unsavedWalkerIds = new HashSet();
+  Set unsavedWalkerNumbers = new HashSet();
 
-  // Populate `unsavedWalkerIds`
+  // Populate `unsavedWalkerNumbers`
   for (int i = 1; i <= numberOfWalkers(); i++) {
     // We take "isConfirmed" to be synonymous with "is saved".
     Boolean isConfirmed = GRID_CACHE[selectedRow][i].get(ATTRIB_IS_CONFIRMED);
     if (isConfirmed != null && isConfirmed == true) continue;
 
-    String walkerId = String.valueOf(i);
-    unsavedWalkerIds.add(walkerId);
+    String walkerNumber = String.valueOf(i);
+    unsavedWalkerNumbers.add(walkerNumber);
   }
   // We must accommodate for the fact that the currently displayed Walker Unit
   // will be saved when it is navigated away from.
-  unsavedWalkerIds.remove(selectedWalker + "");
+  unsavedWalkerNumbers.remove(selectedWalker + "");
 
   // Enqueue "Walker Unit" records which were previously unsaved
-  rowId = String.valueOf(selectedRow);
-  for (String walkerId : unsavedWalkerIds) {
+  rowNumber = String.valueOf(selectedRow);
+  for (String walkerNumber : unsavedWalkerNumbers) {
     String parentUuid = getUuid("Survey_Unit");
 
     // Pack fields
     List walkerUnitToZero = new ArrayList();
     walkerUnitToZero.add(parentUuid);
-    walkerUnitToZero.add(     rowId);
-    walkerUnitToZero.add(  walkerId);
+    walkerUnitToZero.add(rowNumber);
+    walkerUnitToZero.add(walkerNumber);
 
     // Enque packed fields
     WALKER_UNITS_TO_ZERO.put(walkerUnitToZero);
@@ -733,16 +733,16 @@ void dequeWalkerUnitsToZeroRec() {
   List walkerUnitToZero = WALKER_UNITS_TO_ZERO.take();
 
   // Unpack fields from queue
-  String parentUuid   =             walkerUnitToZero.get(0); // Survey Unit UUID
-  String     sRowId   =             walkerUnitToZero.get(1);
-  int        iRowId   = stringToInt(walkerUnitToZero.get(1));
-  String  sWalkerId   =             walkerUnitToZero.get(2);
-  int     iWalkerId   = stringToInt(walkerUnitToZero.get(2));
+  String parentUuid     =             walkerUnitToZero.get(0);//Survey Unit UUID
+  String     sRowNumber =             walkerUnitToZero.get(1);
+  int        iRowNumber = stringToInt(walkerUnitToZero.get(1));
+  String  sWalkerNumber =             walkerUnitToZero.get(2);
+  int     iWalkerNumber = stringToInt(walkerUnitToZero.get(2));
   // Prepare other fields which are required to perform a save
   String uuid         = null;
   String entityType   = "Walker Unit";
   List   geometry     = null;
-  List   attributes   = createZeroedAttributeList(sRowId, sWalkerId);
+  List   attributes   = createZeroedAttributeList(sRowNumber, sWalkerNumber);
   SaveCallback relate = new SaveCallback() {
     onSave(uuid, newRecord) {
       saveEntitiesToHierRel(
@@ -759,7 +759,7 @@ void dequeWalkerUnitsToZeroRec() {
   // Save 'Walker Unit'. This should create a new record as opposed to
   // overwriting an existing one.
   saveArchEnt(uuid, entityType, geometry, attributes, relate);
-  updateGridCache(iRowId, iWalkerId, ATTRIB_IS_CONFIRMED, true);
+  updateGridCache(iRowNumber, iWalkerNumber, ATTRIB_IS_CONFIRMED, true);
 }
 
 String getSavingHtml() {
@@ -792,13 +792,13 @@ String getSavingHtmlLis() {
     List walkerUnitToZero = walkerUnitsToZero.take();
 
     // Unpack values from `walkerUnitToZero`
-    String    rowId = walkerUnitToZero.get(1);
-    String walkerId = walkerUnitToZero.get(2);
+    String    rowNumber = walkerUnitToZero.get(1);
+    String walkerNumber = walkerUnitToZero.get(2);
 
     // Build the <li> string
     String fmtHtmlLi = "<li>Row %s, Walker %s</li>";
-    String    htmlLi = replaceFirst(fmtHtmlLi,    rowId);
-              htmlLi = replaceFirst(   htmlLi, walkerId);
+    String    htmlLi = replaceFirst(fmtHtmlLi,    rowNumber);
+              htmlLi = replaceFirst(   htmlLi, walkerNumber);
 
     // Append the <li> string
     html += htmlLi;
@@ -867,14 +867,14 @@ List getZeroableAttribNames() {
   return attribNames;
 }
 
-List createZeroedAttributeList(String rowId, String walkerId) {
+List createZeroedAttributeList(String rowNumber, String walkerNumber) {
   List attribs = createAttributeList();
 
   String cert = "1.0"; // Certainty, having the default value of 1.0
 
-  // Set 'Walker ID' and 'Row ID' to given values
-  attribs.add(createEntityAttribute("Walker ID", null, null, walkerId, cert));
-  attribs.add(createEntityAttribute("Row ID",    null, null, rowId,    cert));
+  // Set 'Walker Number' and 'Row Number' to given values
+  attribs.add(createEntityAttribute("Walker Number", null, null, walkerNumber, cert));
+  attribs.add(createEntityAttribute("Row Number",    null, null, rowNumber,    cert));
 
   // Set zeroable properties to zero
   for (String ref : getZeroableRefs()) {
@@ -946,7 +946,7 @@ void loadOrMakeWalkerUnit() {
     cancelTabGroup(refWalkerUnit, false);
 
   // Restore the highlighted cell. This causes any new walker unit to be made
-  // with the correct Row ID and Walker ID.
+  // with the correct Row Number and Walker Number.
   highlightedRow   (highlightedRow   );
   highlightedWalker(highlightedWalker);
 
@@ -1061,11 +1061,11 @@ boolean DO_REDIRECT_TO_WALKER_UNIT = false;
 
 inheritWalkerUnitFields() {
   setFieldValue(
-    "Walker_Unit/Vars/Row_ID",
+    "Walker_Unit/Vars/Row_Number",
     String.valueOf(highlightedRow())
   );
   setFieldValue(
-    "Walker_Unit/Vars/Walker_ID",
+    "Walker_Unit/Vars/Walker_Number",
     String.valueOf(highlightedWalker())
   );
 }
@@ -1075,13 +1075,13 @@ populateWalkerRadioGroup () {
   String selectedWalker  = String.valueOf(selectedWalker());
   String refWalker       = "Walker_Unit/Walker_Unit/Load_Walker";
 
-  List walkerIds = new ArrayList();
+  List walkerNumbers = new ArrayList();
   for (int i = 1; i <= numberOfWalkers; i++ ) {
     String s_i = String.valueOf(i);
-    walkerIds.add(new NameValuePair(s_i, s_i));
+    walkerNumbers.add(new NameValuePair(s_i, s_i));
   }
 
-  populateRadioGroup(refWalker, walkerIds);
+  populateRadioGroup(refWalker, walkerNumbers);
 }
 
 void onClickSurveyUnitAddNewWalkerUnit () {
