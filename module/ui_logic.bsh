@@ -4816,7 +4816,7 @@ void updateGridWalkers(Object result) {
     String uuid          =             dbRow.get(2);
 
     updateGridCache(0, iWalkerNumber, ATTRIB_INITIALS, initials);
-    updateGridCache(0, iWalkerNumber, ATTRIB_UUID,       uuid    );
+    updateGridCache(0, iWalkerNumber, ATTRIB_UUID,     uuid    );
   }
 }
 
