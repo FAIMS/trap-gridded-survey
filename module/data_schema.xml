@@ -240,6 +240,11 @@
       <formatString>{{if $1 then $1}}{{if and($1, $2) then " " }}{{if $2 then $2}}{{if $3 then " ($3)"}}{{if between($4,0,0.49) then "??" elsif lessThan($4,1) then "?" }}</formatString>
       <appendCharacterString> - </appendCharacterString>
     </property>
+    <property name="Walkers" type="measure">
+      <description></description>
+      <formatString>{{if $1 then $1}}{{if and($1, $2) then " " }}{{if $2 then $2}}{{if $3 then " ($3)"}}{{if between($4,0,0.49) then "??" elsif lessThan($4,1) then "?" }}</formatString>
+      <appendCharacterString> - </appendCharacterString>
+    </property>
   </ArchaeologicalElement>
   <ArchaeologicalElement name="Walker">
     <description></description>
@@ -261,6 +266,16 @@
   </ArchaeologicalElement>
   <ArchaeologicalElement name="Walker Unit">
     <description></description>
+    <property name="Row Number" type="measure" isIdentifier="true">
+      <description></description>
+      <formatString>Row $2</formatString>
+      <appendCharacterString> - </appendCharacterString>
+    </property>
+    <property name="Walker Number" type="measure" isIdentifier="true">
+      <description></description>
+      <formatString>, Walker $2</formatString>
+      <appendCharacterString> - </appendCharacterString>
+    </property>
     <property name="N A" type="vocab">
       <description></description>
       <formatString>{{if $1 then $1}}{{if and($1, $2) then " " }}{{if $2 then $2}}{{if $3 then " ($3)"}}{{if between($4,0,0.49) then "??" elsif lessThan($4,1) then "?" }}</formatString>
@@ -363,16 +378,6 @@
         <term>{5}
 <description></description></term>
       </lookup>
-    </property>
-    <property name="Row Number" type="measure" isIdentifier="true">
-      <description></description>
-      <formatString>{{if $1 then $1}}{{if and($1, $2) then " " }}{{if $2 then $2}}{{if $3 then " ($3)"}}{{if between($4,0,0.49) then "??" elsif lessThan($4,1) then "?" }}</formatString>
-      <appendCharacterString> - </appendCharacterString>
-    </property>
-    <property name="Walker Number" type="measure" isIdentifier="true">
-      <description></description>
-      <formatString>{{if $1 then $1}}{{if and($1, $2) then " " }}{{if $2 then $2}}{{if $3 then " ($3)"}}{{if between($4,0,0.49) then "??" elsif lessThan($4,1) then "?" }}</formatString>
-      <appendCharacterString> - </appendCharacterString>
     </property>
   </ArchaeologicalElement>
 </dataSchema>

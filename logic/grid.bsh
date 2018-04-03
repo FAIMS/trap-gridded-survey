@@ -21,6 +21,8 @@ final String ATTRIB_MODERN          = "Modern";
 final String ATTRIB_NA              = "N A";
 final String ATTRIB_UUID            = "UUID";
 
+final String REF_WALKERS_PLAIN_TEXT = "Survey_Unit/Survey_Unit/Walkers";
+
 List getCountAttribs1() {
   List l = new ArrayList();
   l.add("Ancient");
@@ -331,7 +333,7 @@ void updateGridWalkers(Object result) {
     String uuid          =             dbRow.get(2);
 
     updateGridCache(0, iWalkerNumber, ATTRIB_INITIALS, initials);
-    updateGridCache(0, iWalkerNumber, ATTRIB_UUID,       uuid    );
+    updateGridCache(0, iWalkerNumber, ATTRIB_UUID,     uuid    );
   }
 }
 
@@ -1204,6 +1206,10 @@ void dequeWalkersToRelateRec() {
   );
 }
 
+void populateWalkersTextField() {
+  setFieldValue(REF_WALKERS_PLAIN_TEXT, ordinalWalkerAsPlainText());
+}
+
 addOnEvent("Survey_Unit", "save", "maybeRedirectToWalkerUnit()");
 addOnEvent("Survey_Unit", "firstsave", "enqueueWalkersToRelate()");
 
@@ -1231,6 +1237,7 @@ addOnEvent("Walker_Unit",                        "leave",  "initHighlighted()");
 
 addOnEvent("Survey_Unit",                 "create", "initGridCache()", PRECEDENCE_MID-1);
 addOnEvent("Survey_Unit",                 "create", "updateGridWalkers()");
+addOnEvent("Survey_Unit",                 "create", "populateWalkersTextField()");
 
 addOnEvent("Survey_Unit",                 "fetch",  "initGridCache()", PRECEDENCE_MID-1);
 addOnEvent("Survey_Unit",                 "fetch",  "updateGridCache()");

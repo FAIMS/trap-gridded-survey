@@ -99,6 +99,7 @@
               <Number_of_Walkers/>
               <Row_Interval_m/>
               <Walker_Interval_m/>
+              <Walkers/>
             </Survey_Unit>
             <Walker_Units>
               <Add_New_Walker_Unit/>
@@ -246,6 +247,7 @@
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Number_of_Walkers" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Row_Interval_m" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Walker_Interval_m" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Walkers" type="string"/>
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Row" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Walker" type="decimal"/>
       <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_4/Col_1/Ancient" type="decimal"/>
@@ -568,6 +570,9 @@
         </input>
         <input faims_attribute_name="Walker Interval m" faims_attribute_type="measure" ref="Walker_Interval_m" faims_read_only="true">
           <label>{Walker_Interval__m_}</label>
+        </input>
+        <input faims_attribute_name="Walkers" faims_attribute_type="measure" ref="Walkers" faims_read_only="true">
+          <label>{Walkers}</label>
         </input>
       </group>
       <group ref="Walker_Units" faims_scrollable="false">

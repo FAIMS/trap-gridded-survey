@@ -636,6 +636,15 @@ public class ModuleUtil extends ModuleHelper {
 
     /*
         Type: input
+        Ref:  Survey_Unit/Survey_Unit/Walkers
+     */
+    public static View get_SurveyUnit_SurveyUnit_Walkers(Solo solo) {
+        String ref = "Survey_Unit/Survey_Unit/Walkers";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: input
         Ref:  Survey_Unit/Vars/Highlighted_Row
      */
     public static EditText get_SurveyUnit_Vars_HighlightedRow(Solo solo) {

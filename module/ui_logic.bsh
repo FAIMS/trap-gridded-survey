@@ -322,6 +322,7 @@ REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Number_of_Rows", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Number_of_Walkers", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Row_Interval_m", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Walker_Interval_m", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Walkers", "input");
 REF_TO_TYPE.put("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "button");
 REF_TO_TYPE.put("Survey_Unit/Vars/Highlighted_Row", "input");
 REF_TO_TYPE.put("Survey_Unit/Vars/Highlighted_Walker", "input");
@@ -395,6 +396,7 @@ DATA_REFS.add("Survey_Unit/Survey_Unit/Number_of_Rows");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Number_of_Walkers");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Row_Interval_m");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Walker_Interval_m");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Walkers");
 DATA_REFS.add("Walker/Walker/First_Name");
 DATA_REFS.add("Walker/Walker/Last_Name");
 DATA_REFS.add("Walker/Walker/Initials");
@@ -4506,6 +4508,8 @@ final String ATTRIB_MODERN          = "Modern";
 final String ATTRIB_NA              = "N A";
 final String ATTRIB_UUID            = "UUID";
 
+final String REF_WALKERS_PLAIN_TEXT = "Survey_Unit/Survey_Unit/Walkers";
+
 List getCountAttribs1() {
   List l = new ArrayList();
   l.add("Ancient");
@@ -5689,6 +5693,10 @@ void dequeWalkersToRelateRec() {
   );
 }
 
+void populateWalkersTextField() {
+  setFieldValue(REF_WALKERS_PLAIN_TEXT, ordinalWalkerAsPlainText());
+}
+
 addOnEvent("Survey_Unit", "save", "maybeRedirectToWalkerUnit()");
 addOnEvent("Survey_Unit", "firstsave", "enqueueWalkersToRelate()");
 
@@ -5716,6 +5724,7 @@ addOnEvent("Walker_Unit",                        "leave",  "initHighlighted()");
 
 addOnEvent("Survey_Unit",                 "create", "initGridCache()", PRECEDENCE_MID-1);
 addOnEvent("Survey_Unit",                 "create", "updateGridWalkers()");
+addOnEvent("Survey_Unit",                 "create", "populateWalkersTextField()");
 
 addOnEvent("Survey_Unit",                 "fetch",  "initGridCache()", PRECEDENCE_MID-1);
 addOnEvent("Survey_Unit",                 "fetch",  "updateGridCache()");
@@ -6394,6 +6403,26 @@ void ordinalWalkerReallyDelete() {
   };
 
   deleteArchEnt(uuid, callback);
+}
+
+String ordinalWalkerAsPlainText() {
+  String txt = "";
+
+  int count = 0;
+  for (int i = 0; i < NUM_WALKERS; i++) {
+    Map walker = WALKER_CACHE_CLEAN[i];
+    Boolean isSel = walker.get(ATTRIB_IS_SELECTED);
+
+    if (isSel == null) isSel = false;
+    if (!isSel)        continue;
+
+    txt += ++count + " - " + walker.get(ATTRIB_IDENTIFIER) + "\n";
+  }
+
+  if (txt.length() > 0)
+    txt = txt.substring(0, txt.length() - 1);
+
+  return txt;
 }
 
 updateWalkerCacheAndRedraw();

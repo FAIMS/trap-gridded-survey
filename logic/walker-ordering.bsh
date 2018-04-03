@@ -440,6 +440,26 @@ void ordinalWalkerReallyDelete() {
   deleteArchEnt(uuid, callback);
 }
 
+String ordinalWalkerAsPlainText() {
+  String txt = "";
+
+  int count = 0;
+  for (int i = 0; i < NUM_WALKERS; i++) {
+    Map walker = WALKER_CACHE_CLEAN[i];
+    Boolean isSel = walker.get(ATTRIB_IS_SELECTED);
+
+    if (isSel == null) isSel = false;
+    if (!isSel)        continue;
+
+    txt += ++count + " - " + walker.get(ATTRIB_IDENTIFIER) + "\n";
+  }
+
+  if (txt.length() > 0)
+    txt = txt.substring(0, txt.length() - 1);
+
+  return txt;
+}
+
 updateWalkerCacheAndRedraw();
 addOnEvent("Walker", "save",   "updateWalkerCacheAndRedraw()");
 addOnEvent("Walker", "delete", "updateWalkerCacheAndRedraw()");
