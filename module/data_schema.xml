@@ -271,14 +271,19 @@
   </ArchaeologicalElement>
   <ArchaeologicalElement name="Walker Unit">
     <description></description>
+    <property name="Walker Unit Survey Unit ID" type="measure" isIdentifier="true">
+      <description></description>
+      <formatString>$2</formatString>
+      <appendCharacterString> - </appendCharacterString>
+    </property>
     <property name="Row Number" type="measure" isIdentifier="true">
       <description></description>
-      <formatString>Row $2</formatString>
+      <formatString> - ($2</formatString>
       <appendCharacterString> - </appendCharacterString>
     </property>
     <property name="Walker Number" type="measure" isIdentifier="true">
       <description></description>
-      <formatString>, Walker $2</formatString>
+      <formatString>, $2)</formatString>
       <appendCharacterString> - </appendCharacterString>
     </property>
     <property name="N A" type="vocab">

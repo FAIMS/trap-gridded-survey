@@ -238,7 +238,7 @@ in which it appears.
 
 <Walker_Unit>
   Walker Grid
-  <fmt>Row {{Row_Number}}, Walker {{Walker_Number}}</fmt>
+  <fmt>{{Walker_Unit_Survey_Unit_ID}} - ({{Row_Number}}, {{Walker_Number}})</fmt>
   <Walker_Unit>
     Walker Grid
     <Survey_Unit_ID t="webview" f="nolabel"/>
@@ -358,6 +358,7 @@ Enter **raw count** or click the m^2^ button to enter **density** per square m.
     <Next_Survey_Unit t="button"/>
   </Walker_Unit>
   <Vars f="hidden">
+    <Walker_Unit_Survey_Unit_ID i="Survey_Unit/Survey_Unit/Survey_Unit_ID"/>
     <Row_Number    b="decimal" f="readonly"/>
     <Walker_Number b="decimal" f="readonly"/>
   </Vars>

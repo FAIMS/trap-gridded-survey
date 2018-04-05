@@ -726,6 +726,15 @@ public class ModuleUtil extends ModuleHelper {
 
     /*
         Type: input
+        Ref:  Walker_Unit/Vars/Walker_Unit_Survey_Unit_ID
+     */
+    public static EditText get_WalkerUnit_Vars_WalkerUnitSurveyUnitID(Solo solo) {
+        String ref = "Walker_Unit/Vars/Walker_Unit_Survey_Unit_ID";
+        return (android.widget.EditText) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: input
         Ref:  Walker_Unit/Walker_Unit/A_C
      */
     public static EditText get_WalkerUnit_WalkerUnit_AC(Solo solo) {
