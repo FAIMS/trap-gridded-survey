@@ -364,7 +364,7 @@ Enter **raw count** or click the m^2^ button to enter **density** per square m.
   </Vars>
 </Walker_Unit>
 
-<Saving f="nodata">
+<Saving f="nodata nowire">
   Saving...
   <Saving>
     Saving...
