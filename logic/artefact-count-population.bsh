@@ -1,0 +1,134 @@
+/************************* ARTEFACT COUNT POPULATION **************************/
+final String REF_MOST_RECENTLY_COMPUTED_ARTEFACT_COUNTS =
+    "Survey_Unit/Survey_Unit/Most_Recently_Computed_Artefact_Counts";
+
+void populateArtefactCounts() {
+  String parentUuid = getUuid();
+  FetchCallback populateArtefactCounts = new FetchCallback() {
+    onFetch(result) {
+      if (result        == null) return;
+      if (result.size() == 0   ) return;
+
+      String out = "";
+      out += "Ancient: " + result.get(0).get(0) + "\n";
+      out += "Modern: "  + result.get(0).get(1) + "\n";
+      out += "A/C: "     + result.get(0).get(2) + "\n";
+      out += "HM: "      + result.get(0).get(3) + "\n";
+      out += "Lithic: "  + result.get(0).get(4) + "\n";
+      out += "Daub: "    + result.get(0).get(5) + "\n";
+      out += "Glass: "   + result.get(0).get(6) + "\n";
+      out += "Other: "   + result.get(0).get(7) + "\n";
+      out += "Total: "   + result.get(0).get(8);
+
+      setFieldValue(REF_MOST_RECENTLY_COMPUTED_ARTEFACT_COUNTS, out);
+    }
+  };
+
+  List qs = new ArrayList();
+  List cs = new ArrayList();
+
+  // Add Queries
+  qs.add("drop table if exists materialisedWalker");
+  qs.add(
+      "create table materialisedWalker as" +
+      "  select uuid, attributename, vocabid, measure" +
+      "    from latestnondeletedarchent" +
+      "    join latestnondeletedaentvalue using (uuid)" +
+      "    join attributekey using (attributeid)" +
+      "    where attributename in (" +
+      "        'Walker Number', 'Row Number', 'N A', 'Ancient', 'Modern'," +
+      "        'A C', 'HM', 'Lithic', 'Daub', 'Glass', 'Other'" +
+      "    )"
+  );
+  qs.add(
+      "select" +
+      "    coalesce(sum(AncientMeasure), 0)," +
+      "    coalesce(sum(ModernMeasure), 0)," +
+      "    coalesce(sum(ACMeasure), 0)," +
+      "    coalesce(sum(HMMeasure), 0)," +
+      "    coalesce(sum(LithicMeasure), 0)," +
+      "    coalesce(sum(DaubMeasure), 0)," +
+      "    coalesce(sum(GlassMeasure), 0)," +
+      "    coalesce(sum(OtherMeasure), 0)," +
+      "    coalesce(sum(AncientMeasure), 0) +" +
+      "        coalesce(sum(ModernMeasure), 0) +" +
+      "        coalesce(sum(ACMeasure), 0) +" +
+      "        coalesce(sum(HMMeasure), 0) +" +
+      "        coalesce(sum(LithicMeasure), 0) +" +
+      "        coalesce(sum(DaubMeasure), 0) +" +
+      "        coalesce(sum(GlassMeasure), 0) +" +
+      "        coalesce(sum(OtherMeasure), 0)" +
+      "  from (select *, childuuid as uuid from parentchild) as pc" +
+      "  left outer join (select uuid, sum(measure) as AncientMeasure" +
+      "            from materialisedWalker" +
+      "           where attributename in ('Ancient')" +
+      "           group by uuid" +
+      "          ) as AncientMeasure using (uuid)" +
+      "  left outer join (select uuid, sum(measure) as ModernMeasure" +
+      "            from materialisedWalker" +
+      "           where attributename in ('Modern')" +
+      "           group by uuid" +
+      "          ) as ModernMeasure using (uuid)" +
+      "  left outer join (select uuid, sum(measure) as ACMeasure" +
+      "            from materialisedWalker" +
+      "           where attributename in ('A C')" +
+      "           group by uuid" +
+      "          ) as ACMeasure using (uuid)" +
+      "  left outer join (select uuid, sum(measure) as HMMeasure" +
+      "            from materialisedWalker" +
+      "           where attributename in ('HM')" +
+      "           group by uuid" +
+      "          ) as HMMeasure using (uuid)" +
+      "  left outer join (select uuid, sum(measure) as LithicMeasure" +
+      "            from materialisedWalker" +
+      "           where attributename in ('Lithic')" +
+      "           group by uuid" +
+      "          ) as LithicMeasure using (uuid)" +
+      "  left outer join (select uuid, sum(measure) as DaubMeasure" +
+      "            from materialisedWalker" +
+      "           where attributename in ('Daub')" +
+      "           group by uuid" +
+      "          ) as DaubMeasure using (uuid)" +
+      "  left outer join (select uuid, sum(measure) as GlassMeasure" +
+      "            from materialisedWalker" +
+      "           where attributename in ('Glass')" +
+      "           group by uuid" +
+      "          ) as GlassMeasure using (uuid)" +
+      "  left outer join (select uuid, sum(measure) as OtherMeasure" +
+      "          from materialisedWalker" +
+      "         where attributename in ('Other')" +
+      "         group by uuid" +
+      "        ) as OtherMeasure using (uuid)" +
+      "  left outer join (select uuid, vocabid is not null as na" +
+      "          from materialisedWalker" +
+      "         where attributename in ('N A')" +
+      "        ) as naVocab using (uuid)" +
+      "  join (select uuid, measure as walkerID" +
+      "      from materialisedWalker" +
+      "      where attributename = 'Walker Number') USING (uuid)" +
+      "  join (select uuid, measure as rowID" +
+      "      from materialisedWalker" +
+      "      where attributename = 'Row Number') USING (uuid)" +
+      "  where parentuuid = " + parentUuid +
+      "  and na is null" +
+      "  order by rowID, walkerID"
+  );
+
+  // Add callbacks
+  cs.add(null);
+  cs.add(null);
+  cs.add(populateArtefactCounts);
+
+  sequentialFetchAll(qs, cs);
+}
+
+void initArtefactCounts() {
+  setFieldValue(REF_MOST_RECENTLY_COMPUTED_ARTEFACT_COUNTS, "None");
+}
+
+addOnEvent("Survey_Unit", "create", "initArtefactCounts()");
+addOnEvent(
+    "Survey_Unit/Survey_Unit/Compute_Artefact_Counts",
+    "click",
+    "populateArtefactCounts()"
+);

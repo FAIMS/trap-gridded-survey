@@ -204,7 +204,9 @@ Use the '▲', '▼' and '(De)select' buttons to choose walkers for your team. S
     <Number_of_Walkers  b="decimal" f="readonly" i="Control/Main/Number_of_Walkers"/>
     <Row_Interval_m     b="decimal" f="readonly" i="Control/Main/Row_Interval">Row Interval (m)</Row_Interval_m>
     <Walker_Interval_m  b="decimal" f="readonly" i="Control/Main/Walker_Interval">Walker Interval (m)</Walker_Interval_m>
-    <Walkers b="string" f="readonly"/>
+    <Walkers f="readonly"/>
+    <Most_Recently_Computed_Artefact_Counts f="readonly"/>
+    <Compute_Artefact_Counts t="button"/>
   </Survey_Unit>
   <Walker_Units f="noscroll">
     <Add_New_Walker_Unit lc="Walker_Unit" t="button">
@@ -384,6 +386,7 @@ Enter **raw count** or click the m^2^ button to enter **density** per square m.
   <!--@SOURCE: logic/walker-ordering.bsh-->
   <!--@SOURCE: logic/walker-initials.bsh-->
   <!--@SOURCE: logic/persistence.bsh-->
+  <!--@SOURCE: logic/artefact-count-population.bsh-->
 ]]></logic>
 
 </module>

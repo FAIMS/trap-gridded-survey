@@ -100,6 +100,8 @@
               <Row_Interval_m/>
               <Walker_Interval_m/>
               <Walkers/>
+              <Most_Recently_Computed_Artefact_Counts/>
+              <Compute_Artefact_Counts/>
             </Survey_Unit>
             <Walker_Units>
               <Add_New_Walker_Unit/>
@@ -247,7 +249,6 @@
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Number_of_Walkers" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Row_Interval_m" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Walker_Interval_m" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Walkers" type="string"/>
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Row" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Walker" type="decimal"/>
       <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_4/Col_1/Ancient" type="decimal"/>
@@ -574,6 +575,12 @@
         <input faims_attribute_name="Walkers" faims_attribute_type="measure" ref="Walkers" faims_read_only="true">
           <label>{Walkers}</label>
         </input>
+        <input faims_attribute_name="Most Recently Computed Artefact Counts" faims_attribute_type="measure" ref="Most_Recently_Computed_Artefact_Counts" faims_read_only="true">
+          <label>{Most_Recently_Computed_Artefact_Counts}</label>
+        </input>
+        <trigger ref="Compute_Artefact_Counts">
+          <label>{Compute_Artefact_Counts}</label>
+        </trigger>
       </group>
       <group ref="Walker_Units" faims_scrollable="false">
         <label>{Walker_Units}</label>

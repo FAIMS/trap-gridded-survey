@@ -240,6 +240,15 @@ public class ModuleUtil extends ModuleHelper {
 
     /*
         Type: button
+        Ref:  Survey_Unit/Survey_Unit/Compute_Artefact_Counts
+     */
+    public static View get_SurveyUnit_SurveyUnit_ComputeArtefactCounts(Solo solo) {
+        String ref = "Survey_Unit/Survey_Unit/Compute_Artefact_Counts";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: button
         Ref:  Survey_Unit/Walker_Units/Add_New_Walker_Unit
      */
     public static View get_SurveyUnit_WalkerUnits_AddNewWalkerUnit(Solo solo) {
@@ -587,6 +596,15 @@ public class ModuleUtil extends ModuleHelper {
     public static EditText get_Control_Search_SearchTerm(Solo solo) {
         String ref = "Control/Search/Search_Term";
         return (android.widget.EditText) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: input
+        Ref:  Survey_Unit/Survey_Unit/Most_Recently_Computed_Artefact_Counts
+     */
+    public static View get_SurveyUnit_SurveyUnit_MostRecentlyComputedArtefactCounts(Solo solo) {
+        String ref = "Survey_Unit/Survey_Unit/Most_Recently_Computed_Artefact_Counts";
+        return (android.view.View) solo.getView((Object) ref);
     }
 
     /*
