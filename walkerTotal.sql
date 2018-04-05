@@ -100,42 +100,42 @@ left outer join (select uuid, sum(measure) as OtherMeasure
 select walkerID, rowid, na, (AncientMeasure), (ModernMeasure), (ACMeasure), (HMMeasure),(LithicMeasure), (DaubMeasure), (GlassMeasure), (OtherMeasure)
 
   from (select *, childuuid as uuid from parentchild) as pc
-left outer join (select uuid, sum(measure) as AncientMeasure
+left outer join (select uuid, coalesce(sum(measure),0) as AncientMeasure
           from materialisedWalker
          where attributename in ('Ancient')
          group by uuid
         ) as AncientMeasure using (uuid)
-left outer join (select uuid, sum(measure) as ModernMeasure
+left outer join (select uuid, coalesce(sum(measure),0) as ModernMeasure
           from materialisedWalker
          where attributename in ('Modern')
          group by uuid
         ) as ModernMeasure using (uuid) 
-left outer join (select uuid, sum(measure) as ACMeasure
+left outer join (select uuid, coalesce(sum(measure),0) as ACMeasure
           from materialisedWalker
          where attributename in ('A C')
          group by uuid
         ) as ACMeasure using (uuid)
-left outer join (select uuid, sum(measure) as HMMeasure
+left outer join (select uuid, coalesce(sum(measure),0) as HMMeasure
           from materialisedWalker
          where attributename in ('HM')
          group by uuid
         ) as HMMeasure using (uuid)
-left outer join (select uuid, sum(measure) as LithicMeasure
+left outer join (select uuid, coalesce(sum(measure),0) as LithicMeasure
           from materialisedWalker
          where attributename in ('Lithic')
          group by uuid
         ) as LithicMeasure using (uuid)
-left outer join (select uuid, sum(measure) as DaubMeasure
+left outer join (select uuid, coalesce(sum(measure),0) as DaubMeasure
           from materialisedWalker
          where attributename in ('Daub')
          group by uuid
         ) as DaubMeasure using (uuid)
-left outer join (select uuid, sum(measure) as GlassMeasure
+left outer join (select uuid, coalesce(sum(measure),0) as GlassMeasure
           from materialisedWalker
          where attributename in ('Glass')
          group by uuid
         ) as GlassMeasure using (uuid)
-left outer join (select uuid, sum(measure) as OtherMeasure
+left outer join (select uuid, coalesce(sum(measure),0) as OtherMeasure
           from materialisedWalker
          where attributename in ('Other')
          group by uuid
