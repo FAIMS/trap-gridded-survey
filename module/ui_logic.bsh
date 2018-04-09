@@ -1,5 +1,5 @@
 /*
- * GENERATED WITH FAIMS-TOOLS, SHA1: f7611f86d9118e4843b30c4d7c9602ed6eccfbe3
+ * GENERATED WITH FAIMS-TOOLS, SHA1: 228b6499954b35cbefa339d3ec6e6967da36cc40
  */
 import android.util.Log;
 import android.os.Build.MODEL;
@@ -175,7 +175,7 @@ String escape(String s) {
   return translate(s, dict);
 }
 
-Map MEMOISED_FILTERED_BY_REGEX = new HashMap();
+Map MEMOISED_FILTERED_BY_REGEX = new LinkedHashMap();
 
 List filterListByRegex(List unfiltered, String regex, boolean forceUpdate) {
   // Return a copy of the memoised result if possible. It's important to return
@@ -191,7 +191,7 @@ List filterListByRegex(List unfiltered, String regex, boolean forceUpdate) {
 
   // Compute the filtered list
   List filteredList;
-  Set  filteredSet = new HashSet();
+  Set  filteredSet = new LinkedHashSet();
   for (element : unfiltered)
     if (element.matches(regex))
       filteredSet.add(element);
@@ -295,7 +295,7 @@ String  PREVIOUSLY_DISPLAYED_TAB_GROUP = "";
 String  CURRENTLY_DISPLAYED_TAB_GROUP  = "";
 String  PREVIOUSLY_DISPLAYED_TAB       = "";
 String  CURRENTLY_DISPLAYED_TAB        = "";
-Map     REF_TO_TYPE                    = new HashMap();
+Map     REF_TO_TYPE                    = new LinkedHashMap();
 HashSet DATA_REFS                      = new HashSet();
 HashSet NO_UI_REFS                     = new HashSet();
 HashSet HIER_REFS                      = new HashSet();
@@ -360,7 +360,16 @@ REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Number_of_Walkers", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Row_Interval_m", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Walker_Interval_m", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Walkers", "input");
-REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Most_Recently_Computed_Artefact_Counts", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Sep_Most_Recently_Computed", "webview");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Most_Recently_Computed_Total", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Most_Recently_Computed_Ancient", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Most_Recently_Computed_Modern", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Most_Recently_Computed_A_C", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Most_Recently_Computed_HM", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Most_Recently_Computed_Lithic", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Most_Recently_Computed_Daub", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Most_Recently_Computed_Glass", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Most_Recently_Computed_Other", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Compute_Artefact_Counts", "button");
 REF_TO_TYPE.put("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "button");
 REF_TO_TYPE.put("Survey_Unit/Vars/Highlighted_Row", "input");
@@ -437,7 +446,15 @@ DATA_REFS.add("Survey_Unit/Survey_Unit/Number_of_Walkers");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Row_Interval_m");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Walker_Interval_m");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Walkers");
-DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_Artefact_Counts");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_Total");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_Ancient");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_Modern");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_A_C");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_HM");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_Lithic");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_Daub");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_Glass");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_Other");
 DATA_REFS.add("Walker/Walker/First_Name");
 DATA_REFS.add("Walker/Walker/Last_Name");
 DATA_REFS.add("Walker/Walker/Initials");
@@ -2225,7 +2242,6 @@ void persistOverSessions(String ref) {
 }
 
 persistOverSessions("Control/Main/Number_of_Rows", false);
-persistOverSessions("Control/Main/Number_of_Walkers", false);
 persistOverSessions("Control/Main/Row_Interval", false);
 persistOverSessions("Control/Main/Walker_Interval", false);
 persistOverSessions("Control/Main/Land_Use", false);
@@ -5213,14 +5229,15 @@ void zeroRowAndNext() {
 
   // Enqueue "Walker Unit" records which were previously unsaved
   rowNumber = String.valueOf(selectedRow);
+  String parentUuid = getUuid("Survey_Unit");
+  String surveyUnitId = getFieldValue("Survey_Unit/Survey_Unit/Survey_Unit_ID");
   for (String walkerNumber : unsavedWalkerNumbers) {
-    String parentUuid = getUuid("Survey_Unit");
-
     // Pack fields
     List walkerUnitToZero = new ArrayList();
     walkerUnitToZero.add(parentUuid);
     walkerUnitToZero.add(rowNumber);
     walkerUnitToZero.add(walkerNumber);
+    walkerUnitToZero.add(surveyUnitId);
 
     // Enque packed fields
     WALKER_UNITS_TO_ZERO.put(walkerUnitToZero);
@@ -5265,16 +5282,19 @@ void dequeWalkerUnitsToZeroRec() {
   List walkerUnitToZero = WALKER_UNITS_TO_ZERO.take();
 
   // Unpack fields from queue
-  String parentUuid     =             walkerUnitToZero.get(0);//Survey Unit UUID
-  String     sRowNumber =             walkerUnitToZero.get(1);
-  int        iRowNumber = stringToInt(walkerUnitToZero.get(1));
-  String  sWalkerNumber =             walkerUnitToZero.get(2);
-  int     iWalkerNumber = stringToInt(walkerUnitToZero.get(2));
+  String    parentUuid =             walkerUnitToZero.get(0); //Survey Unit UUID
+  String    sRowNumber =             walkerUnitToZero.get(1);
+  int       iRowNumber = stringToInt(walkerUnitToZero.get(1));
+  String sWalkerNumber =             walkerUnitToZero.get(2);
+  int    iWalkerNumber = stringToInt(walkerUnitToZero.get(2));
+  int    iWalkerNumber = stringToInt(walkerUnitToZero.get(2));
+  String  surveyUnitId =             walkerUnitToZero.get(3);
   // Prepare other fields which are required to perform a save
   String uuid         = null;
   String entityType   = "Walker Unit";
   List   geometry     = null;
-  List   attributes   = createZeroedAttributeList(sRowNumber, sWalkerNumber);
+  List   attributes   = createZeroedAttributeList(
+      sRowNumber, sWalkerNumber, surveyUnitId);
   SaveCallback relate = new SaveCallback() {
     onSave(uuid, newRecord) {
       saveEntitiesToHierRel(
@@ -5399,14 +5419,25 @@ List getZeroableAttribNames() {
   return attribNames;
 }
 
-List createZeroedAttributeList(String rowNumber, String walkerNumber) {
+List createZeroedAttributeList(
+    String rowNumber,
+    String walkerNumber,
+    String surveyUnitId
+) {
   List attribs = createAttributeList();
 
   String cert = "1.0"; // Certainty, having the default value of 1.0
 
   // Set 'Walker Number' and 'Row Number' to given values
-  attribs.add(createEntityAttribute("Walker Number", null, null, walkerNumber, cert));
-  attribs.add(createEntityAttribute("Row Number",    null, null, rowNumber,    cert));
+  attribs.add(
+      createEntityAttribute(
+          "Walker Number",              null, null, walkerNumber, cert));
+  attribs.add(
+      createEntityAttribute(
+          "Row Number",                 null, null, rowNumber,    cert));
+  attribs.add(
+      createEntityAttribute(
+          "Walker Unit Survey Unit ID", null, null, surveyUnitId, cert));
 
   // Set zeroable properties to zero
   for (String ref : getZeroableRefs()) {
@@ -6111,6 +6142,15 @@ void updateWalkerCache(int i, String attribName, attribVal) {
   cell.put(attribName, attribVal);
 }
 
+void updateNumCleanWalkersSelectedField() {
+  int num = getNumCleanWalkersSelected();
+  String val =
+      num == 0 ?
+      num + " \u2014 Use the 'Walkers' tab to select walkers" :// u2014 = emdash
+      num + "";
+  setFieldValue("Control/Main/Number_of_Walkers", val);
+}
+
 void redrawWalkers() {
   String html = "";
   html += "<!DOCTYPE html>";
@@ -6230,7 +6270,7 @@ void redrawWalkers() {
 
 void updateWalkerCacheAndRedraw() {
   populateWebViewHtml(REF_WALKERS_WEBVIEW, "Loading...");
-  updateWalkerCache("redrawWalkers()");
+  updateWalkerCache("redrawWalkers(); updateNumCleanWalkersSelectedField()");
 }
 
 void ordinalWalkerUp  () {
@@ -6413,6 +6453,7 @@ void ordinalWalkerSave() {
       ordinalWalkerSaveCleanCache();
 
       redrawWalkers();
+      updateNumCleanWalkersSelectedField();
       showToast("Saved");
     }
   };
@@ -6481,6 +6522,7 @@ addOnEvent("Control/Walkers/Save", "click", "ordinalWalkerSave()");
 addOnEventCond("Control/Walkers/Add_New_Walker", "click", "ordinalWalkerValidateChanges()");
 addOnEvent("Control/Walkers/Delete_Selected_Walker", "click", "ordinalWalkerDeleteSelected()");
 addOnEvent("Control/Walkers", "leave", "ordinalWalkerValidateChanges()");
+addOnEvent("Control/Main", "show", "updateNumCleanWalkersSelectedField()");
 /****************************** WALKER INITIALS *******************************/
 final String REF_FIRST_NAME = "Walker/Walker/First_Name";
 final String REF_LAST_NAME  = "Walker/Walker/Last_Name";
@@ -6527,8 +6569,9 @@ setFieldValue(String ref, Object value){
 
 persistOverSessions(REF_CULTURAL_COND, false, "{N_A}");
 /************************* ARTEFACT COUNT POPULATION **************************/
-final String REF_MOST_RECENTLY_COMPUTED_ARTEFACT_COUNTS =
-    "Survey_Unit/Survey_Unit/Most_Recently_Computed_Artefact_Counts";
+final String COUNT_REF_PREFIX =
+    "Survey_Unit/Survey_Unit/Most_Recently_Computed_";
+final List COUNT_REFS = getRefsMatching(COUNT_REF_PREFIX + "*");
 
 void populateArtefactCounts() {
   String parentUuid = getUuid();
@@ -6537,18 +6580,8 @@ void populateArtefactCounts() {
       if (result        == null) return;
       if (result.size() == 0   ) return;
 
-      String out = "";
-      out += "Ancient: " + result.get(0).get(0) + "\n";
-      out += "Modern: "  + result.get(0).get(1) + "\n";
-      out += "A/C: "     + result.get(0).get(2) + "\n";
-      out += "HM: "      + result.get(0).get(3) + "\n";
-      out += "Lithic: "  + result.get(0).get(4) + "\n";
-      out += "Daub: "    + result.get(0).get(5) + "\n";
-      out += "Glass: "   + result.get(0).get(6) + "\n";
-      out += "Other: "   + result.get(0).get(7) + "\n";
-      out += "Total: "   + result.get(0).get(8);
-
-      setFieldValue(REF_MOST_RECENTLY_COMPUTED_ARTEFACT_COUNTS, out);
+      for (int i = 0; i < COUNT_REFS.size(); i++)
+        setFieldValue(COUNT_REFS.get(i), result.get(0).get(i));
     }
   };
 
@@ -6557,6 +6590,7 @@ void populateArtefactCounts() {
 
   // Add Queries
   qs.add("drop table if exists materialisedWalker");
+
   qs.add(
       "create table materialisedWalker as" +
       "  select uuid, attributename, vocabid, measure" +
@@ -6568,16 +6602,9 @@ void populateArtefactCounts() {
       "        'A C', 'HM', 'Lithic', 'Daub', 'Glass', 'Other'" +
       "    )"
   );
+
   qs.add(
       "select" +
-      "    coalesce(sum(AncientMeasure), 0)," +
-      "    coalesce(sum(ModernMeasure), 0)," +
-      "    coalesce(sum(ACMeasure), 0)," +
-      "    coalesce(sum(HMMeasure), 0)," +
-      "    coalesce(sum(LithicMeasure), 0)," +
-      "    coalesce(sum(DaubMeasure), 0)," +
-      "    coalesce(sum(GlassMeasure), 0)," +
-      "    coalesce(sum(OtherMeasure), 0)," +
       "    coalesce(sum(AncientMeasure), 0) +" +
       "        coalesce(sum(ModernMeasure), 0) +" +
       "        coalesce(sum(ACMeasure), 0) +" +
@@ -6585,7 +6612,15 @@ void populateArtefactCounts() {
       "        coalesce(sum(LithicMeasure), 0) +" +
       "        coalesce(sum(DaubMeasure), 0) +" +
       "        coalesce(sum(GlassMeasure), 0) +" +
-      "        coalesce(sum(OtherMeasure), 0)" +
+      "        coalesce(sum(OtherMeasure), 0)," +
+      "    coalesce(sum(AncientMeasure), 0)," +
+      "    coalesce(sum(ModernMeasure), 0)," +
+      "    coalesce(sum(ACMeasure), 0)," +
+      "    coalesce(sum(HMMeasure), 0)," +
+      "    coalesce(sum(LithicMeasure), 0)," +
+      "    coalesce(sum(DaubMeasure), 0)," +
+      "    coalesce(sum(GlassMeasure), 0)," +
+      "    coalesce(sum(OtherMeasure), 0)" +
       "  from (select *, childuuid as uuid from parentchild) as pc" +
       "  left outer join (select uuid, sum(measure) as AncientMeasure" +
       "            from materialisedWalker" +
@@ -6651,7 +6686,8 @@ void populateArtefactCounts() {
 }
 
 void initArtefactCounts() {
-  setFieldValue(REF_MOST_RECENTLY_COMPUTED_ARTEFACT_COUNTS, "None");
+  for (String ref : COUNT_REFS)
+    setFieldValue(ref, "None");
 }
 
 addOnEvent("Survey_Unit", "create", "initArtefactCounts()");

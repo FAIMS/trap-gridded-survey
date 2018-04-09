@@ -1,6 +1,7 @@
 /************************* ARTEFACT COUNT POPULATION **************************/
-final String REF_MOST_RECENTLY_COMPUTED_ARTEFACT_COUNTS =
-    "Survey_Unit/Survey_Unit/Most_Recently_Computed_Artefact_Counts";
+final String COUNT_REF_PREFIX =
+    "Survey_Unit/Survey_Unit/Most_Recently_Computed_";
+final List COUNT_REFS = getRefsMatching(COUNT_REF_PREFIX + "*");
 
 void populateArtefactCounts() {
   String parentUuid = getUuid();
@@ -9,18 +10,8 @@ void populateArtefactCounts() {
       if (result        == null) return;
       if (result.size() == 0   ) return;
 
-      String out = "";
-      out += "Ancient: " + result.get(0).get(0) + "\n";
-      out += "Modern: "  + result.get(0).get(1) + "\n";
-      out += "A/C: "     + result.get(0).get(2) + "\n";
-      out += "HM: "      + result.get(0).get(3) + "\n";
-      out += "Lithic: "  + result.get(0).get(4) + "\n";
-      out += "Daub: "    + result.get(0).get(5) + "\n";
-      out += "Glass: "   + result.get(0).get(6) + "\n";
-      out += "Other: "   + result.get(0).get(7) + "\n";
-      out += "Total: "   + result.get(0).get(8);
-
-      setFieldValue(REF_MOST_RECENTLY_COMPUTED_ARTEFACT_COUNTS, out);
+      for (int i = 0; i < COUNT_REFS.size(); i++)
+        setFieldValue(COUNT_REFS.get(i), result.get(0).get(i));
     }
   };
 
@@ -29,6 +20,7 @@ void populateArtefactCounts() {
 
   // Add Queries
   qs.add("drop table if exists materialisedWalker");
+
   qs.add(
       "create table materialisedWalker as" +
       "  select uuid, attributename, vocabid, measure" +
@@ -40,16 +32,9 @@ void populateArtefactCounts() {
       "        'A C', 'HM', 'Lithic', 'Daub', 'Glass', 'Other'" +
       "    )"
   );
+
   qs.add(
       "select" +
-      "    coalesce(sum(AncientMeasure), 0)," +
-      "    coalesce(sum(ModernMeasure), 0)," +
-      "    coalesce(sum(ACMeasure), 0)," +
-      "    coalesce(sum(HMMeasure), 0)," +
-      "    coalesce(sum(LithicMeasure), 0)," +
-      "    coalesce(sum(DaubMeasure), 0)," +
-      "    coalesce(sum(GlassMeasure), 0)," +
-      "    coalesce(sum(OtherMeasure), 0)," +
       "    coalesce(sum(AncientMeasure), 0) +" +
       "        coalesce(sum(ModernMeasure), 0) +" +
       "        coalesce(sum(ACMeasure), 0) +" +
@@ -57,7 +42,15 @@ void populateArtefactCounts() {
       "        coalesce(sum(LithicMeasure), 0) +" +
       "        coalesce(sum(DaubMeasure), 0) +" +
       "        coalesce(sum(GlassMeasure), 0) +" +
-      "        coalesce(sum(OtherMeasure), 0)" +
+      "        coalesce(sum(OtherMeasure), 0)," +
+      "    coalesce(sum(AncientMeasure), 0)," +
+      "    coalesce(sum(ModernMeasure), 0)," +
+      "    coalesce(sum(ACMeasure), 0)," +
+      "    coalesce(sum(HMMeasure), 0)," +
+      "    coalesce(sum(LithicMeasure), 0)," +
+      "    coalesce(sum(DaubMeasure), 0)," +
+      "    coalesce(sum(GlassMeasure), 0)," +
+      "    coalesce(sum(OtherMeasure), 0)" +
       "  from (select *, childuuid as uuid from parentchild) as pc" +
       "  left outer join (select uuid, sum(measure) as AncientMeasure" +
       "            from materialisedWalker" +
@@ -123,7 +116,8 @@ void populateArtefactCounts() {
 }
 
 void initArtefactCounts() {
-  setFieldValue(REF_MOST_RECENTLY_COMPUTED_ARTEFACT_COUNTS, "None");
+  for (String ref : COUNT_REFS)
+    setFieldValue(ref, "None");
 }
 
 addOnEvent("Survey_Unit", "create", "initArtefactCounts()");

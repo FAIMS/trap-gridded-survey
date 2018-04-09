@@ -100,7 +100,40 @@
               <Row_Interval_m/>
               <Walker_Interval_m/>
               <Walkers/>
-              <Most_Recently_Computed_Artefact_Counts/>
+              <Sep_Most_Recently_Computed/>
+              <Most_Recently_Computed_Total/>
+              <Colgroup_1>
+                <Col_1>
+                  <Most_Recently_Computed_Ancient/>
+                </Col_1>
+                <Col_2>
+                  <Most_Recently_Computed_Modern/>
+                </Col_2>
+              </Colgroup_1>
+              <Colgroup_2>
+                <Col_1>
+                  <Most_Recently_Computed_A_C/>
+                </Col_1>
+                <Col_2>
+                  <Most_Recently_Computed_HM/>
+                </Col_2>
+              </Colgroup_2>
+              <Colgroup_3>
+                <Col_1>
+                  <Most_Recently_Computed_Lithic/>
+                </Col_1>
+                <Col_2>
+                  <Most_Recently_Computed_Daub/>
+                </Col_2>
+              </Colgroup_3>
+              <Colgroup_4>
+                <Col_1>
+                  <Most_Recently_Computed_Glass/>
+                </Col_1>
+                <Col_2>
+                  <Most_Recently_Computed_Other/>
+                </Col_2>
+              </Colgroup_4>
               <Compute_Artefact_Counts/>
             </Survey_Unit>
             <Walker_Units>
@@ -243,13 +276,21 @@
       </instance>
       <bind nodeset="/faims/Control/Main/Next_Survey_Unit_ID" type="decimal"/>
       <bind nodeset="/faims/Control/Main/Number_of_Rows" type="decimal"/>
-      <bind nodeset="/faims/Control/Main/Number_of_Walkers" type="decimal"/>
       <bind nodeset="/faims/Control/Main/Row_Interval" type="decimal"/>
       <bind nodeset="/faims/Control/Main/Walker_Interval" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Number_of_Rows" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Number_of_Walkers" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Row_Interval_m" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Walker_Interval_m" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Most_Recently_Computed_Total" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_1/Col_1/Most_Recently_Computed_Ancient" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_1/Col_2/Most_Recently_Computed_Modern" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_2/Col_1/Most_Recently_Computed_A_C" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_2/Col_2/Most_Recently_Computed_HM" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_3/Col_1/Most_Recently_Computed_Lithic" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_3/Col_2/Most_Recently_Computed_Daub" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_4/Col_1/Most_Recently_Computed_Glass" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_4/Col_2/Most_Recently_Computed_Other" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Row" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Walker" type="decimal"/>
       <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_4/Col_1/Ancient" type="decimal"/>
@@ -317,7 +358,7 @@
         <input ref="Number_of_Rows" faims_style_class="required">
           <label>{Starting_Number_of_Rows}</label>
         </input>
-        <input ref="Number_of_Walkers" faims_style_class="required">
+        <input ref="Number_of_Walkers" faims_style_class="required" faims_read_only="true">
           <label>{Number_of_Walkers}</label>
         </input>
         <input ref="Row_Interval" faims_style_class="required">
@@ -576,9 +617,72 @@
         <input faims_attribute_name="Walkers" faims_attribute_type="measure" ref="Walkers" faims_read_only="true">
           <label>{Walkers}</label>
         </input>
-        <input faims_attribute_name="Most Recently Computed Artefact Counts" faims_attribute_type="measure" ref="Most_Recently_Computed_Artefact_Counts" faims_read_only="true">
-          <label>{Most_Recently_Computed_Artefact_Counts}</label>
+        <input faims_web="true" ref="Sep_Most_Recently_Computed">
+          <label/>
         </input>
+        <input faims_attribute_name="Most Recently Computed Total" faims_attribute_type="measure" ref="Most_Recently_Computed_Total" faims_read_only="true">
+          <label>{Most_Recently_Computed_Total}</label>
+        </input>
+        <group ref="Colgroup_1" faims_style="orientation">
+          <label/>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Most Recently Computed Ancient" faims_attribute_type="measure" ref="Most_Recently_Computed_Ancient" faims_read_only="true">
+              <label>{Most_Recently_Computed_Ancient}</label>
+            </input>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Most Recently Computed Modern" faims_attribute_type="measure" ref="Most_Recently_Computed_Modern" faims_read_only="true">
+              <label>{Most_Recently_Computed_Modern}</label>
+            </input>
+          </group>
+        </group>
+        <group ref="Colgroup_2" faims_style="orientation">
+          <label/>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Most Recently Computed A C" faims_attribute_type="measure" ref="Most_Recently_Computed_A_C" faims_read_only="true">
+              <label>{Most_Recently_Computed_A_C}</label>
+            </input>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Most Recently Computed HM" faims_attribute_type="measure" ref="Most_Recently_Computed_HM" faims_read_only="true">
+              <label>{Most_Recently_Computed_HM}</label>
+            </input>
+          </group>
+        </group>
+        <group ref="Colgroup_3" faims_style="orientation">
+          <label/>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Most Recently Computed Lithic" faims_attribute_type="measure" ref="Most_Recently_Computed_Lithic" faims_read_only="true">
+              <label>{Most_Recently_Computed_Lithic}</label>
+            </input>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Most Recently Computed Daub" faims_attribute_type="measure" ref="Most_Recently_Computed_Daub" faims_read_only="true">
+              <label>{Most_Recently_Computed_Daub}</label>
+            </input>
+          </group>
+        </group>
+        <group ref="Colgroup_4" faims_style="orientation">
+          <label/>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Most Recently Computed Glass" faims_attribute_type="measure" ref="Most_Recently_Computed_Glass" faims_read_only="true">
+              <label>{Most_Recently_Computed_Glass}</label>
+            </input>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Most Recently Computed Other" faims_attribute_type="measure" ref="Most_Recently_Computed_Other" faims_read_only="true">
+              <label>{Most_Recently_Computed_Other}</label>
+            </input>
+          </group>
+        </group>
         <trigger ref="Compute_Artefact_Counts">
           <label>{Compute_Artefact_Counts}</label>
         </trigger>

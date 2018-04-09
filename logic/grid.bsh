@@ -683,14 +683,15 @@ void zeroRowAndNext() {
 
   // Enqueue "Walker Unit" records which were previously unsaved
   rowNumber = String.valueOf(selectedRow);
+  String parentUuid = getUuid("Survey_Unit");
+  String surveyUnitId = getFieldValue("Survey_Unit/Survey_Unit/Survey_Unit_ID");
   for (String walkerNumber : unsavedWalkerNumbers) {
-    String parentUuid = getUuid("Survey_Unit");
-
     // Pack fields
     List walkerUnitToZero = new ArrayList();
     walkerUnitToZero.add(parentUuid);
     walkerUnitToZero.add(rowNumber);
     walkerUnitToZero.add(walkerNumber);
+    walkerUnitToZero.add(surveyUnitId);
 
     // Enque packed fields
     WALKER_UNITS_TO_ZERO.put(walkerUnitToZero);
@@ -735,16 +736,19 @@ void dequeWalkerUnitsToZeroRec() {
   List walkerUnitToZero = WALKER_UNITS_TO_ZERO.take();
 
   // Unpack fields from queue
-  String parentUuid     =             walkerUnitToZero.get(0);//Survey Unit UUID
-  String     sRowNumber =             walkerUnitToZero.get(1);
-  int        iRowNumber = stringToInt(walkerUnitToZero.get(1));
-  String  sWalkerNumber =             walkerUnitToZero.get(2);
-  int     iWalkerNumber = stringToInt(walkerUnitToZero.get(2));
+  String    parentUuid =             walkerUnitToZero.get(0); //Survey Unit UUID
+  String    sRowNumber =             walkerUnitToZero.get(1);
+  int       iRowNumber = stringToInt(walkerUnitToZero.get(1));
+  String sWalkerNumber =             walkerUnitToZero.get(2);
+  int    iWalkerNumber = stringToInt(walkerUnitToZero.get(2));
+  int    iWalkerNumber = stringToInt(walkerUnitToZero.get(2));
+  String  surveyUnitId =             walkerUnitToZero.get(3);
   // Prepare other fields which are required to perform a save
   String uuid         = null;
   String entityType   = "Walker Unit";
   List   geometry     = null;
-  List   attributes   = createZeroedAttributeList(sRowNumber, sWalkerNumber);
+  List   attributes   = createZeroedAttributeList(
+      sRowNumber, sWalkerNumber, surveyUnitId);
   SaveCallback relate = new SaveCallback() {
     onSave(uuid, newRecord) {
       saveEntitiesToHierRel(
@@ -869,14 +873,25 @@ List getZeroableAttribNames() {
   return attribNames;
 }
 
-List createZeroedAttributeList(String rowNumber, String walkerNumber) {
+List createZeroedAttributeList(
+    String rowNumber,
+    String walkerNumber,
+    String surveyUnitId
+) {
   List attribs = createAttributeList();
 
   String cert = "1.0"; // Certainty, having the default value of 1.0
 
   // Set 'Walker Number' and 'Row Number' to given values
-  attribs.add(createEntityAttribute("Walker Number", null, null, walkerNumber, cert));
-  attribs.add(createEntityAttribute("Row Number",    null, null, rowNumber,    cert));
+  attribs.add(
+      createEntityAttribute(
+          "Walker Number",              null, null, walkerNumber, cert));
+  attribs.add(
+      createEntityAttribute(
+          "Row Number",                 null, null, rowNumber,    cert));
+  attribs.add(
+      createEntityAttribute(
+          "Walker Unit Survey Unit ID", null, null, surveyUnitId, cert));
 
   // Set zeroable properties to zero
   for (String ref : getZeroableRefs()) {

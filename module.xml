@@ -27,8 +27,7 @@
     <Number_of_Rows    b="decimal" f="notnull persist">
       Starting Number of Rows
     </Number_of_Rows>
-    <Number_of_Walkers b="decimal" f="notnull persist">
-    </Number_of_Walkers>
+    <Number_of_Walkers             f="notnull readonly"/>
     <Row_Interval      b="decimal" f="notnull persist">
       Row Interval (m)
     </Row_Interval>
@@ -205,7 +204,26 @@ Use the '▲', '▼' and '(De)select' buttons to choose walkers for your team. S
     <Row_Interval_m     b="decimal" f="readonly" i="Control/Main/Row_Interval">Row Interval (m)</Row_Interval_m>
     <Walker_Interval_m  b="decimal" f="readonly" i="Control/Main/Walker_Interval">Walker Interval (m)</Walker_Interval_m>
     <Walkers f="readonly"/>
-    <Most_Recently_Computed_Artefact_Counts f="readonly"/>
+    <Sep_Most_Recently_Computed t="webview" f="nolabel">\ </Sep_Most_Recently_Computed>
+    <Most_Recently_Computed_Total b="decimal" f="readonly"/>
+    <cols>
+      <Most_Recently_Computed_Ancient b="decimal" f="readonly"/>
+      <Most_Recently_Computed_Modern  b="decimal" f="readonly"/>
+    </cols>
+    <cols>
+      <Most_Recently_Computed_A_C    b="decimal" f="readonly">
+        Most Recently Computed A/C
+      </Most_Recently_Computed_A_C>
+      <Most_Recently_Computed_HM     b="decimal" f="readonly"/>
+    </cols>
+    <cols>
+      <Most_Recently_Computed_Lithic b="decimal" f="readonly"/>
+      <Most_Recently_Computed_Daub   b="decimal" f="readonly"/>
+    </cols>
+    <cols>
+      <Most_Recently_Computed_Glass  b="decimal" f="readonly"/>
+      <Most_Recently_Computed_Other  b="decimal" f="readonly"/>
+    </cols>
     <Compute_Artefact_Counts t="button"/>
   </Survey_Unit>
   <Walker_Units f="noscroll">

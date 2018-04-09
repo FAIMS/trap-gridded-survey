@@ -566,9 +566,9 @@ public class ModuleUtil extends ModuleHelper {
         Type: input
         Ref:  Control/Main/Number_of_Walkers
      */
-    public static EditText get_Control_Main_NumberofWalkers(Solo solo) {
+    public static View get_Control_Main_NumberofWalkers(Solo solo) {
         String ref = "Control/Main/Number_of_Walkers";
-        return (android.widget.EditText) solo.getView((Object) ref);
+        return (android.view.View) solo.getView((Object) ref);
     }
 
     /*
@@ -600,10 +600,82 @@ public class ModuleUtil extends ModuleHelper {
 
     /*
         Type: input
-        Ref:  Survey_Unit/Survey_Unit/Most_Recently_Computed_Artefact_Counts
+        Ref:  Survey_Unit/Survey_Unit/Most_Recently_Computed_A_C
      */
-    public static View get_SurveyUnit_SurveyUnit_MostRecentlyComputedArtefactCounts(Solo solo) {
-        String ref = "Survey_Unit/Survey_Unit/Most_Recently_Computed_Artefact_Counts";
+    public static View get_SurveyUnit_SurveyUnit_MostRecentlyComputedAC(Solo solo) {
+        String ref = "Survey_Unit/Survey_Unit/Most_Recently_Computed_A_C";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: input
+        Ref:  Survey_Unit/Survey_Unit/Most_Recently_Computed_Ancient
+     */
+    public static View get_SurveyUnit_SurveyUnit_MostRecentlyComputedAncient(Solo solo) {
+        String ref = "Survey_Unit/Survey_Unit/Most_Recently_Computed_Ancient";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: input
+        Ref:  Survey_Unit/Survey_Unit/Most_Recently_Computed_Daub
+     */
+    public static View get_SurveyUnit_SurveyUnit_MostRecentlyComputedDaub(Solo solo) {
+        String ref = "Survey_Unit/Survey_Unit/Most_Recently_Computed_Daub";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: input
+        Ref:  Survey_Unit/Survey_Unit/Most_Recently_Computed_Glass
+     */
+    public static View get_SurveyUnit_SurveyUnit_MostRecentlyComputedGlass(Solo solo) {
+        String ref = "Survey_Unit/Survey_Unit/Most_Recently_Computed_Glass";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: input
+        Ref:  Survey_Unit/Survey_Unit/Most_Recently_Computed_HM
+     */
+    public static View get_SurveyUnit_SurveyUnit_MostRecentlyComputedHM(Solo solo) {
+        String ref = "Survey_Unit/Survey_Unit/Most_Recently_Computed_HM";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: input
+        Ref:  Survey_Unit/Survey_Unit/Most_Recently_Computed_Lithic
+     */
+    public static View get_SurveyUnit_SurveyUnit_MostRecentlyComputedLithic(Solo solo) {
+        String ref = "Survey_Unit/Survey_Unit/Most_Recently_Computed_Lithic";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: input
+        Ref:  Survey_Unit/Survey_Unit/Most_Recently_Computed_Modern
+     */
+    public static View get_SurveyUnit_SurveyUnit_MostRecentlyComputedModern(Solo solo) {
+        String ref = "Survey_Unit/Survey_Unit/Most_Recently_Computed_Modern";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: input
+        Ref:  Survey_Unit/Survey_Unit/Most_Recently_Computed_Other
+     */
+    public static View get_SurveyUnit_SurveyUnit_MostRecentlyComputedOther(Solo solo) {
+        String ref = "Survey_Unit/Survey_Unit/Most_Recently_Computed_Other";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: input
+        Ref:  Survey_Unit/Survey_Unit/Most_Recently_Computed_Total
+     */
+    public static View get_SurveyUnit_SurveyUnit_MostRecentlyComputedTotal(Solo solo) {
+        String ref = "Survey_Unit/Survey_Unit/Most_Recently_Computed_Total";
         return (android.view.View) solo.getView((Object) ref);
     }
 
@@ -982,6 +1054,15 @@ public class ModuleUtil extends ModuleHelper {
      */
     public static View get_Saving_Saving_Saving(Solo solo) {
         String ref = "Saving/Saving/Saving";
+        return (android.view.View) solo.getView((Object) ref);
+    }
+
+    /*
+        Type: webview
+        Ref:  Survey_Unit/Survey_Unit/Sep_Most_Recently_Computed
+     */
+    public static View get_SurveyUnit_SurveyUnit_SepMostRecentlyComputed(Solo solo) {
+        String ref = "Survey_Unit/Survey_Unit/Sep_Most_Recently_Computed";
         return (android.view.View) solo.getView((Object) ref);
     }
 
