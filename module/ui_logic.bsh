@@ -1,5 +1,5 @@
 /*
- * GENERATED WITH FAIMS-TOOLS, SHA1: 228b6499954b35cbefa339d3ec6e6967da36cc40
+ * GENERATED WITH FAIMS-TOOLS, SHA1: cf610c8d0af07428795bdc49cabe7fa374ab52ab
  */
 import android.util.Log;
 import android.os.Build.MODEL;
@@ -3118,6 +3118,7 @@ void validateControl() {
 /*                                 AUTOSAVING                                 */
 /******************************************************************************/
 Map tabgroupToUuid = Collections.synchronizedMap(new HashMap());
+Set seenUuids = Collections.synchronizedSet(new HashSet());
 
 String getUuid(String tabgroup) {
   return tabgroupToUuid.get(tabgroup);
@@ -3152,6 +3153,13 @@ void saveTabGroup(String tabgroup, String callback) {
   SaveCallback saveCallback  = new SaveCallback() {
     onSave(uuid, newRecord) {
       setUuid(tabgroup, uuid);
+
+      // This is a workaround for a bug where `newRecord` can be `true` twice if
+      // a record was saved again shortly after it was created.
+      if (seenUuids.contains(uuid))
+        newRecord = false;
+      if (uuid != null)
+        seenUuids.add(uuid);
 
       String cb = newRecord ? callbackFirstSave : callback;
 
