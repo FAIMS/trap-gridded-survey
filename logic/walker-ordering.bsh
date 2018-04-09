@@ -103,6 +103,15 @@ void updateWalkerCache(int i, String attribName, attribVal) {
   cell.put(attribName, attribVal);
 }
 
+void updateNumCleanWalkersSelectedField() {
+  int num = getNumCleanWalkersSelected();
+  String val =
+      num == 0 ?
+      num + " \u2014 Use the 'Walkers' tab to select walkers" :// u2014 = emdash
+      num + "";
+  setFieldValue("Control/Main/Number_of_Walkers", val);
+}
+
 void redrawWalkers() {
   String html = "";
   html += "<!DOCTYPE html>";
@@ -222,7 +231,7 @@ void redrawWalkers() {
 
 void updateWalkerCacheAndRedraw() {
   populateWebViewHtml(REF_WALKERS_WEBVIEW, "Loading...");
-  updateWalkerCache("redrawWalkers()");
+  updateWalkerCache("redrawWalkers(); updateNumCleanWalkersSelectedField()");
 }
 
 void ordinalWalkerUp  () {
@@ -405,6 +414,7 @@ void ordinalWalkerSave() {
       ordinalWalkerSaveCleanCache();
 
       redrawWalkers();
+      updateNumCleanWalkersSelectedField();
       showToast("Saved");
     }
   };
@@ -473,3 +483,4 @@ addOnEvent("Control/Walkers/Save", "click", "ordinalWalkerSave()");
 addOnEventCond("Control/Walkers/Add_New_Walker", "click", "ordinalWalkerValidateChanges()");
 addOnEvent("Control/Walkers/Delete_Selected_Walker", "click", "ordinalWalkerDeleteSelected()");
 addOnEvent("Control/Walkers", "leave", "ordinalWalkerValidateChanges()");
+addOnEvent("Control/Main", "show", "updateNumCleanWalkersSelectedField()");
