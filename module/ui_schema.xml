@@ -367,7 +367,7 @@
         <input ref="Walker_Interval" faims_style_class="required">
           <label>{Walker_Interval__m_}</label>
         </input>
-        <select1 ref="Land_Use">
+        <select1 ref="Land_Use" faims_style_class="required">
           <label>{Land_Use}</label>
           <item>
             <label>Options not loaded</label>
@@ -532,7 +532,7 @@
         <input faims_attribute_name="Survey Unit ID" faims_attribute_type="measure" ref="Survey_Unit_ID">
           <label>{Survey_Unit_ID}</label>
         </input>
-        <select1 faims_attribute_name="Land Use" faims_attribute_type="vocab" ref="Land_Use">
+        <select1 faims_attribute_name="Land Use" faims_attribute_type="vocab" ref="Land_Use" faims_style_class="required">
           <label>{Land_Use}</label>
           <item>
             <label>Options not loaded</label>

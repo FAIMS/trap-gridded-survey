@@ -1,2 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
-<ValidationSchema/>
+<ValidationSchema>
+  <ArchaeologicalElement name="Survey Unit">
+    <property name="Land Use">
+      <validator type="blankchecker">
+        <param type="field" value="vocab"/>
+      </validator>
+    </property>
+  </ArchaeologicalElement>
+</ValidationSchema>

@@ -3108,6 +3108,14 @@ void validateControl() {
   f.add(fieldPair("Control/Main/Number_of_Walkers", "{Number_of_Walkers}"));
   f.add(fieldPair("Control/Main/Row_Interval", "{Row_Interval__m_}"));
   f.add(fieldPair("Control/Main/Walker_Interval", "{Walker_Interval__m_}"));
+  f.add(fieldPair("Control/Main/Land_Use", "{Land_Use}"));
+
+  String validationMessage = validateFields(f, "PLAINTEXT");
+  showWarning("{validation_results}", validationMessage);
+}
+void validateSurveyUnit() {
+  List f = new ArrayList(); // Fields to be validated
+  f.add(fieldPair("Survey_Unit/Survey_Unit/Land_Use", "{Land_Use}"));
 
   String validationMessage = validateFields(f, "PLAINTEXT");
   showWarning("{validation_results}", validationMessage);
@@ -3331,6 +3339,7 @@ void addNavigationButtons(String tabgroup) {
   removeNavigationButtons();
   List tabgroupsToValidate = new ArrayList();
   tabgroupsToValidate.add("Control");
+  tabgroupsToValidate.add("Survey_Unit");
   addNavigationButton("new", new ActionButtonCallback() {
     actionOnLabel() {
       "{New}";

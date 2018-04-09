@@ -34,7 +34,7 @@
     <Walker_Interval   b="decimal" f="notnull persist">
       Walker Interval (m)
     </Walker_Interval>
-    <Land_Use t="dropdown" f="persist" vp="Survey_Unit/Survey_Unit/Land_Use"/>
+    <Land_Use t="dropdown" f="persist notnull" vp="Survey_Unit/Survey_Unit/Land_Use"/>
     <Agricultural_Condition t="dropdown" vp="Survey_Unit/Survey_Unit/Agricultural_Condition">
       <!-- custom logic: f="persist" -->
     </Agricultural_Condition>
@@ -83,7 +83,7 @@ Use the '▲', '▼' and '(De)select' buttons to choose walkers for your team. S
 <Survey_Unit>
   <Survey_Unit>
     <Survey_Unit_ID f="id autonum"/>
-    <Land_Use i="Control/Main/Land_Use">
+    <Land_Use i="Control/Main/Land_Use" f="notnull">
       <desc>Prevalent landuse in a given Survey Unit.</desc>
       <opts>
         <opt>Annual Agriculture</opt>
