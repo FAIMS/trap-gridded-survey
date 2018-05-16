@@ -1,0 +1,1 @@
+perf-test/db.sqlite filter=lfs diff=lfs merge=lfs -text
