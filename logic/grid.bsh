@@ -246,7 +246,6 @@ void updateGridCacheFromUuid(String parentUuid, String uuid, String callback) {
           int walkerNumber = stringToInt(r.get(2));
 
           updateGridCache(rowNumber, walkerNumber, ATTRIB_NA, "");
-          continue;
         }
 
         updateGridCache(result);
