@@ -1,5 +1,5 @@
 /*
- * GENERATED WITH FAIMS-TOOLS, SHA1: a113c19219aac575116caf3f9084b6336425ce2b
+ * GENERATED WITH FAIMS-TOOLS, SHA1: 91c7b5311d007e66f6451b0d6143bd03e7aa75e9
  */
 import android.util.Log;
 import android.os.Build.MODEL;
@@ -5609,10 +5609,7 @@ void onCreateWalkerUnit() {
 
 addOnEvent("Walker_Unit", "fetch", "onLoadWalkerUnit()");
 addOnEvent("Walker_Unit", "create", "onCreateWalkerUnit()");
-
-void onShowWalkerUnit () {
-  saveWalkerUnit();
-}
+addOnEvent("Walker_Unit", "show", "saveWalkerUnit()");
 
 void saveWalkerUnit() {
   String  tabgroup            = "Walker_Unit";
