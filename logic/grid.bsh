@@ -991,10 +991,7 @@ void onCreateWalkerUnit() {
 
 addOnEvent("Walker_Unit", "fetch", "onLoadWalkerUnit()");
 addOnEvent("Walker_Unit", "create", "onCreateWalkerUnit()");
-
-void onShowWalkerUnit () {
-  saveWalkerUnit();
-}
+addOnEvent("Walker_Unit", "show", "saveWalkerUnit()");
 
 void saveWalkerUnit() {
   String  tabgroup            = "Walker_Unit";

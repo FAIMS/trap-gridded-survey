@@ -24,29 +24,29 @@
       <appendCharacterString> - </appendCharacterString>
       <lookup>
         <term>{Annual_Agriculture}
-<description></description></term>
+<description> </description></term>
         <term>{Perennial_Agriculture}
-<description></description></term>
+<description> </description></term>
         <term>{Fallow_field}
-<description></description></term>
+<description> </description></term>
         <term>{Pasture}
-<description></description></term>
+<description> </description></term>
         <term>{Scrub}
-<description></description></term>
+<description> </description></term>
         <term>{Forest}
-<description></description></term>
+<description> </description></term>
         <term>{Wetland}
-<description></description></term>
+<description> </description></term>
         <term>{Urban}
-<description></description></term>
+<description> </description></term>
         <term>{Industrial}
-<description></description></term>
+<description> </description></term>
         <term>{Communication}
-<description></description></term>
+<description> </description></term>
         <term>{Beach}
-<description></description></term>
+<description> </description></term>
         <term>{Other}
-<description></description></term>
+<description> </description></term>
       </lookup>
     </property>
     <property name="Agricultural Condition" type="vocab">
@@ -55,27 +55,27 @@
       <appendCharacterString> - </appendCharacterString>
       <lookup>
         <term>{N_A}
-<description></description></term>
+<description> </description></term>
         <term>{Ploughed}
-<description></description></term>
+<description> </description></term>
         <term>{Harrowed}
-<description></description></term>
+<description> </description></term>
         <term>{Seedlings}
-<description></description></term>
+<description> </description></term>
         <term>{Immature_Crop}
-<description></description></term>
+<description> </description></term>
         <term>{Mature_Crop}
-<description></description></term>
+<description> </description></term>
         <term>{Harvested_Clean}
-<description></description></term>
+<description> </description></term>
         <term>{Harvested_with_Stubble}
-<description></description></term>
+<description> </description></term>
         <term>{Partially_Fallow}
-<description></description></term>
+<description> </description></term>
         <term>{Burnt}
-<description></description></term>
+<description> </description></term>
         <term>{Other}
-<description></description></term>
+<description> </description></term>
       </lookup>
     </property>
     <property name="Topography" type="vocab">
@@ -84,21 +84,21 @@
       <appendCharacterString> - </appendCharacterString>
       <lookup>
         <term>{N_A}
-<description></description></term>
+<description> </description></term>
         <term>{Hillside}
-<description></description></term>
+<description> </description></term>
         <term>{Reservoir_Slope}
-<description></description></term>
+<description> </description></term>
         <term>{Ridgeline}
-<description></description></term>
+<description> </description></term>
         <term>{River_Terrace}
-<description></description></term>
+<description> </description></term>
         <term>{Undulating_Landscape}
-<description></description></term>
+<description> </description></term>
         <term>{Valley_Bottom}
-<description></description></term>
+<description> </description></term>
         <term>{Other}
-<description></description></term>
+<description> </description></term>
       </lookup>
     </property>
     <property name="Slope" type="vocab">
@@ -107,15 +107,15 @@
       <appendCharacterString> - </appendCharacterString>
       <lookup>
         <term>{Level}
-<description></description></term>
+<description> </description></term>
         <term>{Gentle}
-<description></description></term>
+<description> </description></term>
         <term>{Steep}
-<description></description></term>
+<description> </description></term>
         <term>{Very_Steep}
-<description></description></term>
+<description> </description></term>
         <term>{Impassable}
-<description></description></term>
+<description> </description></term>
       </lookup>
     </property>
     <property name="Visibility" type="vocab">
@@ -124,15 +124,15 @@
       <appendCharacterString> - </appendCharacterString>
       <lookup>
         <term>{0_20_}
-<description></description></term>
+<description> </description></term>
         <term>{20_40_}
-<description></description></term>
+<description> </description></term>
         <term>{40_60_}
-<description></description></term>
+<description> </description></term>
         <term>{60_80_}
-<description></description></term>
+<description> </description></term>
         <term>{80_100_}
-<description></description></term>
+<description> </description></term>
       </lookup>
     </property>
     <property name="Passability" type="vocab">
@@ -141,15 +141,15 @@
       <appendCharacterString> - </appendCharacterString>
       <lookup>
         <term>{1}
-<description></description></term>
+<description> </description></term>
         <term>{2}
-<description></description></term>
+<description> </description></term>
         <term>{3}
-<description></description></term>
+<description> </description></term>
         <term>{4}
-<description></description></term>
+<description> </description></term>
         <term>{5}
-<description></description></term>
+<description> </description></term>
       </lookup>
     </property>
     <property name="Drainage" type="vocab">
@@ -158,15 +158,15 @@
       <appendCharacterString> - </appendCharacterString>
       <lookup>
         <term>{1}
-<description></description></term>
+<description> </description></term>
         <term>{2}
-<description></description></term>
+<description> </description></term>
         <term>{3}
-<description></description></term>
+<description> </description></term>
         <term>{4}
-<description></description></term>
+<description> </description></term>
         <term>{5}
-<description></description></term>
+<description> </description></term>
       </lookup>
     </property>
     <property name="Vegetation" type="vocab">
@@ -175,15 +175,15 @@
       <appendCharacterString> - </appendCharacterString>
       <lookup>
         <term>{1}
-<description></description></term>
+<description> </description></term>
         <term>{2}
-<description></description></term>
+<description> </description></term>
         <term>{3}
-<description></description></term>
+<description> </description></term>
         <term>{4}
-<description></description></term>
+<description> </description></term>
         <term>{5}
-<description></description></term>
+<description> </description></term>
       </lookup>
     </property>
     <property name="Stoniness" type="vocab">
@@ -192,15 +192,15 @@
       <appendCharacterString> - </appendCharacterString>
       <lookup>
         <term>{1}
-<description></description></term>
+<description> </description></term>
         <term>{2}
-<description></description></term>
+<description> </description></term>
         <term>{3}
-<description></description></term>
+<description> </description></term>
         <term>{4}
-<description></description></term>
+<description> </description></term>
         <term>{5}
-<description></description></term>
+<description> </description></term>
       </lookup>
     </property>
     <property name="Shade" type="vocab">
@@ -209,15 +209,15 @@
       <appendCharacterString> - </appendCharacterString>
       <lookup>
         <term>{1}
-<description></description></term>
+<description> </description></term>
         <term>{2}
-<description></description></term>
+<description> </description></term>
         <term>{3}
-<description></description></term>
+<description> </description></term>
         <term>{4}
-<description></description></term>
+<description> </description></term>
         <term>{5}
-<description></description></term>
+<description> </description></term>
       </lookup>
     </property>
     <property name="Number of Rows" type="measure">
@@ -332,7 +332,7 @@
       <appendCharacterString> - </appendCharacterString>
       <lookup>
         <term>{N_A}
-<description></description></term>
+<description> </description></term>
       </lookup>
     </property>
     <property name="Ancient" type="measure">
@@ -386,13 +386,13 @@
       <appendCharacterString> - </appendCharacterString>
       <lookup>
         <term>{Prehistoric}
-<description></description></term>
+<description> </description></term>
         <term>{Classical}
-<description></description></term>
+<description> </description></term>
         <term>{Medieval}
-<description></description></term>
+<description> </description></term>
         <term>{Ottoman}
-<description></description></term>
+<description> </description></term>
       </lookup>
     </property>
     <property name="Fragmentation" type="vocab">
@@ -401,15 +401,15 @@
       <appendCharacterString> - </appendCharacterString>
       <lookup>
         <term>{1}
-<description></description></term>
+<description> </description></term>
         <term>{2}
-<description></description></term>
+<description> </description></term>
         <term>{3}
-<description></description></term>
+<description> </description></term>
         <term>{4}
-<description></description></term>
+<description> </description></term>
         <term>{5}
-<description></description></term>
+<description> </description></term>
       </lookup>
     </property>
     <property name="Wear" type="vocab">
@@ -418,15 +418,15 @@
       <appendCharacterString> - </appendCharacterString>
       <lookup>
         <term>{1}
-<description></description></term>
+<description> </description></term>
         <term>{2}
-<description></description></term>
+<description> </description></term>
         <term>{3}
-<description></description></term>
+<description> </description></term>
         <term>{4}
-<description></description></term>
+<description> </description></term>
         <term>{5}
-<description></description></term>
+<description> </description></term>
       </lookup>
     </property>
   </ArchaeologicalElement>
