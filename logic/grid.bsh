@@ -988,9 +988,13 @@ void onCreateWalkerUnit() {
   redrawGrid();
 }
 
+delOnEvent(
+    "Walker_Unit",
+    "show",
+    fun2str("saveTabGroup", new Object[]{"Walker_Unit"}));
+addOnEvent("Walker_Unit", "show", "saveWalkerUnit()");
 addOnEvent("Walker_Unit", "fetch", "onLoadWalkerUnit()");
 addOnEvent("Walker_Unit", "create", "onCreateWalkerUnit()");
-addOnEvent("Walker_Unit", "show", "saveWalkerUnit()");
 
 void saveWalkerUnit() {
   String  tabgroup            = "Walker_Unit";
