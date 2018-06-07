@@ -1,11 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--https://docs.google.com/document/d/1xuc-WQ_fDYRJCNK0bOt60fa-0xU0bvz9oxRSPzENwTw/edit#-->
-<!--TODO: onShowSurveyUnit-->
-<!--TODO: onShowWalker-->
-<!--TODO: onShowWalkerUnit-->
-<!--TODO: executeOnEvent("Survey_Unit", "show", "onShowSurveyUnit()");-->
-<!--TODO: executeOnEvent("Walker", "show", "onShowWalker()");-->
-<!--TODO: executeOnEvent("Walker_Unit", "show", "onShowWalkerUnit()");-->
 <!--@POSTPROC: ./postproc.sh -->
 <module>
 

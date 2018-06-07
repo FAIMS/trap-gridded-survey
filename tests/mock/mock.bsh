@@ -1,6 +1,7 @@
 // CLASSES
 public interface FetchCallback {
   void onFetch(Object result);
+  void onError(Object message);
 }
 
 public interface SaveCallback {
@@ -347,15 +348,21 @@ void addActionBarItem(String s, ToggleActionButtonCallback c) { }
 void execute(String s) { eval(s); }
 void fetchAll(String s) { fetchAll(s, null); }
 void fetchAll(String query, FetchCallback callback) {
-  result = Fetch.fetchAll(query);
-  if (callback != null)
-    callback.onFetch(result);
+  try {
+    result = Fetch.fetchAll(query);
+    if (callback != null) callback.onFetch(result);
+  } catch (Exception e) {
+    if (callback != null) callback.onError(e + "");
+  }
 }
 void fetchOne(String s) { fetchOne(s, null); }
 void fetchOne(String query, FetchCallback callback) {
-  result = Fetch.fetchOne(query);
-  if (callback != null)
-    callback.onFetch(result);
+  try {
+    result = Fetch.fetchOne(query);
+    if (callback != null) callback.onFetch(result);
+  } catch (Exception e) {
+    if (callback != null) callback.onError(e + "");
+  }
 }
 void onEvent(String s1, String s2, String s3) { return; }
 void onFocus(String s1, String s2, String s3) { return; }
@@ -437,3 +444,4 @@ void addDatabaseLayerQuery(String ref, String name, String sql) { return; }
 void refreshTabgroupCSS(String ref) { return; }
 void refreshMap(String ref) { return; }
 void fetchArchEnt(String id, FetchCallback callback) { if (callback != null) callback.onFetch(null); }
+boolean isNull(Object o) { return o == null; }
