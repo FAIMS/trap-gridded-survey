@@ -81,6 +81,7 @@ Use the '▲', '▼' and '(De)select' buttons to choose walkers for your team. S
 </Control>
 
 <Survey_Unit>
+  <fmt>{{Survey_Unit_ID}}: {{Most_Recently_Computed_Total}}</fmt>
   <Survey_Unit>
     <Survey_Unit_ID f="id autonum"/>
     <Land_Use i="Control/Main/Land_Use" f="notnull">
@@ -199,6 +200,7 @@ Use the '▲', '▼' and '(De)select' buttons to choose walkers for your team. S
         <opt>5</opt>
       </opts>
     </Shade>
+    <gps/>
     <Number_of_Rows     b="decimal" f="readonly" i="Control/Main/Number_of_Rows"/>
     <Number_of_Walkers  b="decimal" f="readonly" i="Control/Main/Number_of_Walkers"/>
     <Row_Interval_m     b="decimal" f="readonly" i="Control/Main/Row_Interval">Row Interval (m)</Row_Interval_m>

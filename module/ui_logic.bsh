@@ -1,5 +1,5 @@
 /*
- * GENERATED WITH FAIMS-TOOLS, SHA1: f617b1957cf2adac0297ed764e3cbb916ae15932
+ * GENERATED WITH FAIMS-TOOLS, SHA1: 9c562002cd0aac56cd2bbf4dcd71e0ee8888b547
  */
 import android.util.Log;
 import android.os.Build.MODEL;
@@ -358,6 +358,12 @@ REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Drainage", "radio");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Vegetation", "radio");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Stoniness", "radio");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Shade", "radio");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Latitude", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Longitude", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Northing", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Easting", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Accuracy", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Take_From_GPS_1", "button");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Number_of_Rows", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Number_of_Walkers", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Row_Interval_m", "input");
@@ -444,6 +450,11 @@ DATA_REFS.add("Survey_Unit/Survey_Unit/Drainage");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Vegetation");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Stoniness");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Shade");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Latitude");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Longitude");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Northing");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Easting");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Accuracy");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Number_of_Rows");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Number_of_Walkers");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Row_Interval_m");
@@ -576,6 +587,9 @@ boolean hasVpRef(String ref) {
   return getVpRef(ref) != null;
 }
 
+/* Returns `true` if `ref` refers to a hierarhical menu. (e.g. a hierarchical
+ * dropdown or hierarchical picture gallery.) Returns `false` otherwise.
+ */
 boolean isHier(String ref) {
   return HIER_REFS.contains(ref);
 }
@@ -1118,6 +1132,21 @@ void addOnEvent(String ref, String event, String statement, int precedence) {
   addToOnEventPriorities(ref, event, statement, precedence, ON_EVT_STMTS);
 }
 
+/* Adds a condition to be checked before any expressions bound by `addOnEvent`
+ * are evaluated. `check` is `boolean` expression which must evaluate to `true`
+ * before the bound expressions evaluate. For instance, in the following logic,
+ * `onShowMyTabGroup()` will never be evaluated:
+ *
+ * ```
+ * boolean myChecker() {
+ *   showWarning("I'm Sorry, Dave", "I'm afraid I can't do that.");
+ *   return false;
+ * }
+ *
+ * addOnEvent    ("My_Tab_Group", "show", "onShowMyTabGroup()");
+ * addOnEventCond("My_Tab_Group", "show", "myChecker()");
+ * ```
+ */
 void addOnEventCond(String ref, String event, String check) {
   addToOnEventPriorities(ref, event, check, PRECEDENCE_MID, ON_EVT_CONDS);
 }
@@ -1377,6 +1406,28 @@ int getNumDummyPhotosAtNode(tree) {
     PERF_PHOTOS_PER_FIELD;
 }
 
+int getNumSavedPhotos() {
+  String dirStr = "/sdcard/faims/modules/" + getModuleId() + "/files/server/";
+  return getNumFilesInDir(dirStr);
+}
+
+int getNumFilesInDir(String path) {
+  File file = new File(path);
+  return getNumFilesInDir(file);
+}
+
+int getNumFilesInDir(File dir) {
+  int num = 0;
+
+  File[] files = dir.listFiles();
+  if (files == null) return num;
+
+  for (File file : dir.listFiles())
+    num += file.isFile() ? 1 : getNumFilesInDir(file);
+
+  return num;
+}
+
 int getNumDummyRecords() {
   getNumDummyRecords(PERF_TYPE_TREE);
 }
@@ -1406,8 +1457,32 @@ float getFileSizeInMBytes(String path) {
   return file.length() / 1000.f / 1000.f;
 }
 
+float getDirSizeInMBytes(String path) {
+  File file = new File(path);
+  return getDirSizeInMBytes(file);
+}
+
+float getDirSizeInMBytes(File dir) {
+  float length = 0;
+
+  File[] files = dir.listFiles();
+  if (files == null) return length;
+
+  for (File file : dir.listFiles())
+    length += file.isFile()
+      ? file.length() / 1000.f / 1000.f
+      : getDirSizeInMBytes(file);
+
+  return length;
+}
+
 float getSizeDummyPhotosInMBytes() {
   return getNumDummyPhotos() * getFileSizeInMBytes(PERF_TEST_IMG);
+}
+
+float getSizeSavedPhotosInMBytes() {
+  String dirStr = "/sdcard/faims/modules/" + getModuleId() + "/files/server/";
+  return getDirSizeInMBytes(dirStr);
 }
 
 String megabytesToString(float mb) {
@@ -1420,8 +1495,16 @@ String getSizeDummyPhotosInMBytesAsString() {
   return megabytesToString(getSizeDummyPhotosInMBytes());
 }
 
+String getSizeSavedPhotosInMBytesAsString() {
+  return megabytesToString(getSizeSavedPhotosInMBytes());
+}
+
 float getFreeSpaceInMBytes() {
-  StatFs statFs = new StatFs(Environment.getRootDirectory().getAbsolutePath());
+  return getFreeSpaceInMBytes(Environment.getRootDirectory().getAbsolutePath());
+}
+
+float getFreeSpaceInMBytes(String path) {
+  StatFs statFs = new StatFs(path);
   return statFs.getBlockCount() * statFs.getBlockSize() / 1000.f / 1000.f;
 }
 
@@ -1739,6 +1822,23 @@ List getAttribsForArchEnt(String archEntType) {
   return attribs;
 }
 
+List getDummyGeometry(String archEntType) {
+  String tabGroupRef = archEntType.replaceAll(" ", "_");
+
+  if (getTakeFromGpsMappings().get(tabGroupRef) == null)
+    return null;
+
+  Double northing = 1.f;
+  Double easting  = 1.f;
+
+  MapPos mapPos = new MapPos(easting, northing);
+  Point samplePoint = new Point(mapPos, null, (PointStyle) null, null);
+  ArrayList geolist = new ArrayList();
+  geolist.add(samplePoint);
+
+  return geolist;
+}
+
 void displayRecordDigest(int numCreated) {
   String q = "";
   q += "   SELECT '{All}', count(*)";
@@ -1765,6 +1865,14 @@ void displayRecordDigest(int numCreated) {
 
         body += "\t- " + type + ": " + num + "\n";
       }
+
+      body += "\nThere are " +
+        getNumSavedPhotos() +
+        " saved files on this device. There is " +
+        getFreeSpaceInMBytesAsString() +
+        " MB of free space on this device, of which the saved files use " +
+        getSizeSavedPhotosInMBytesAsString() +
+        " MB.";
 
       if (dialog != null)
         dialog.dismiss();
@@ -1820,12 +1928,13 @@ PerfSaveCallback(tree, String parentUuid) {
 
 void saveArchEnts(tree, String parentUuid) {
   String archEntName = tree.label;
+  List   geometry    = getDummyGeometry(archEntName);
   int    numEnts     = tree.data;
   cb                 = PerfSaveCallback(tree, parentUuid);
 
   for (int i = 0; i < numEnts; i++) {
     List attribs = getAttribsForArchEnt(archEntName);
-    saveArchEnt(null, archEntName, (List) null, attribs, cb);
+    saveArchEnt(null, archEntName, geometry, attribs, cb);
   }
 }
 
@@ -1898,9 +2007,9 @@ PerfImageDownloader() {
       return;
 
     String filStr = "/sdcard/faims/modules/" + getModuleId() +
-        "/files/app/test.jpg";
-    String urlStr = "https://raw.githubusercontent.com/FAIMS/FAIMS-Tools/" +
-        "master/test-images/construction-2894x1924.jpg";
+        "/files/test.jpg";
+    String urlStr = "https://github.com/FAIMS/FAIMS-Tools/raw/master/" +
+        "generators/christian/tests/images/construction-2894x1924.jpg";
 
     if (detectFile(filStr))
       return;
@@ -4052,11 +4161,11 @@ void loadWalkerUnitFrom(String uuid) {
 /******************************************************************************/
 /*                          TAKE FROM GPS BUTTON(S)                           */
 /******************************************************************************/
-
+addOnEvent("Survey_Unit/Survey_Unit/Take_From_GPS_1", "click", "takePoint(\"Survey_Unit\")");
 
 Map getTakeFromGpsMappings() {
   Map tabgroupToTabRef = new HashMap();
-  
+  tabgroupToTabRef.put("Survey_Unit", "Survey_Unit/Survey_Unit");
   return tabgroupToTabRef;
 }
 
@@ -6081,14 +6190,32 @@ void removeWalkerUnitFromEntityTypesList() {
 
 removeWalkerUnitFromEntityTypesList();
 
+void populateSelectUser(){
+  String refSearchUsers = "Control/Search/Select_User";
+  String getNonDeletedUsersQuery = "SELECT userid, fname || ' ' || lname "+
+                                   "  FROM user "+
+                                   " WHERE userdeleted is null "+
+                                   " UNION " +
+                                   "SELECT -1, '{All}'";
+
+  fetchAll(getNonDeletedUsersQuery, new FetchCallback() {
+    onFetch(result) {
+      populateDropDown(refSearchUsers, result, false);
+      search();
+    }
+  });
+}
+
 void search(){
   String tabgroup = "Control";
   String refEntityList  = tabgroup + "/Search/Entity_List";
   String refSearchTerm  = tabgroup + "/Search/Search_Term";
   String refEntityTypes = tabgroup + "/Search/Entity_Types";
+  String refSelectUser  = tabgroup + "/Search/Select_User";
 
   String type = getFieldValue(refEntityTypes);
   String term = getFieldValue(refSearchTerm);
+  String user = getFieldValue(refSelectUser);
   String searchQuery = "SELECT uuid, response "+
                        "  FROM latestNonDeletedMaterialisedArchEntFormattedIdentifiers  "+
                        " WHERE uuid in (SELECT uuid "+
@@ -6096,12 +6223,15 @@ void search(){
                        "                 WHERE measure LIKE {term}||'%' )"+
                        " AND ( aenttypename = {type} OR '' = {type} ) "+
                        " AND ( aenttypename != 'Walker Unit' ) "+
+                       " AND ( userid = {user} OR -1 = {user}) " +
                        " ORDER BY substr(uuid, 7, 13) desc, response" +
                        " LIMIT ? "+
                        "OFFSET ? ";
   searchQuery = dbReplaceFirst(searchQuery, "{term}", term);
   searchQuery = dbReplaceFirst(searchQuery, "{type}", type);
   searchQuery = dbReplaceFirst(searchQuery, "{type}", type);
+  searchQuery = replaceFirst(searchQuery,   "{user}", user);
+  searchQuery = replaceFirst(searchQuery,   "{user}", user);
 
   drop1Q  = " drop table if exists materialisedlatestnondeletedaentvalue";
 
@@ -6111,11 +6241,11 @@ void search(){
   drop2Q  = " drop table if exists latestNonDeletedMaterialisedArchEntFormattedIdentifiers";
 
   make2Q  = " create table if not exists latestNonDeletedMaterialisedArchEntFormattedIdentifiers as";
-  make2Q += "   select uuid, aenttypeid, aenttypename, group_concat(response, '') as response, null as deleted";
+  make2Q += "   select uuid, aenttypeid, aenttypename, group_concat(response, '') as response, null as deleted, userid";
   make2Q += "   from (";
-  make2Q += "     select uuid, aenttypeid, aenttypename, group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response, null as deleted, aentcountorder";
+  make2Q += "     select uuid, aenttypeid, aenttypename, group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response, null as deleted, aentcountorder, userid";
   make2Q += "     from (";
-  make2Q += "       select uuid, aenttypeid, aenttypename, formatstring, vocabname, measure, freetext, certainty, appendcharacterstring, null as deleted, aentcountorder, vocabcountorder, attributeid";
+  make2Q += "       select uuid, aenttypeid, aenttypename, formatstring, vocabname, measure, freetext, certainty, appendcharacterstring, null as deleted, aentcountorder, vocabcountorder, attributeid, latestNonDeletedArchent.userid";
   make2Q += "       from latestNonDeletedArchent";
   make2Q += "         JOIN aenttype using (aenttypeid)";
   make2Q += "         JOIN (select * from idealaent where isIdentifier='true') using (aenttypeid)";
@@ -6193,7 +6323,7 @@ void search(){
       }
     }
     onError(message) {
-      Log.d("asdfasdfasdfASDFASDFASDFADfERORRR", "" + message);
+      Log.d("search", "" + message);
       //fetchOne(drop1Q, make1);
     }
   };
@@ -6220,6 +6350,8 @@ void loadingResults(String ref) {
 delOnEvent("Control/Search", "show", "search()");
 delOnEvent("Control/Search/Entity_Types", "click" , "search()");
 addOnEvent("Control/Search", "show", "initSearchResultList()");
+addOnEvent("Control/Search", "show", "populateSelectUser()");
+
 /****************************** WALKER ORDERING *******************************/
 final String REF_WALKER_ENT = "Walker";
 final String REF_WALKERS_WEBVIEW = "Control/Walkers/Walkers";

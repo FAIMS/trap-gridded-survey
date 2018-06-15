@@ -23,14 +23,32 @@ void removeWalkerUnitFromEntityTypesList() {
 
 removeWalkerUnitFromEntityTypesList();
 
+void populateSelectUser(){
+  String refSearchUsers = "Control/Search/Select_User";
+  String getNonDeletedUsersQuery = "SELECT userid, fname || ' ' || lname "+
+                                   "  FROM user "+
+                                   " WHERE userdeleted is null "+
+                                   " UNION " +
+                                   "SELECT -1, '{All}'";
+
+  fetchAll(getNonDeletedUsersQuery, new FetchCallback() {
+    onFetch(result) {
+      populateDropDown(refSearchUsers, result, false);
+      search();
+    }
+  });
+}
+
 void search(){
   String tabgroup = "Control";
   String refEntityList  = tabgroup + "/Search/Entity_List";
   String refSearchTerm  = tabgroup + "/Search/Search_Term";
   String refEntityTypes = tabgroup + "/Search/Entity_Types";
+  String refSelectUser  = tabgroup + "/Search/Select_User";
 
   String type = getFieldValue(refEntityTypes);
   String term = getFieldValue(refSearchTerm);
+  String user = getFieldValue(refSelectUser);
   String searchQuery = "SELECT uuid, response "+
                        "  FROM latestNonDeletedMaterialisedArchEntFormattedIdentifiers  "+
                        " WHERE uuid in (SELECT uuid "+
@@ -38,12 +56,15 @@ void search(){
                        "                 WHERE measure LIKE {term}||'%' )"+
                        " AND ( aenttypename = {type} OR '' = {type} ) "+
                        " AND ( aenttypename != 'Walker Unit' ) "+
+                       " AND ( userid = {user} OR -1 = {user}) " +
                        " ORDER BY substr(uuid, 7, 13) desc, response" +
                        " LIMIT ? "+
                        "OFFSET ? ";
   searchQuery = dbReplaceFirst(searchQuery, "{term}", term);
   searchQuery = dbReplaceFirst(searchQuery, "{type}", type);
   searchQuery = dbReplaceFirst(searchQuery, "{type}", type);
+  searchQuery = replaceFirst(searchQuery,   "{user}", user);
+  searchQuery = replaceFirst(searchQuery,   "{user}", user);
 
   drop1Q  = " drop table if exists materialisedlatestnondeletedaentvalue";
 
@@ -53,11 +74,11 @@ void search(){
   drop2Q  = " drop table if exists latestNonDeletedMaterialisedArchEntFormattedIdentifiers";
 
   make2Q  = " create table if not exists latestNonDeletedMaterialisedArchEntFormattedIdentifiers as";
-  make2Q += "   select uuid, aenttypeid, aenttypename, group_concat(response, '') as response, null as deleted";
+  make2Q += "   select uuid, aenttypeid, aenttypename, group_concat(response, '') as response, null as deleted, userid";
   make2Q += "   from (";
-  make2Q += "     select uuid, aenttypeid, aenttypename, group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response, null as deleted, aentcountorder";
+  make2Q += "     select uuid, aenttypeid, aenttypename, group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response, null as deleted, aentcountorder, userid";
   make2Q += "     from (";
-  make2Q += "       select uuid, aenttypeid, aenttypename, formatstring, vocabname, measure, freetext, certainty, appendcharacterstring, null as deleted, aentcountorder, vocabcountorder, attributeid";
+  make2Q += "       select uuid, aenttypeid, aenttypename, formatstring, vocabname, measure, freetext, certainty, appendcharacterstring, null as deleted, aentcountorder, vocabcountorder, attributeid, latestNonDeletedArchent.userid";
   make2Q += "       from latestNonDeletedArchent";
   make2Q += "         JOIN aenttype using (aenttypeid)";
   make2Q += "         JOIN (select * from idealaent where isIdentifier='true') using (aenttypeid)";
@@ -135,7 +156,7 @@ void search(){
       }
     }
     onError(message) {
-      Log.d("asdfasdfasdfASDFASDFASDFADfERORRR", "" + message);
+      Log.d("search", "" + message);
       //fetchOne(drop1Q, make1);
     }
   };
@@ -162,3 +183,5 @@ void loadingResults(String ref) {
 delOnEvent("Control/Search", "show", "search()");
 delOnEvent("Control/Search/Entity_Types", "click" , "search()");
 addOnEvent("Control/Search", "show", "initSearchResultList()");
+addOnEvent("Control/Search", "show", "populateSelectUser()");
+

@@ -78,7 +78,14 @@
                   <Search_Button/>
                 </Col_1>
               </Colgroup_0>
-              <Entity_Types/>
+              <Colgroup_1>
+                <Col_0>
+                  <Entity_Types/>
+                </Col_0>
+                <Col_1>
+                  <Select_User/>
+                </Col_1>
+              </Colgroup_1>
               <Entity_List/>
             </Search>
           </Control>
@@ -95,6 +102,26 @@
               <Vegetation/>
               <Stoniness/>
               <Shade/>
+              <Colgroup_1>
+                <Col_1>
+                  <Latitude/>
+                </Col_1>
+                <Col_2>
+                  <Longitude/>
+                </Col_2>
+              </Colgroup_1>
+              <Colgroup_2>
+                <Col_1>
+                  <Northing/>
+                </Col_1>
+                <Col_2>
+                  <Easting/>
+                </Col_2>
+                <Col_3>
+                  <Accuracy/>
+                </Col_3>
+              </Colgroup_2>
+              <Take_From_GPS_1/>
               <Number_of_Rows/>
               <Number_of_Walkers/>
               <Row_Interval_m/>
@@ -102,38 +129,38 @@
               <Walkers/>
               <Sep_Most_Recently_Computed/>
               <Most_Recently_Computed_Total/>
-              <Colgroup_1>
+              <Colgroup_3>
                 <Col_1>
                   <Most_Recently_Computed_Ancient/>
                 </Col_1>
                 <Col_2>
                   <Most_Recently_Computed_Modern/>
                 </Col_2>
-              </Colgroup_1>
-              <Colgroup_2>
+              </Colgroup_3>
+              <Colgroup_4>
                 <Col_1>
                   <Most_Recently_Computed_A_C/>
                 </Col_1>
                 <Col_2>
                   <Most_Recently_Computed_HM/>
                 </Col_2>
-              </Colgroup_2>
-              <Colgroup_3>
+              </Colgroup_4>
+              <Colgroup_5>
                 <Col_1>
                   <Most_Recently_Computed_Lithic/>
                 </Col_1>
                 <Col_2>
                   <Most_Recently_Computed_Daub/>
                 </Col_2>
-              </Colgroup_3>
-              <Colgroup_4>
+              </Colgroup_5>
+              <Colgroup_6>
                 <Col_1>
                   <Most_Recently_Computed_Glass/>
                 </Col_1>
                 <Col_2>
                   <Most_Recently_Computed_Other/>
                 </Col_2>
-              </Colgroup_4>
+              </Colgroup_6>
               <Compute_Artefact_Counts/>
             </Survey_Unit>
             <Walker_Units>
@@ -283,14 +310,14 @@
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Row_Interval_m" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Walker_Interval_m" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Most_Recently_Computed_Total" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_1/Col_1/Most_Recently_Computed_Ancient" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_1/Col_2/Most_Recently_Computed_Modern" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_2/Col_1/Most_Recently_Computed_A_C" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_2/Col_2/Most_Recently_Computed_HM" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_3/Col_1/Most_Recently_Computed_Lithic" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_3/Col_2/Most_Recently_Computed_Daub" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_4/Col_1/Most_Recently_Computed_Glass" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_4/Col_2/Most_Recently_Computed_Other" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_3/Col_1/Most_Recently_Computed_Ancient" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_3/Col_2/Most_Recently_Computed_Modern" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_4/Col_1/Most_Recently_Computed_A_C" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_4/Col_2/Most_Recently_Computed_HM" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_5/Col_1/Most_Recently_Computed_Lithic" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_5/Col_2/Most_Recently_Computed_Daub" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_6/Col_1/Most_Recently_Computed_Glass" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_6/Col_2/Most_Recently_Computed_Other" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Row" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Walker" type="decimal"/>
       <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_4/Col_1/Ancient" type="decimal"/>
@@ -509,13 +536,29 @@
             </trigger>
           </group>
         </group>
-        <select1 ref="Entity_Types">
-          <label>{Entity_Types}</label>
-          <item>
-            <label>Options not loaded</label>
-            <value>Options not loaded</value>
-          </item>
-        </select1>
+        <group ref="Colgroup_1" faims_style="orientation">
+          <label/>
+          <group ref="Col_0" faims_style="even">
+            <label/>
+            <select1 ref="Entity_Types">
+              <label>{Entity_Types}</label>
+              <item>
+                <label>Options not loaded</label>
+                <value>Options not loaded</value>
+              </item>
+            </select1>
+          </group>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <select1 ref="Select_User">
+              <label>{Select_User}</label>
+              <item>
+                <label>Options not loaded</label>
+                <value>Options not loaded</value>
+              </item>
+            </select1>
+          </group>
+        </group>
         <select1 appearance="compact" ref="Entity_List">
           <label>{Entity_List}</label>
           <item>
@@ -602,6 +645,45 @@
             <value>Options not loaded</value>
           </item>
         </select1>
+        <group ref="Colgroup_1" faims_style="orientation">
+          <label/>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Latitude" faims_attribute_type="measure" ref="Latitude" faims_read_only="true">
+              <label>{Latitude}</label>
+            </input>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Longitude" faims_attribute_type="measure" ref="Longitude" faims_read_only="true">
+              <label>{Longitude}</label>
+            </input>
+          </group>
+        </group>
+        <group ref="Colgroup_2" faims_style="orientation">
+          <label/>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Northing" faims_attribute_type="measure" ref="Northing" faims_read_only="true">
+              <label>{Northing}</label>
+            </input>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Easting" faims_attribute_type="measure" ref="Easting" faims_read_only="true">
+              <label>{Easting}</label>
+            </input>
+          </group>
+          <group ref="Col_3" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Accuracy" faims_attribute_type="measure" ref="Accuracy" faims_read_only="true">
+              <label>{Accuracy}</label>
+            </input>
+          </group>
+        </group>
+        <trigger ref="Take_From_GPS_1">
+          <label>{Take_From_GPS}</label>
+        </trigger>
         <input faims_attribute_name="Number of Rows" faims_attribute_type="measure" ref="Number_of_Rows" faims_read_only="true">
           <label>{Number_of_Rows}</label>
         </input>
@@ -623,7 +705,7 @@
         <input faims_attribute_name="Most Recently Computed Total" faims_attribute_type="measure" ref="Most_Recently_Computed_Total" faims_read_only="true">
           <label>{Most_Recently_Computed_Total}</label>
         </input>
-        <group ref="Colgroup_1" faims_style="orientation">
+        <group ref="Colgroup_3" faims_style="orientation">
           <label/>
           <group ref="Col_1" faims_style="even">
             <label/>
@@ -638,7 +720,7 @@
             </input>
           </group>
         </group>
-        <group ref="Colgroup_2" faims_style="orientation">
+        <group ref="Colgroup_4" faims_style="orientation">
           <label/>
           <group ref="Col_1" faims_style="even">
             <label/>
@@ -653,7 +735,7 @@
             </input>
           </group>
         </group>
-        <group ref="Colgroup_3" faims_style="orientation">
+        <group ref="Colgroup_5" faims_style="orientation">
           <label/>
           <group ref="Col_1" faims_style="even">
             <label/>
@@ -668,7 +750,7 @@
             </input>
           </group>
         </group>
-        <group ref="Colgroup_4" faims_style="orientation">
+        <group ref="Colgroup_6" faims_style="orientation">
           <label/>
           <group ref="Col_1" faims_style="even">
             <label/>
