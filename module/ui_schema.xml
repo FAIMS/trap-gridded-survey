@@ -92,16 +92,6 @@
           <Survey_Unit>
             <Survey_Unit>
               <Survey_Unit_ID/>
-              <Land_Use/>
-              <Agricultural_Condition/>
-              <Topography/>
-              <Slope/>
-              <Visibility/>
-              <Passability/>
-              <Drainage/>
-              <Vegetation/>
-              <Stoniness/>
-              <Shade/>
               <Colgroup_1>
                 <Col_1>
                   <Latitude/>
@@ -122,45 +112,79 @@
                 </Col_3>
               </Colgroup_2>
               <Take_From_GPS_1/>
-              <Number_of_Rows/>
-              <Number_of_Walkers/>
-              <Row_Interval_m/>
-              <Walker_Interval_m/>
+              <Colgroup_3>
+                <Col_1>
+                  <Land_Use/>
+                </Col_1>
+                <Col_2>
+                  <Agricultural_Condition/>
+                </Col_2>
+              </Colgroup_3>
+              <Colgroup_4>
+                <Col_1>
+                  <Topography/>
+                </Col_1>
+                <Col_2>
+                  <Slope/>
+                </Col_2>
+              </Colgroup_4>
+              <Visibility/>
+              <Passability/>
+              <Drainage/>
+              <Vegetation/>
+              <Stoniness/>
+              <Shade/>
+              <Colgroup_5>
+                <Col_1>
+                  <Number_of_Rows/>
+                </Col_1>
+                <Col_2>
+                  <Number_of_Walkers/>
+                </Col_2>
+              </Colgroup_5>
+              <Colgroup_6>
+                <Col_1>
+                  <Row_Interval_m/>
+                </Col_1>
+                <Col_2>
+                  <Walker_Interval_m/>
+                </Col_2>
+              </Colgroup_6>
               <Walkers/>
               <Sep_Most_Recently_Computed/>
               <Most_Recently_Computed_Total/>
-              <Colgroup_3>
+              <Colgroup_7>
                 <Col_1>
                   <Most_Recently_Computed_Ancient/>
                 </Col_1>
                 <Col_2>
                   <Most_Recently_Computed_Modern/>
                 </Col_2>
-              </Colgroup_3>
-              <Colgroup_4>
+              </Colgroup_7>
+              <Colgroup_8>
                 <Col_1>
                   <Most_Recently_Computed_A_C/>
                 </Col_1>
                 <Col_2>
                   <Most_Recently_Computed_HM/>
                 </Col_2>
-              </Colgroup_4>
-              <Colgroup_5>
+              </Colgroup_8>
+              <Colgroup_9>
                 <Col_1>
                   <Most_Recently_Computed_Lithic/>
                 </Col_1>
                 <Col_2>
                   <Most_Recently_Computed_Daub/>
                 </Col_2>
-              </Colgroup_5>
-              <Colgroup_6>
+              </Colgroup_9>
+              <Colgroup_10>
                 <Col_1>
                   <Most_Recently_Computed_Glass/>
                 </Col_1>
                 <Col_2>
                   <Most_Recently_Computed_Other/>
                 </Col_2>
-              </Colgroup_6>
+              </Colgroup_10>
               <Compute_Artefact_Counts/>
             </Survey_Unit>
             <Walker_Units>
@@ -305,19 +329,19 @@
       <bind nodeset="/faims/Control/Main/Number_of_Rows" type="decimal"/>
       <bind nodeset="/faims/Control/Main/Row_Interval" type="decimal"/>
       <bind nodeset="/faims/Control/Main/Walker_Interval" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Number_of_Rows" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Number_of_Walkers" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Row_Interval_m" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Walker_Interval_m" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_5/Col_1/Number_of_Rows" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_5/Col_2/Number_of_Walkers" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_6/Col_1/Row_Interval_m" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_6/Col_2/Walker_Interval_m" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Most_Recently_Computed_Total" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_3/Col_1/Most_Recently_Computed_Ancient" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_3/Col_2/Most_Recently_Computed_Modern" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_4/Col_1/Most_Recently_Computed_A_C" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_4/Col_2/Most_Recently_Computed_HM" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_5/Col_1/Most_Recently_Computed_Lithic" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_5/Col_2/Most_Recently_Computed_Daub" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_6/Col_1/Most_Recently_Computed_Glass" type="decimal"/>
-      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_6/Col_2/Most_Recently_Computed_Other" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_7/Col_1/Most_Recently_Computed_Ancient" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_7/Col_2/Most_Recently_Computed_Modern" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_8/Col_1/Most_Recently_Computed_A_C" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_8/Col_2/Most_Recently_Computed_HM" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_9/Col_1/Most_Recently_Computed_Lithic" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_9/Col_2/Most_Recently_Computed_Daub" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_10/Col_1/Most_Recently_Computed_Glass" type="decimal"/>
+      <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_10/Col_2/Most_Recently_Computed_Other" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Row" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Walker" type="decimal"/>
       <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_4/Col_1/Ancient" type="decimal"/>
@@ -575,34 +599,91 @@
         <input faims_attribute_name="Survey Unit ID" faims_attribute_type="measure" ref="Survey_Unit_ID">
           <label>{Survey_Unit_ID}</label>
         </input>
-        <select1 faims_attribute_name="Land Use" faims_attribute_type="vocab" ref="Land_Use" faims_style_class="required">
-          <label>{Land_Use}</label>
-          <item>
-            <label>Options not loaded</label>
-            <value>Options not loaded</value>
-          </item>
-        </select1>
-        <select1 faims_attribute_name="Agricultural Condition" faims_attribute_type="vocab" ref="Agricultural_Condition">
-          <label>{Agricultural_Condition}</label>
-          <item>
-            <label>Options not loaded</label>
-            <value>Options not loaded</value>
-          </item>
-        </select1>
-        <select1 faims_attribute_name="Topography" faims_attribute_type="vocab" ref="Topography">
-          <label>{Topography}</label>
-          <item>
-            <label>Options not loaded</label>
-            <value>Options not loaded</value>
-          </item>
-        </select1>
-        <select1 faims_attribute_name="Slope" faims_attribute_type="vocab" ref="Slope">
-          <label>{Slope}</label>
-          <item>
-            <label>Options not loaded</label>
-            <value>Options not loaded</value>
-          </item>
-        </select1>
+        <group ref="Colgroup_1" faims_style="orientation">
+          <label/>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Latitude" faims_attribute_type="measure" ref="Latitude" faims_read_only="true">
+              <label>{Latitude}</label>
+            </input>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Longitude" faims_attribute_type="measure" ref="Longitude" faims_read_only="true">
+              <label>{Longitude}</label>
+            </input>
+          </group>
+        </group>
+        <group ref="Colgroup_2" faims_style="orientation">
+          <label/>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Northing" faims_attribute_type="measure" ref="Northing" faims_read_only="true">
+              <label>{Northing}</label>
+            </input>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Easting" faims_attribute_type="measure" ref="Easting" faims_read_only="true">
+              <label>{Easting}</label>
+            </input>
+          </group>
+          <group ref="Col_3" faims_style="even">
+            <label/>
+            <input faims_attribute_name="Accuracy" faims_attribute_type="measure" ref="Accuracy" faims_read_only="true">
+              <label>{Accuracy}</label>
+            </input>
+          </group>
+        </group>
+        <trigger ref="Take_From_GPS_1">
+          <label>{Take_From_GPS}</label>
+        </trigger>
+        <group ref="Colgroup_3" faims_style="orientation">
+          <label/>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <select1 faims_attribute_name="Land Use" faims_attribute_type="vocab" ref="Land_Use" faims_style_class="required">
+              <label>{Land_Use}</label>
+              <item>
+                <label>Options not loaded</label>
+                <value>Options not loaded</value>
+              </item>
+            </select1>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <select1 faims_attribute_name="Agricultural Condition" faims_attribute_type="vocab" ref="Agricultural_Condition">
+              <label>{Agricultural_Condition}</label>
+              <item>
+                <label>Options not loaded</label>
+                <value>Options not loaded</value>
+              </item>
+            </select1>
+          </group>
+        </group>
+        <group ref="Colgroup_4" faims_style="orientation">
+          <label/>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <select1 faims_attribute_name="Topography" faims_attribute_type="vocab" ref="Topography">
+              <label>{Topography}</label>
+              <item>
+                <label>Options not loaded</label>
+                <value>Options not loaded</value>
+              </item>
+            </select1>
+          </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <select1 faims_attribute_name="Slope" faims_attribute_type="vocab" ref="Slope">
+              <label>{Slope}</label>
+              <item>
+                <label>Options not loaded</label>
+                <value>Options not loaded</value>
+              </item>
+            </select1>
+          </group>
+        </group>
         <select1 faims_attribute_name="Visibility" faims_attribute_type="vocab" ref="Visibility">
           <label>{Visibility}</label>
           <item>
@@ -645,57 +726,36 @@
             <value>Options not loaded</value>
           </item>
         </select1>
-        <group ref="Colgroup_1" faims_style="orientation">
+        <group ref="Colgroup_5" faims_style="orientation">
           <label/>
           <group ref="Col_1" faims_style="even">
             <label/>
-            <input faims_attribute_name="Latitude" faims_attribute_type="measure" ref="Latitude" faims_read_only="true">
-              <label>{Latitude}</label>
+            <input faims_attribute_name="Number of Rows" faims_attribute_type="measure" ref="Number_of_Rows" faims_read_only="true">
+              <label>{Number_of_Rows}</label>
             </input>
           </group>
           <group ref="Col_2" faims_style="even">
             <label/>
-            <input faims_attribute_name="Longitude" faims_attribute_type="measure" ref="Longitude" faims_read_only="true">
-              <label>{Longitude}</label>
+            <input faims_attribute_name="Number of Walkers" faims_attribute_type="measure" ref="Number_of_Walkers" faims_read_only="true">
+              <label>{Number_of_Walkers}</label>
             </input>
           </group>
         </group>
-        <group ref="Colgroup_2" faims_style="orientation">
+        <group ref="Colgroup_6" faims_style="orientation">
           <label/>
           <group ref="Col_1" faims_style="even">
             <label/>
-            <input faims_attribute_name="Northing" faims_attribute_type="measure" ref="Northing" faims_read_only="true">
-              <label>{Northing}</label>
+            <input faims_attribute_name="Row Interval m" faims_attribute_type="measure" ref="Row_Interval_m" faims_read_only="true">
+              <label>{Row_Interval__m_}</label>
             </input>
           </group>
           <group ref="Col_2" faims_style="even">
             <label/>
-            <input faims_attribute_name="Easting" faims_attribute_type="measure" ref="Easting" faims_read_only="true">
-              <label>{Easting}</label>
-            </input>
-          </group>
-          <group ref="Col_3" faims_style="even">
-            <label/>
-            <input faims_attribute_name="Accuracy" faims_attribute_type="measure" ref="Accuracy" faims_read_only="true">
-              <label>{Accuracy}</label>
+            <input faims_attribute_name="Walker Interval m" faims_attribute_type="measure" ref="Walker_Interval_m" faims_read_only="true">
+              <label>{Walker_Interval__m_}</label>
             </input>
           </group>
         </group>
-        <trigger ref="Take_From_GPS_1">
-          <label>{Take_From_GPS}</label>
-        </trigger>
-        <input faims_attribute_name="Number of Rows" faims_attribute_type="measure" ref="Number_of_Rows" faims_read_only="true">
-          <label>{Number_of_Rows}</label>
-        </input>
-        <input faims_attribute_name="Number of Walkers" faims_attribute_type="measure" ref="Number_of_Walkers" faims_read_only="true">
-          <label>{Number_of_Walkers}</label>
-        </input>
-        <input faims_attribute_name="Row Interval m" faims_attribute_type="measure" ref="Row_Interval_m" faims_read_only="true">
-          <label>{Row_Interval__m_}</label>
-        </input>
-        <input faims_attribute_name="Walker Interval m" faims_attribute_type="measure" ref="Walker_Interval_m" faims_read_only="true">
-          <label>{Walker_Interval__m_}</label>
-        </input>
         <input faims_attribute_name="Walkers" faims_attribute_type="measure" ref="Walkers" faims_read_only="true">
           <label>{Walkers}</label>
         </input>
@@ -705,7 +765,7 @@
         <input faims_attribute_name="Most Recently Computed Total" faims_attribute_type="measure" ref="Most_Recently_Computed_Total" faims_read_only="true">
           <label>{Most_Recently_Computed_Total}</label>
         </input>
-        <group ref="Colgroup_3" faims_style="orientation">
+        <group ref="Colgroup_7" faims_style="orientation">
           <label/>
           <group ref="Col_1" faims_style="even">
             <label/>
@@ -720,7 +780,7 @@
             </input>
           </group>
         </group>
-        <group ref="Colgroup_4" faims_style="orientation">
+        <group ref="Colgroup_8" faims_style="orientation">
           <label/>
           <group ref="Col_1" faims_style="even">
             <label/>
@@ -735,7 +795,7 @@
             </input>
           </group>
         </group>
-        <group ref="Colgroup_5" faims_style="orientation">
+        <group ref="Colgroup_9" faims_style="orientation">
           <label/>
           <group ref="Col_1" faims_style="even">
             <label/>
@@ -750,7 +810,7 @@
             </input>
           </group>
         </group>
-        <group ref="Colgroup_6" faims_style="orientation">
+        <group ref="Colgroup_10" faims_style="orientation">
           <label/>
           <group ref="Col_1" faims_style="even">
             <label/>

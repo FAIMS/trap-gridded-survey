@@ -348,6 +348,12 @@ REF_TO_TYPE.put("Control/Search/Search_Button", "button");
 REF_TO_TYPE.put("Control/Search/Entity_Types", "dropdown");
 REF_TO_TYPE.put("Control/Search/Entity_List", "list");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Survey_Unit_ID", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Latitude", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Longitude", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Northing", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Easting", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Accuracy", "input");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Take_From_GPS_1", "button");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Land_Use", "dropdown");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Agricultural_Condition", "dropdown");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Topography", "dropdown");
@@ -358,12 +364,6 @@ REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Drainage", "radio");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Vegetation", "radio");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Stoniness", "radio");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Shade", "radio");
-REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Latitude", "input");
-REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Longitude", "input");
-REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Northing", "input");
-REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Easting", "input");
-REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Accuracy", "input");
-REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Take_From_GPS_1", "button");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Number_of_Rows", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Number_of_Walkers", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Row_Interval_m", "input");
@@ -440,6 +440,11 @@ REF_TO_TYPE.put("Walker_Unit/Vars", "tab");
 REF_TO_TYPE.put("Saving/Saving", "tab");
 
 DATA_REFS.add("Survey_Unit/Survey_Unit/Survey_Unit_ID");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Latitude");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Longitude");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Northing");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Easting");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Accuracy");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Land_Use");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Agricultural_Condition");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Topography");
@@ -450,11 +455,6 @@ DATA_REFS.add("Survey_Unit/Survey_Unit/Drainage");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Vegetation");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Stoniness");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Shade");
-DATA_REFS.add("Survey_Unit/Survey_Unit/Latitude");
-DATA_REFS.add("Survey_Unit/Survey_Unit/Longitude");
-DATA_REFS.add("Survey_Unit/Survey_Unit/Northing");
-DATA_REFS.add("Survey_Unit/Survey_Unit/Easting");
-DATA_REFS.add("Survey_Unit/Survey_Unit/Accuracy");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Number_of_Rows");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Number_of_Walkers");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Row_Interval_m");
@@ -7011,7 +7011,7 @@ addOnEvent(
     "click",
     "populateArtefactCounts()"
 );
-
+        
 
 /******************************************************************************/
 /*                                    INIT                                    */
