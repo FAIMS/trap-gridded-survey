@@ -383,10 +383,12 @@ REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Compute_Artefact_Counts", "button");
 REF_TO_TYPE.put("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "button");
 REF_TO_TYPE.put("Survey_Unit/Vars/Highlighted_Row", "input");
 REF_TO_TYPE.put("Survey_Unit/Vars/Highlighted_Walker", "input");
+REF_TO_TYPE.put("Survey_Unit/Vars/Date", "input");
 REF_TO_TYPE.put("Walker/Walker/Help", "webview");
 REF_TO_TYPE.put("Walker/Walker/First_Name", "input");
 REF_TO_TYPE.put("Walker/Walker/Last_Name", "input");
 REF_TO_TYPE.put("Walker/Walker/Initials", "input");
+REF_TO_TYPE.put("Walker/Vars/Date", "input");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Survey_Unit_ID", "webview");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Grid", "webview");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit/Delete_Row", "button");
@@ -435,6 +437,7 @@ REF_TO_TYPE.put("Survey_Unit/Survey_Unit", "tab");
 REF_TO_TYPE.put("Survey_Unit/Walker_Units", "tab");
 REF_TO_TYPE.put("Survey_Unit/Vars", "tab");
 REF_TO_TYPE.put("Walker/Walker", "tab");
+REF_TO_TYPE.put("Walker/Vars", "tab");
 REF_TO_TYPE.put("Walker_Unit/Walker_Unit", "tab");
 REF_TO_TYPE.put("Walker_Unit/Vars", "tab");
 REF_TO_TYPE.put("Saving/Saving", "tab");
@@ -469,9 +472,11 @@ DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_Lithic");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_Daub");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_Glass");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_Other");
+DATA_REFS.add("Survey_Unit/Vars/Date");
 DATA_REFS.add("Walker/Walker/First_Name");
 DATA_REFS.add("Walker/Walker/Last_Name");
 DATA_REFS.add("Walker/Walker/Initials");
+DATA_REFS.add("Walker/Vars/Date");
 DATA_REFS.add("Walker_Unit/Walker_Unit/N_A");
 DATA_REFS.add("Walker_Unit/Walker_Unit/Ancient");
 DATA_REFS.add("Walker_Unit/Walker_Unit/Modern");
@@ -521,6 +526,7 @@ TABS_AS_LIST.add("Survey_Unit/Survey_Unit");
 TABS_AS_LIST.add("Survey_Unit/Walker_Units");
 TABS_AS_LIST.add("Survey_Unit/Vars");
 TABS_AS_LIST.add("Walker/Walker");
+TABS_AS_LIST.add("Walker/Vars");
 TABS_AS_LIST.add("Walker_Unit/Walker_Unit");
 TABS_AS_LIST.add("Walker_Unit/Vars");
 TABS_AS_LIST.add("Saving/Saving");
@@ -6206,6 +6212,31 @@ void populateSelectUser(){
   });
 }
 
+void populateSelectDate() {
+    String refSearchDate = "Control/Search/Select_Date";
+    String getNonDeletedDateQuery = "select distinct measure as key, measure as value " +
+									 "from materialisedlatestnondeletedaentvalue " +
+									 "join attributekey using (attributeid) " +
+									 "where attributename = 'Date' ";
+	FetchCallback popDate = new FetchCallback() {
+		onFetch(result) {
+				  if (isNull(result))
+					result = new ArrayList();
+
+				  // Add the option 'All' at the top of the list
+				  List all = new ArrayList();
+				  all.add("");
+				  all.add("{All}");
+
+				  result.add(0, all);
+
+				  // Populate dropdown
+				  populateDropDown(refSearchDate, result, false);
+			}
+	};
+	fetchAll(getNonDeletedDateQuery, popDate);
+}
+
 void search(){
   String tabgroup = "Control";
   String refEntityList  = tabgroup + "/Search/Entity_List";
@@ -6213,17 +6244,21 @@ void search(){
   String refEntityTypes = tabgroup + "/Search/Entity_Types";
   String refSelectUser  = tabgroup + "/Search/Select_User";
 
+  String refSelectDate	= tabgroup + "/Search/Select_Date";
+
   String type = getFieldValue(refEntityTypes);
   String term = getFieldValue(refSearchTerm);
   String user = getFieldValue(refSelectUser);
+  String date = getFieldValue(refSelectDate);
   String searchQuery = "SELECT uuid, response "+
                        "  FROM latestNonDeletedMaterialisedArchEntFormattedIdentifiers  "+
                        " WHERE uuid in (SELECT uuid "+
                        "                  FROM materialisedlatestnondeletedaentvalue "+
-                       "                 WHERE measure LIKE {term}||'%' )"+
+                       "                 WHERE measure LIKE {term}||'%')"+
                        " AND ( aenttypename = {type} OR '' = {type} ) "+
                        " AND ( aenttypename != 'Walker Unit' ) "+
                        " AND ( userid = {user} OR -1 = {user}) " +
+//					   " AND (attributename = 'Date' AND (measure = {date} or '' = {date})) " +
                        " ORDER BY substr(uuid, 7, 13) desc, response" +
                        " LIMIT ? "+
                        "OFFSET ? ";
@@ -6233,6 +6268,8 @@ void search(){
   searchQuery = replaceFirst(searchQuery,   "{user}", user);
   searchQuery = replaceFirst(searchQuery,   "{user}", user);
 
+  searchQuery = replaceFirst(searchQuery,   "{date}", date);
+  searchQuery = replaceFirst(searchQuery,   "{date}", date);
   drop1Q  = " drop table if exists materialisedlatestnondeletedaentvalue";
 
   make1Q  = " create table materialisedlatestnondeletedaentvalue as";
@@ -6351,7 +6388,7 @@ delOnEvent("Control/Search", "show", "search()");
 delOnEvent("Control/Search/Entity_Types", "click" , "search()");
 addOnEvent("Control/Search", "show", "initSearchResultList()");
 addOnEvent("Control/Search", "show", "populateSelectUser()");
-
+addOnEvent("Control/Search", "show", "populateSelectDate()");
 /****************************** WALKER ORDERING *******************************/
 final String REF_WALKER_ENT = "Walker";
 final String REF_WALKERS_WEBVIEW = "Control/Walkers/Walkers";
@@ -7011,6 +7048,25 @@ addOnEvent(
     "click",
     "populateArtefactCounts()"
 );
+
+/****************************** DATE POPULATION *******************************/
+String surveyUnitTabGroupRef = "Survey_Unit";
+String walkerTabGroupRef = "Walker";
+String varsDateRef = "Vars/Date";
+
+String refSurveyUnitDate = surveyUnitTabGroupRef + "/" + varsDateRef;
+String refWalkerDate = walkerTabGroupRef + "/" + varsDateRef;
+
+void setDate(String ref) {
+    String fmt = "dd-MM-yyyy";
+    date = new Date();
+    dateFmt = new java.text.SimpleDateFormat(fmt);
+    dateStr = dateFmt.format(date);
+    setFieldValue(ref, dateStr);
+}
+
+addOnEvent(surveyUnitTabGroupRef, "create", "setDate(refSurveyUnitDate)");
+addOnEvent(walkerTabGroupRef, "create", "setDate(refWalkerDate)");
         
 
 /******************************************************************************/

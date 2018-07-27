@@ -1,0 +1,18 @@
+/****************************** DATE POPULATION *******************************/
+String surveyUnitTabGroupRef = "Survey_Unit";
+String walkerTabGroupRef = "Walker";
+String varsDateRef = "Vars/Date";
+
+String refSurveyUnitDate = surveyUnitTabGroupRef + "/" + varsDateRef;
+String refWalkerDate = walkerTabGroupRef + "/" + varsDateRef;
+
+void setDate(String ref) {
+    String fmt = "dd-MM-yyyy";
+    date = new Date();
+    dateFmt = new java.text.SimpleDateFormat(fmt);
+    dateStr = dateFmt.format(date);
+    setFieldValue(ref, dateStr);
+}
+
+addOnEvent(surveyUnitTabGroupRef, "create", "setDate(refSurveyUnitDate)");
+addOnEvent(walkerTabGroupRef, "create", "setDate(refWalkerDate)");

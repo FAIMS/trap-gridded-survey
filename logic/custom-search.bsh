@@ -39,6 +39,31 @@ void populateSelectUser(){
   });
 }
 
+void populateSelectDate() {
+    String refSearchDate = "Control/Search/Select_Date";
+    String getNonDeletedDateQuery = "select distinct measure as key, measure as value " +
+									 "from materialisedlatestnondeletedaentvalue " +
+									 "join attributekey using (attributeid) " +
+									 "where attributename = 'Date' ";
+	FetchCallback popDate = new FetchCallback() {
+		onFetch(result) {
+				  if (isNull(result))
+					result = new ArrayList();
+
+				  // Add the option 'All' at the top of the list
+				  List all = new ArrayList();
+				  all.add("");
+				  all.add("{All}");
+
+				  result.add(0, all);
+
+				  // Populate dropdown
+				  populateDropDown(refSearchDate, result, false);
+			}
+	};
+	fetchAll(getNonDeletedDateQuery, popDate);
+}
+
 void search(){
   String tabgroup = "Control";
   String refEntityList  = tabgroup + "/Search/Entity_List";
@@ -46,17 +71,21 @@ void search(){
   String refEntityTypes = tabgroup + "/Search/Entity_Types";
   String refSelectUser  = tabgroup + "/Search/Select_User";
 
+  String refSelectDate	= tabgroup + "/Search/Select_Date";
+
   String type = getFieldValue(refEntityTypes);
   String term = getFieldValue(refSearchTerm);
   String user = getFieldValue(refSelectUser);
+  String date = getFieldValue(refSelectDate);
   String searchQuery = "SELECT uuid, response "+
                        "  FROM latestNonDeletedMaterialisedArchEntFormattedIdentifiers  "+
                        " WHERE uuid in (SELECT uuid "+
                        "                  FROM materialisedlatestnondeletedaentvalue "+
-                       "                 WHERE measure LIKE {term}||'%' )"+
+                       "                 WHERE measure LIKE {term}||'%')"+
                        " AND ( aenttypename = {type} OR '' = {type} ) "+
                        " AND ( aenttypename != 'Walker Unit' ) "+
                        " AND ( userid = {user} OR -1 = {user}) " +
+//					   " AND (attributename = 'Date' AND (measure = {date} or '' = {date})) " +
                        " ORDER BY substr(uuid, 7, 13) desc, response" +
                        " LIMIT ? "+
                        "OFFSET ? ";
@@ -66,6 +95,8 @@ void search(){
   searchQuery = replaceFirst(searchQuery,   "{user}", user);
   searchQuery = replaceFirst(searchQuery,   "{user}", user);
 
+  searchQuery = replaceFirst(searchQuery,   "{date}", date);
+  searchQuery = replaceFirst(searchQuery,   "{date}", date);
   drop1Q  = " drop table if exists materialisedlatestnondeletedaentvalue";
 
   make1Q  = " create table materialisedlatestnondeletedaentvalue as";
@@ -184,4 +215,4 @@ delOnEvent("Control/Search", "show", "search()");
 delOnEvent("Control/Search/Entity_Types", "click" , "search()");
 addOnEvent("Control/Search", "show", "initSearchResultList()");
 addOnEvent("Control/Search", "show", "populateSelectUser()");
-
+addOnEvent("Control/Search", "show", "populateSelectDate()");

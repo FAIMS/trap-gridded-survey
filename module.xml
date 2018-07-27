@@ -247,6 +247,7 @@
         <Vars f="hidden">
             <Highlighted_Row    b="decimal" f="nodata"/>
             <Highlighted_Walker b="decimal" f="nodata"/>
+            <Date/>
         </Vars>
     </Survey_Unit>
 
@@ -263,6 +264,10 @@
             <Last_Name/>
             <Initials/>
         </Walker>
+        <Vars f="hidden">
+            <Date/>
+
+        </Vars>
     </Walker>
 
     <Walker_Unit>
@@ -417,6 +422,8 @@
         <!--@SOURCE: logic/walker-initials.bsh-->
         <!--@SOURCE: logic/persistence.bsh-->
         <!--@SOURCE: logic/artefact-count-population.bsh-->
+
+        <!--@SOURCE: logic/date-population.bsh-->
         ]]></logic>
 
 </module>

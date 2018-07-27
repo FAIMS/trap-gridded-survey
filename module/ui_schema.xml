@@ -85,6 +85,9 @@
                 <Col_1>
                   <Select_User/>
                 </Col_1>
+                <Col_2>
+                  <Select_Date/>
+                </Col_2>
               </Colgroup_1>
               <Entity_List/>
             </Search>
@@ -193,6 +196,7 @@
             <Vars>
               <Highlighted_Row/>
               <Highlighted_Walker/>
+              <Date/>
             </Vars>
           </Survey_Unit>
           <Walker>
@@ -202,6 +206,9 @@
               <Last_Name/>
               <Initials/>
             </Walker>
+            <Vars>
+              <Date/>
+            </Vars>
           </Walker>
           <Walker_Unit>
             <Walker_Unit>
@@ -582,6 +589,16 @@
               </item>
             </select1>
           </group>
+          <group ref="Col_2" faims_style="even">
+            <label/>
+            <select1 ref="Select_Date">
+              <label>{Select_Date}</label>
+              <item>
+                <label>Options not loaded</label>
+                <value>Options not loaded</value>
+              </item>
+            </select1>
+          </group>
         </group>
         <select1 appearance="compact" ref="Entity_List">
           <label>{Entity_List}</label>
@@ -843,6 +860,9 @@
         <input ref="Highlighted_Walker">
           <label>{Highlighted_Walker}</label>
         </input>
+        <input faims_attribute_name="Date" faims_attribute_type="measure" ref="Date">
+          <label>{Date}</label>
+        </input>
       </group>
     </group>
     <group ref="Walker" faims_archent_type="Walker">
@@ -860,6 +880,12 @@
         </input>
         <input faims_attribute_name="Initials" faims_attribute_type="measure" ref="Initials">
           <label>{Initials}</label>
+        </input>
+      </group>
+      <group ref="Vars" faims_hidden="true">
+        <label>{Vars}</label>
+        <input faims_attribute_name="Date" faims_attribute_type="measure" ref="Date">
+          <label>{Date}</label>
         </input>
       </group>
     </group>
