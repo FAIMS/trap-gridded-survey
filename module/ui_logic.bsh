@@ -6250,19 +6250,22 @@ void search(){
   String term = getFieldValue(refSearchTerm);
   String user = getFieldValue(refSelectUser);
   String date = getFieldValue(refSelectDate);
-  String searchQuery = "SELECT uuid, response "+
-                       "  FROM latestNonDeletedMaterialisedArchEntFormattedIdentifiers  "+
-                       " WHERE uuid in (SELECT uuid "+
+  String searchQuery = "SELECT uuid, response " +
+ 					   " FROM latestNonDeletedMaterialisedArchEntFormattedIdentifiers "+
+ 					   " JOIN materialisedlatestnondeletedaentvalue USING (uuid) "+
+ 					   " JOIN attributekey USING (attributeid) "+
+ 					   " WHERE attributename = 'Date' "+
+ 					   " AND ( measure = '{date}' OR '' = '{date}' ) "+
+                       " AND uuid in (SELECT uuid " +
                        "                  FROM materialisedlatestnondeletedaentvalue "+
-                       "                 WHERE measure LIKE {term}||'%')"+
+                       "                 WHERE measure LIKE {term}||'%') "+
                        " AND ( aenttypename = {type} OR '' = {type} ) "+
                        " AND ( aenttypename != 'Walker Unit' ) "+
-                       " AND ( userid = {user} OR -1 = {user}) " +
-//					   " AND (attributename = 'Date' AND (measure = {date} or '' = {date})) " +
-                       " ORDER BY substr(uuid, 7, 13) desc, response" +
+                       " AND ( latestNonDeletedMaterialisedArchEntFormattedIdentifiers.userid = {user} "+
+					   "			 OR -1 = {user}) "+
+                       " ORDER BY substr(uuid, 7, 13) DESC, response" +
                        " LIMIT ? "+
-                       "OFFSET ? ";
-  searchQuery = dbReplaceFirst(searchQuery, "{term}", term);
+                       "OFFSET ? ";  searchQuery = dbReplaceFirst(searchQuery, "{term}", term);
   searchQuery = dbReplaceFirst(searchQuery, "{type}", type);
   searchQuery = dbReplaceFirst(searchQuery, "{type}", type);
   searchQuery = replaceFirst(searchQuery,   "{user}", user);
