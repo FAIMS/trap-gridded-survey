@@ -5962,6 +5962,78 @@ void populateWalkersTextField() {
 addOnEvent("Survey_Unit", "save", "maybeRedirectToWalkerUnit()");
 addOnEvent("Survey_Unit", "firstsave", "enqueueWalkersToRelate()");
 
+
+void naIfBlank(String ref) {
+  String blank = "";
+  String na  = "N/A";
+  String val   = getFieldValue(ref);
+  setFieldValue(ref, na);
+
+}
+
+void blankIfna(String ref) {
+  String blank = "";
+  String na  = "N/A";
+  String val   = getFieldValue(ref);
+  Log.d("val", val);
+  setFieldValue(ref, blank);
+
+}
+
+
+
+void setFieldsToNA() {
+  List refs = getZeroableRefs();
+  // Check the checkbox N_A, if value is N/A then set all zeroable refs to NA
+  String tab = "Walker_Unit/Walker_Unit";
+  String na = "N/A";
+  String naRef = tab + "/N_A";
+  String zero = "0";
+  List value = getFieldValue(naRef);
+
+  // N/A is chosen, remove zeroIfBlank "blur" event and blankIfZero "focus" event,
+  // and replace this with N/A
+  if(!value.isEmpty()) {
+    for(String ref : refs) {
+        setFieldValue(ref, na);
+        String val   = getFieldValue(ref);
+        Log.d("val", val);
+
+        String focus = "blankIfZero(\"%s\")"; focus = replaceFirst(focus, ref);
+        String blur  = "zeroIfBlank(\"%s\")"; blur  = replaceFirst(blur,  ref);
+        delOnEvent(ref, "focus", focus);
+        delOnEvent(ref, "blur",  blur );
+
+        String focusNA = "blankIfna(\"%s\")"; focusNA = replaceFirst(focusNA, ref);
+        String blurNA  = "naIfBlank(\"%s\")"; blurNA  = replaceFirst(blurNA,  ref);
+
+        addOnEvent(ref, "focus", focusNA);
+        addOnEvent(ref, "blur",  blurNA );
+
+        String hasFocusNA = Boolean.toString(hasOnEvent(ref, "focus", focusNA));
+        String hasBlurNA = Boolean.toString(hasOnEvent(ref, "blur",  blurNA));
+
+        Log.d("focusNA", hasFocusNA);
+        Log.d("blurNA", hasBlurNA);
+    }
+  } else {  // NA is unticked so add back default events and values
+
+    for (String ref : getZeroableRefs()) {
+        setFieldValue(ref, zero);
+
+        String focus = "blankIfZero(\"%s\")"; focus = replaceFirst(focus, ref);
+        String blur  = "zeroIfBlank(\"%s\")"; blur  = replaceFirst(blur,  ref);
+
+        addOnEvent(ref, "focus", focus);
+        addOnEvent(ref, "blur",  blur );
+      }
+  }
+  System.out.println("Value: " + value);
+}
+addOnEvent("Walker_Unit/Walker_Unit/N_A", "click", "setFieldsToNA()");
+
+
+
 /*************************** GRID - EVENT BINDINGS ****************************/
 addOnEvent("Walker_Unit/Walker_Unit/Zero_Row_And_Next_1", "click", "zeroRowAndNext()");
 addOnEvent("Walker_Unit/Walker_Unit/Zero_Row_And_Next_2", "click", "zeroRowAndNext()");
@@ -6256,16 +6328,17 @@ void search(){
  					   " JOIN attributekey USING (attributeid) "+
  					   " WHERE attributename = 'Date' "+
  					   " AND ( measure = '{date}' OR '' = '{date}' ) "+
-                       " AND uuid in (SELECT uuid " +
-                       "                  FROM materialisedlatestnondeletedaentvalue "+
-                       "                 WHERE measure LIKE {term}||'%') "+
-                       " AND ( aenttypename = {type} OR '' = {type} ) "+
-                       " AND ( aenttypename != 'Walker Unit' ) "+
-                       " AND ( latestNonDeletedMaterialisedArchEntFormattedIdentifiers.userid = {user} "+
+             " AND uuid in (SELECT uuid " +
+             "                  FROM materialisedlatestnondeletedaentvalue "+
+             "                 WHERE measure LIKE {term}||'%') "+
+             " AND ( aenttypename = {type} OR '' = {type} ) "+
+             " AND ( aenttypename != 'Walker Unit' ) "+
+             " AND ( latestNonDeletedMaterialisedArchEntFormattedIdentifiers.userid = {user} "+
 					   "			 OR -1 = {user}) "+
-                       " ORDER BY substr(uuid, 7, 13) DESC, response" +
-                       " LIMIT ? "+
-                       "OFFSET ? ";  searchQuery = dbReplaceFirst(searchQuery, "{term}", term);
+             " ORDER BY substr(uuid, 7, 13) DESC, response"+
+             " LIMIT ? "+
+             "OFFSET ? ";
+  searchQuery = dbReplaceFirst(searchQuery, "{term}", term);
   searchQuery = dbReplaceFirst(searchQuery, "{type}", type);
   searchQuery = dbReplaceFirst(searchQuery, "{type}", type);
   searchQuery = replaceFirst(searchQuery,   "{user}", user);

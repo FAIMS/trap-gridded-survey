@@ -83,16 +83,16 @@ void search(){
  					   " JOIN attributekey USING (attributeid) "+
  					   " WHERE attributename = 'Date' "+
  					   " AND ( measure = '{date}' OR '' = '{date}' ) "+
-                       " AND uuid in (SELECT uuid " +
-                       "                  FROM materialisedlatestnondeletedaentvalue "+
-                       "                 WHERE measure LIKE {term}||'%') "+
-                       " AND ( aenttypename = {type} OR '' = {type} ) "+
-                       " AND ( aenttypename != 'Walker Unit' ) "+
-                       " AND ( latestNonDeletedMaterialisedArchEntFormattedIdentifiers.userid = {user} "+
+             " AND uuid in (SELECT uuid " +
+             "                  FROM materialisedlatestnondeletedaentvalue "+
+             "                 WHERE measure LIKE {term}||'%') "+
+             " AND ( aenttypename = {type} OR '' = {type} ) "+
+             " AND ( aenttypename != 'Walker Unit' ) "+
+             " AND ( latestNonDeletedMaterialisedArchEntFormattedIdentifiers.userid = {user} "+
 					   "			 OR -1 = {user}) "+
-                       " ORDER BY substr(uuid, 7, 13) DESC, response"+
-                       " LIMIT ? "+
-                       "OFFSET ? ";  
+             " ORDER BY substr(uuid, 7, 13) DESC, response"+
+             " LIMIT ? "+
+             "OFFSET ? ";
   searchQuery = dbReplaceFirst(searchQuery, "{term}", term);
   searchQuery = dbReplaceFirst(searchQuery, "{type}", type);
   searchQuery = dbReplaceFirst(searchQuery, "{type}", type);
