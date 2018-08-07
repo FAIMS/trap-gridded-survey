@@ -5962,26 +5962,11 @@ void populateWalkersTextField() {
 addOnEvent("Survey_Unit", "save", "maybeRedirectToWalkerUnit()");
 addOnEvent("Survey_Unit", "firstsave", "enqueueWalkersToRelate()");
 
+/*************************** GRID - N/A Checkbox ****************************/
 
-void naIfBlank(String ref) {
-  String blank = "";
-  String na  = "N/A";
-  String val   = getFieldValue(ref);
-  setFieldValue(ref, na);
-
-}
-
-void blankIfna(String ref) {
-  String blank = "";
-  String na  = "N/A";
-  String val   = getFieldValue(ref);
-  Log.d("val", val);
-  setFieldValue(ref, blank);
-
-}
-
-
-
+// Event Handler function for when Walker_Unit/Walker_Unit/N_A checkbox is clicked.
+// When the "N/A" option is ticked, then, set all fields that are zeroable to
+// have the value "N/A". If unticked, set the value of all zeroable fields to zero.
 void setFieldsToNA() {
   List refs = getZeroableRefs();
   // Check the checkbox N_A, if value is N/A then set all zeroable refs to NA
@@ -6003,18 +5988,6 @@ void setFieldsToNA() {
         String blur  = "zeroIfBlank(\"%s\")"; blur  = replaceFirst(blur,  ref);
         delOnEvent(ref, "focus", focus);
         delOnEvent(ref, "blur",  blur );
-
-        String focusNA = "blankIfna(\"%s\")"; focusNA = replaceFirst(focusNA, ref);
-        String blurNA  = "naIfBlank(\"%s\")"; blurNA  = replaceFirst(blurNA,  ref);
-
-        addOnEvent(ref, "focus", focusNA);
-        addOnEvent(ref, "blur",  blurNA );
-
-        String hasFocusNA = Boolean.toString(hasOnEvent(ref, "focus", focusNA));
-        String hasBlurNA = Boolean.toString(hasOnEvent(ref, "blur",  blurNA));
-
-        Log.d("focusNA", hasFocusNA);
-        Log.d("blurNA", hasBlurNA);
     }
   } else {  // NA is unticked so add back default events and values
 
@@ -6031,8 +6004,6 @@ void setFieldsToNA() {
   System.out.println("Value: " + value);
 }
 addOnEvent("Walker_Unit/Walker_Unit/N_A", "click", "setFieldsToNA()");
-
-
 
 /*************************** GRID - EVENT BINDINGS ****************************/
 addOnEvent("Walker_Unit/Walker_Unit/Zero_Row_And_Next_1", "click", "zeroRowAndNext()");
