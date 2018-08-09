@@ -6276,8 +6276,11 @@ void populateSelectDate() {
 				  // Populate dropdown
 				  populateDropDown(refSearchDate, result, false);
 			}
+    onError(message) {
+      Log.d("populateSelectDate callback", message);
+    }
 	};
-	fetchAll(getNonDeletedDateQuery, popDate);
+  fetchAll(getNonDeletedDateQuery, popDate);
 }
 
 void search(){
