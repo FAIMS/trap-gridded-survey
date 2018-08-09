@@ -189,6 +189,7 @@
                 </Col_2>
               </Colgroup_10>
               <Compute_Artefact_Counts/>
+              <Sample_Taken/>
             </Survey_Unit>
             <Walker_Units>
               <Add_New_Walker_Unit/>
@@ -845,6 +846,13 @@
         <trigger ref="Compute_Artefact_Counts">
           <label>{Compute_Artefact_Counts}</label>
         </trigger>
+        <select1 appearance="full" faims_attribute_name="Sample Taken" faims_attribute_type="vocab" ref="Sample_Taken" faims_style_class="required">
+          <label>{Sample_Taken}</label>
+          <item>
+            <label>Options not loaded</label>
+            <value>Options not loaded</value>
+          </item>
+        </select1>
       </group>
       <group ref="Walker_Units" faims_scrollable="false">
         <label>{Walker_Units}</label>

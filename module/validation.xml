@@ -6,5 +6,10 @@
         <param type="field" value="vocab"/>
       </validator>
     </property>
+    <property name="Sample Taken">
+      <validator type="blankchecker">
+        <param type="field" value="vocab"/>
+      </validator>
+    </property>
   </ArchaeologicalElement>
 </ValidationSchema>

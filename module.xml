@@ -236,6 +236,12 @@
                 <Most_Recently_Computed_Other  b="decimal" f="readonly"/>
             </cols>
             <Compute_Artefact_Counts t="button"/>
+            <Sample_Taken f="notnull" t="radio">
+              <opts>
+                <opt>Yes</opt>
+                <opt>No</opt>
+              </opts>
+            </Sample_Taken>
         </Survey_Unit>
         <Walker_Units f="noscroll">
             <Add_New_Walker_Unit lc="Walker_Unit" t="button">

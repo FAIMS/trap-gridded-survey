@@ -380,6 +380,7 @@ REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Most_Recently_Computed_Daub", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Most_Recently_Computed_Glass", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Most_Recently_Computed_Other", "input");
 REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Compute_Artefact_Counts", "button");
+REF_TO_TYPE.put("Survey_Unit/Survey_Unit/Sample_Taken", "radio");
 REF_TO_TYPE.put("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "button");
 REF_TO_TYPE.put("Survey_Unit/Vars/Highlighted_Row", "input");
 REF_TO_TYPE.put("Survey_Unit/Vars/Highlighted_Walker", "input");
@@ -472,6 +473,7 @@ DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_Lithic");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_Daub");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_Glass");
 DATA_REFS.add("Survey_Unit/Survey_Unit/Most_Recently_Computed_Other");
+DATA_REFS.add("Survey_Unit/Survey_Unit/Sample_Taken");
 DATA_REFS.add("Survey_Unit/Vars/Date");
 DATA_REFS.add("Walker/Walker/First_Name");
 DATA_REFS.add("Walker/Walker/Last_Name");
@@ -3319,6 +3321,7 @@ void validateControl() {
 void validateSurveyUnit() {
   List f = new ArrayList(); // Fields to be validated
   f.add(fieldPair("Survey_Unit/Survey_Unit/Land_Use", "{Land_Use}"));
+  f.add(fieldPair("Survey_Unit/Survey_Unit/Sample_Taken", "{Sample_Taken}"));
 
   String validationMessage = validateFields(f, "PLAINTEXT");
   showWarning("{validation_results}", validationMessage);
