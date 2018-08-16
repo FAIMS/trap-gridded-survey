@@ -211,7 +211,7 @@
               <Date/>
             </Vars>
           </Walker>
-          <Walker_Unit>
+          <Walker_Cell>
             <Walker_Unit>
               <Survey_Unit_ID/>
               <Grid/>
@@ -325,7 +325,7 @@
               <Row_Number/>
               <Walker_Number/>
             </Vars>
-          </Walker_Unit>
+          </Walker_Cell>
           <Saving>
             <Saving>
               <Saving/>
@@ -352,16 +352,16 @@
       <bind nodeset="/faims/Survey_Unit/Survey_Unit/Colgroup_10/Col_2/Most_Recently_Computed_Other" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Row" type="decimal"/>
       <bind nodeset="/faims/Survey_Unit/Vars/Highlighted_Walker" type="decimal"/>
-      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_4/Col_1/Ancient" type="decimal"/>
-      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_4/Col_3/Modern" type="decimal"/>
-      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_5/Col_1/A_C" type="decimal"/>
-      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_5/Col_3/HM" type="decimal"/>
-      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_6/Col_1/Lithic" type="decimal"/>
-      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_6/Col_3/Daub" type="decimal"/>
-      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_7/Col_1/Glass" type="decimal"/>
-      <bind nodeset="/faims/Walker_Unit/Walker_Unit/Colgroup_7/Col_3/Other" type="decimal"/>
-      <bind nodeset="/faims/Walker_Unit/Vars/Row_Number" type="decimal"/>
-      <bind nodeset="/faims/Walker_Unit/Vars/Walker_Number" type="decimal"/>
+      <bind nodeset="/faims/Walker_Cell/Walker_Unit/Colgroup_4/Col_1/Ancient" type="decimal"/>
+      <bind nodeset="/faims/Walker_Cell/Walker_Unit/Colgroup_4/Col_3/Modern" type="decimal"/>
+      <bind nodeset="/faims/Walker_Cell/Walker_Unit/Colgroup_5/Col_1/A_C" type="decimal"/>
+      <bind nodeset="/faims/Walker_Cell/Walker_Unit/Colgroup_5/Col_3/HM" type="decimal"/>
+      <bind nodeset="/faims/Walker_Cell/Walker_Unit/Colgroup_6/Col_1/Lithic" type="decimal"/>
+      <bind nodeset="/faims/Walker_Cell/Walker_Unit/Colgroup_6/Col_3/Daub" type="decimal"/>
+      <bind nodeset="/faims/Walker_Cell/Walker_Unit/Colgroup_7/Col_1/Glass" type="decimal"/>
+      <bind nodeset="/faims/Walker_Cell/Walker_Unit/Colgroup_7/Col_3/Other" type="decimal"/>
+      <bind nodeset="/faims/Walker_Cell/Vars/Row_Number" type="decimal"/>
+      <bind nodeset="/faims/Walker_Cell/Vars/Walker_Number" type="decimal"/>
     </model>
   </h:head>
   <h:body>
@@ -855,7 +855,7 @@
         </select1>
       </group>
       <group ref="Walker_Units" faims_scrollable="false">
-        <label>{Walker_Units}</label>
+        <label>{Walker_Cells}</label>
         <trigger ref="Add_New_Walker_Unit">
           <label>{View_Walker_Grid}</label>
         </trigger>
@@ -897,7 +897,7 @@
         </input>
       </group>
     </group>
-    <group ref="Walker_Unit" faims_archent_type="Walker Unit">
+    <group ref="Walker_Cell" faims_archent_type="Walker Cell">
       <label>{Walker_Grid}</label>
       <group ref="Walker_Unit">
         <label>{Walker_Grid}</label>

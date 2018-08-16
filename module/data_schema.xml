@@ -6,7 +6,7 @@
             <child>Child Of</child>
             <property type="measure" name="Order" isIdentifier="true"/>
         </RelationshipElement>
-  <RelationshipElement name="Survey Unit - Walker Unit" type="hierarchical">
+  <RelationshipElement name="Survey Unit - Walker Cell" type="hierarchical">
     <description>A 1-to-n relationship between the parent and its children, respectively.</description>
     <parent>Parent Of</parent>
     <child>Child Of</child>
@@ -355,7 +355,7 @@
       <appendCharacterString> - </appendCharacterString>
     </property>
   </ArchaeologicalElement>
-  <ArchaeologicalElement name="Walker Unit">
+  <ArchaeologicalElement name="Walker Cell">
     <description></description>
     <property name="Walker Unit Survey Unit ID" type="measure" isIdentifier="true">
       <description></description>

@@ -603,7 +603,7 @@ void highlightedWalker(int newVal) {
 }
 
 int selectedWalker() {
-  String ref = WALKER_UNIT_TAB_GROUP_REF + "Vars/Walker_Number";
+  String ref = WALKER_UNIT_TAB_GROUP_REF + "/Vars/Walker_Number";
   int    val = getFieldValueAsInt(ref);
 
   return max(1, val);
@@ -744,14 +744,14 @@ void dequeWalkerUnitsToZeroRec() {
   String  surveyUnitId =             walkerUnitToZero.get(3);
   // Prepare other fields which are required to perform a save
   String uuid         = null;
-  String entityType   = "Walker Unit";
+  String entityType   = WALKER_UNIT_ENTITY_REF;
   List   geometry     = null;
   List   attributes   = createZeroedAttributeList(
       sRowNumber, sWalkerNumber, surveyUnitId);
   SaveCallback relate = new SaveCallback() {
     onSave(uuid, newRecord) {
       saveEntitiesToHierRel(
-        "Survey Unit - Walker Unit",
+        "Survey Unit - " + WALKER_UNIT_ENTITY_REF,
         parentUuid,
         uuid,
         "Parent Of",
@@ -775,7 +775,7 @@ String getSavingHtml() {
   html += "  <head><title>Saving...</title></head>";
   html += "  <p>";
   html += "    <b>Please do not leave this tab group.</b>";
-  html += "    The following Walker Unit records are saving:";
+  html += "    The following " + WALKER_UNIT_ENTITY_REF + " records are saving:";
   html += "  </p>";
   html += "  <ul>";
   html += getSavingHtmlLis();
@@ -970,9 +970,9 @@ void loadOrMakeWalkerUnit() {
   String uuid = GRID_CACHE[highlightedRow][highlightedWalker].get(ATTRIB_UUID);
   if (uuid == null) {
     parentTabgroup = "Survey_Unit";
-    newWalkerUnit();
+    newWalkerCell();
   } else {
-    loadWalkerUnitFrom(uuid);
+    loadWalkerCellFrom(uuid);
   }
 }
 
@@ -1078,11 +1078,11 @@ boolean DO_REDIRECT_TO_WALKER_UNIT = false;
 
 inheritWalkerUnitFields() {
   setFieldValue(
-    WALKER_UNIT_TAB_GROUP_REF + "Vars/Row_Number",
+    WALKER_UNIT_TAB_GROUP_REF + "/Vars/Row_Number",
     String.valueOf(highlightedRow())
   );
   setFieldValue(
-    WALKER_UNIT_TAB_GROUP_REF + "Vars/Walker_Number",
+    WALKER_UNIT_TAB_GROUP_REF + "/Vars/Walker_Number",
     String.valueOf(highlightedWalker())
   );
 }

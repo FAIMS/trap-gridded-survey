@@ -4,7 +4,7 @@ void removeWalkerUnitFromEntityTypesVar() {
 
   for (int i = 0; i < entityTypes.size(); i++) {
     nameValuePair = entityTypes.get(i);
-    if ("Walker Unit".equals(nameValuePair.getValue())) {
+    if (WALKER_UNIT_ENTITY_REF.equals(nameValuePair.getValue())) {
       idxToRemove = i;
       break;
     }
@@ -90,7 +90,7 @@ void search(){
              "                  FROM materialisedlatestnondeletedaentvalue "+
              "                 WHERE measure LIKE {term}||'%') "+
              " AND ( aenttypename = {type} OR '' = {type} ) "+
-             " AND ( aenttypename != 'Walker Unit' ) "+
+             " AND ( aenttypename != '{walkerUnit}' ) "+
              " AND ( latestNonDeletedMaterialisedArchEntFormattedIdentifiers.userid = {user} "+
 					   "			 OR -1 = {user}) "+
              " ORDER BY substr(uuid, 7, 13) DESC, response"+
@@ -104,6 +104,9 @@ void search(){
 
   searchQuery = replaceFirst(searchQuery,   "{date}", date);
   searchQuery = replaceFirst(searchQuery,   "{date}", date);
+
+  searchQuery = replaceFirst(searchQuery, "{walkerUnit}", WALKER_UNIT_ENTITY_REF);
+
   drop1Q  = " drop table if exists materialisedlatestnondeletedaentvalue";
 
   make1Q  = " create table materialisedlatestnondeletedaentvalue as";

@@ -244,7 +244,8 @@
             </Sample_Taken>
         </Survey_Unit>
         <Walker_Units f="noscroll">
-            <Add_New_Walker_Unit lc="Walker_Unit" t="button">
+            Walker Cells
+            <Add_New_Walker_Unit lc="Walker_Cell" t="button">
                 View Walker Grid
             </Add_New_Walker_Unit>
             <!--Displaying this list is costly, so we just won't do it-->
@@ -276,7 +277,7 @@
         </Vars>
     </Walker>
 
-    <Walker_Unit>
+    <Walker_Cell>
         Walker Grid
         <fmt>{{Walker_Unit_Survey_Unit_ID}} - ({{Row_Number}}, {{Walker_Number}})</fmt>
         <Walker_Unit>
@@ -402,7 +403,7 @@
             <Row_Number    b="decimal" f="readonly"/>
             <Walker_Number b="decimal" f="readonly"/>
         </Vars>
-    </Walker_Unit>
+    </Walker_Cell>
 
     <Saving f="nodata nowire">
         Saving...
