@@ -4486,6 +4486,13 @@ setSyncEnabled    (false);
 
 delOnEvents("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "click");
 
+// Ref string for Walker Unit tabgroup
+final String WALKER_UNIT_TAB_GROUP_REF = "Walker_Unit";
+// Ref string for the tab Walker_Unit
+final String WALKER_UNIT_TAB_REF = "Walker_Unit";
+// Full ref with the backward slash character between the tabgroup and tab
+String WALKER_UNIT_TAB_REF_FULL = WALKER_UNIT_TAB_GROUP_REF + "/" + WALKER_UNIT_TAB_REF;
+
 /************************************ UTIL ************************************/
 boolean isValidInt(String val) {
   try {
@@ -4687,54 +4694,54 @@ addDensityAsCount(String refDest) {
 }
 
 addAncientM2() {
-  String refDest = "Walker_Unit/Walker_Unit/Ancient";
+  String refDest = WALKER_UNIT_TAB_REF_FULL + "/Ancient";
   addDensityAsCount(refDest);
 }
 
 addModernM2() {
-  String refDest = "Walker_Unit/Walker_Unit/Modern";
+  String refDest = WALKER_UNIT_TAB_REF_FULL + "/Modern";
   addDensityAsCount(refDest);
 }
 
 addAcM2() {
-  String refDest = "Walker_Unit/Walker_Unit/A_C";
+  String refDest = WALKER_UNIT_TAB_REF_FULL + "/A_C";
   addDensityAsCount(refDest);
 }
 
 addDaubM2() {
-  String refDest = "Walker_Unit/Walker_Unit/Daub";
+  String refDest = WALKER_UNIT_TAB_REF_FULL + "/Daub";
   addDensityAsCount(refDest);
 }
 
 addHmM2() {
-  String refDest = "Walker_Unit/Walker_Unit/HM";
+  String refDest = WALKER_UNIT_TAB_REF_FULL + "/HM";
   addDensityAsCount(refDest);
 }
 
 addLithicM2() {
-  String refDest = "Walker_Unit/Walker_Unit/Lithic";
+  String refDest = WALKER_UNIT_TAB_REF_FULL + "/Lithic";
   addDensityAsCount(refDest);
 }
 
 addGlassM2() {
-  String refDest = "Walker_Unit/Walker_Unit/Glass";
+  String refDest = WALKER_UNIT_TAB_REF_FULL + "/Glass";
   addDensityAsCount(refDest);
 }
 
 addOtherM2() {
-  String refDest = "Walker_Unit/Walker_Unit/Other";
+  String refDest = WALKER_UNIT_TAB_REF_FULL + "/Other";
   addDensityAsCount(refDest);
 }
 
-addOnEvent("Walker_Unit/Walker_Unit/Add_Ancient_M_2", "click", "addAncientM2()");
-addOnEvent("Walker_Unit/Walker_Unit/Add_Modern_M_2",  "click", "addModernM2()");
-addOnEvent("Walker_Unit/Walker_Unit/Add_A_C_M_2",     "click", "addAcM2()");
-addOnEvent("Walker_Unit/Walker_Unit/Add_Daub_M_2",    "click", "addDaubM2()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Add_Ancient_M_2", "click", "addAncientM2()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Add_Modern_M_2",  "click", "addModernM2()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Add_A_C_M_2",     "click", "addAcM2()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Add_Daub_M_2",    "click", "addDaubM2()");
 
-addOnEvent("Walker_Unit/Walker_Unit/Add_HM_M_2",      "click", "addHmM2()");
-addOnEvent("Walker_Unit/Walker_Unit/Add_Lithic_M_2",  "click", "addLithicM2()");
-addOnEvent("Walker_Unit/Walker_Unit/Add_Glass_M_2",   "click", "addGlassM2()");
-addOnEvent("Walker_Unit/Walker_Unit/Add_Other_M_2",   "click", "addOtherM2()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Add_HM_M_2",      "click", "addHmM2()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Add_Lithic_M_2",  "click", "addLithicM2()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Add_Glass_M_2",   "click", "addGlassM2()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Add_Other_M_2",   "click", "addOtherM2()");
 /************************************ GRID ************************************/
 /* Functions and variables related to the grid interface.                     */
 /******************************************************************************/
@@ -5119,7 +5126,7 @@ void redrawGrid(boolean doRefreshCache) {
 
   int    numberOfRows    = numberOfRows();
   int    numberOfWalkers = numberOfWalkers();
-  String refGridWebView  = "Walker_Unit/Walker_Unit/Grid";
+  String refGridWebView  = WALKER_UNIT_TAB_REF_FULL + "/Grid";
 
   // In a probably vain attempt to improve performance, this code is valid
   // HTML5.
@@ -5249,7 +5256,7 @@ void numberOfRows(int val, String callback) {
   boolean doRehighlight     = val < highlightedRow();
   boolean doReselect        = val < selectedRow();
 
-  if (!isDisplayed("Walker_Unit"))
+  if (!isDisplayed(WALKER_UNIT_TAB_GROUP_REF))
     return;
 
   if (MUTEX_WALKER_UNIT_ROWS.drainPermits() == 0)
@@ -5304,7 +5311,7 @@ void highlightedRow(int newVal) {
 }
 
 int selectedRow() {
-  String ref = "Walker_Unit/Vars/Row_Number";
+  String ref = WALKER_UNIT_TAB_GROUP_REF + "/Vars/Row_Number";
   int    val = getFieldValueAsInt(ref);
 
   return max(1, val);
@@ -5340,7 +5347,7 @@ void highlightedWalker(int newVal) {
 }
 
 int selectedWalker() {
-  String ref = "Walker_Unit/Vars/Walker_Number";
+  String ref = WALKER_UNIT_TAB_GROUP_REF + "Vars/Walker_Number";
   int    val = getFieldValueAsInt(ref);
 
   return max(1, val);
@@ -5380,7 +5387,7 @@ void gridDown () { moveHighlightedRow   (-1); redrawGrid(); }
 void gridLeft () { moveHighlightedWalker(-1); redrawGrid(); }
 void gridRight() { moveHighlightedWalker(+1); redrawGrid(); }
 void gridRandomAccessWalker() {
-  String ref          = "Walker_Unit/Walker_Unit/Load_Walker";
+  String ref          = WALKER_UNIT_TAB_REF_FULL + "/Load_Walker";
   int    walkerNumber = getFieldValueAsInt(ref);
 
   highlightedWalker(walkerNumber);
@@ -5577,7 +5584,7 @@ void deleteRow() { numberOfRows(numberOfRows() - 1, "redrawGrid()"); }
 List getZeroableRefs() {
   List   elemNames = new ArrayList(); // names of zeroable elements
   List   refs      = new ArrayList(); // references of zeroable elements
-  String fmtRef    = "Walker_Unit/Walker_Unit/%s";
+  String fmtRef    = WALKER_UNIT_TAB_REF_FULL + "/%s";
 
   // 1. Write the element names
   elemNames.add("Ancient");
@@ -5682,7 +5689,7 @@ void loadOrMakeWalkerUnit() {
   int selectedRow       = selectedRow   ();
   int selectedWalker    = selectedWalker();
 
-  String refWalkerUnit  = "Walker_Unit";
+  String refWalkerUnit  = WALKER_UNIT_TAB_GROUP_REF;
 
   // The selected walker unit is already loaded
   if (
@@ -5726,15 +5733,15 @@ void onCreateWalkerUnit() {
 }
 
 delOnEvent(
-    "Walker_Unit",
+    WALKER_UNIT_TAB_GROUP_REF,
     "show",
-    fun2str("saveTabGroup", new Object[]{"Walker_Unit"}));
-addOnEvent("Walker_Unit", "show", "saveWalkerUnit()");
-addOnEvent("Walker_Unit", "fetch", "onLoadWalkerUnit()");
-addOnEvent("Walker_Unit", "create", "onCreateWalkerUnit()");
+    fun2str("saveTabGroup", new Object[]{WALKER_UNIT_TAB_GROUP_REF}));
+addOnEvent(WALKER_UNIT_TAB_GROUP_REF, "show", "saveWalkerUnit()");
+addOnEvent(WALKER_UNIT_TAB_GROUP_REF, "fetch", "onLoadWalkerUnit()");
+addOnEvent(WALKER_UNIT_TAB_GROUP_REF, "create", "onCreateWalkerUnit()");
 
 void saveWalkerUnit() {
-  String  tabgroup            = "Walker_Unit";
+  String  tabgroup            = WALKER_UNIT_TAB_GROUP_REF;
   Boolean enableAutosave      = true;
   String  id                  = getUuid(tabgroup);
   String  parentTabgroup_     = parentTabgroup;
@@ -5815,11 +5822,11 @@ boolean DO_REDIRECT_TO_WALKER_UNIT = false;
 
 inheritWalkerUnitFields() {
   setFieldValue(
-    "Walker_Unit/Vars/Row_Number",
+    WALKER_UNIT_TAB_GROUP_REF + "Vars/Row_Number",
     String.valueOf(highlightedRow())
   );
   setFieldValue(
-    "Walker_Unit/Vars/Walker_Number",
+    WALKER_UNIT_TAB_GROUP_REF + "Vars/Walker_Number",
     String.valueOf(highlightedWalker())
   );
 }
@@ -5827,7 +5834,7 @@ inheritWalkerUnitFields() {
 populateWalkerRadioGroup () {
   int    numberOfWalkers = numberOfWalkers();
   String selectedWalker  = String.valueOf(selectedWalker());
-  String refWalker       = "Walker_Unit/Walker_Unit/Load_Walker";
+  String refWalker       = WALKER_UNIT_TAB_REF_FULL + "/Load_Walker";
 
   List walkerNumbers = new ArrayList();
   for (int i = 1; i <= numberOfWalkers; i++ ) {
@@ -5857,7 +5864,7 @@ boolean onClickSurveyUnitAddNewWalkerUnitCond() {
 }
 
 void onClickNextSurveyUnit() {
-  cancelTabGroup("Walker_Unit", false);
+  cancelTabGroup(WALKER_UNIT_TAB_GROUP_REF, false);
   cancelTabGroup("Survey_Unit", false);
 
   DO_REDIRECT_TO_WALKER_UNIT = true;
@@ -5973,7 +5980,7 @@ addOnEvent("Survey_Unit", "firstsave", "enqueueWalkersToRelate()");
 void setFieldsToNA() {
   List refs = getZeroableRefs();
   // Check the checkbox N_A, if value is N/A then set all zeroable refs to NA
-  String tab = "Walker_Unit/Walker_Unit";
+  String tab = WALKER_UNIT_TAB_REF_FULL;
   String na = "N/A";
   String naRef = tab + "/N_A";
   String zero = "0";
@@ -5993,7 +6000,6 @@ void setFieldsToNA() {
         delOnEvent(ref, "blur",  blur );
     }
   } else {  // NA is unticked so add back default events and values
-
     for (String ref : getZeroableRefs()) {
         setFieldValue(ref, zero);
 
@@ -6004,28 +6010,28 @@ void setFieldsToNA() {
         addOnEvent(ref, "blur",  blur );
       }
   }
-  System.out.println("Value: " + value);
 }
-addOnEvent("Walker_Unit/Walker_Unit/N_A", "click", "setFieldsToNA()");
+
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/N_A", "click", "setFieldsToNA()");
 
 /*************************** GRID - EVENT BINDINGS ****************************/
-addOnEvent("Walker_Unit/Walker_Unit/Zero_Row_And_Next_1", "click", "zeroRowAndNext()");
-addOnEvent("Walker_Unit/Walker_Unit/Zero_Row_And_Next_2", "click", "zeroRowAndNext()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Zero_Row_And_Next_1", "click", "zeroRowAndNext()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Zero_Row_And_Next_2", "click", "zeroRowAndNext()");
 
-addOnEvent("Walker_Unit/Walker_Unit/Next_Walker_Unit_1",    "click", "nextWalkerUnit()");
-addOnEvent("Walker_Unit/Walker_Unit/Next_Walker_Unit_2",    "click", "nextWalkerUnit()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Next_Walker_Unit_1",    "click", "nextWalkerUnit()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Next_Walker_Unit_2",    "click", "nextWalkerUnit()");
 
-addOnEvent("Walker_Unit/Walker_Unit/Delete_Row", "click",  "deleteRow()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Delete_Row", "click",  "deleteRow()");
 
-addOnEvent("Walker_Unit/Walker_Unit/Up",          "click",  "gridUp()");
-addOnEvent("Walker_Unit/Walker_Unit/Down",        "click",  "gridDown()");
-addOnEvent("Walker_Unit/Walker_Unit/Left",        "click",  "gridLeft()");
-addOnEvent("Walker_Unit/Walker_Unit/Right",       "click",  "gridRight()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Up",          "click",  "gridUp()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Down",        "click",  "gridDown()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Left",        "click",  "gridLeft()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Right",       "click",  "gridRight()");
 
-addOnEvent("Walker_Unit",                        "show", "populateWalkerRadioGroup()");
-addOnEvent("Walker_Unit",                        "create", "inheritWalkerUnitFields()");
-addOnEvent("Walker_Unit",                        "create", "zeroIfBlank()");
-addOnEvent("Walker_Unit",                        "leave",  "initHighlighted()");
+addOnEvent(WALKER_UNIT_TAB_GROUP_REF,                        "show", "populateWalkerRadioGroup()");
+addOnEvent(WALKER_UNIT_TAB_GROUP_REF,                        "create", "inheritWalkerUnitFields()");
+addOnEvent(WALKER_UNIT_TAB_GROUP_REF,                        "create", "zeroIfBlank()");
+addOnEvent(WALKER_UNIT_TAB_GROUP_REF,                        "leave",  "initHighlighted()");
 
 
 
@@ -6043,20 +6049,20 @@ addOnEvent("Survey_Unit",                 "copy",   "initGridCache()", PRECEDENC
 addOnEvent("Walker",                      "save",   "updateGridWalkers()");
 addOnEvent("Walker",                      "delete", "updateGridWalkers()");
 
-addOnEvent("Walker_Unit/Walker_Unit/Next_Survey_Unit", "click", "onClickNextSurveyUnit()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Next_Survey_Unit", "click", "onClickNextSurveyUnit()");
 
 
 
 addOnEvent("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "click", "onClickSurveyUnitAddNewWalkerUnit()");
 addOnEventCond("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "click", "onClickSurveyUnitAddNewWalkerUnitCond()");
-addOnEvent("Walker_Unit/Walker_Unit/Load_Walker", "click",  "gridRandomAccessWalker()");
-addOnEvent("Walker_Unit/Walker_Unit/Load",       "click",  "loadOrMakeWalkerUnit()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Load_Walker", "click",  "gridRandomAccessWalker()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Load",       "click",  "loadOrMakeWalkerUnit()");
 /***************************** NAVIGATION DRAWER ******************************/
-delOnEvent("Walker_Unit", "show", "addNavigationButtons(\"Walker_Unit\")");
+delOnEvent(WALKER_UNIT_TAB_GROUP_REF, "show", "addNavigationButtons(\"Walker_Unit\")");
 /************************* SURVEY UNIT ID POPULATION **************************/
 void updateSurveyUnitId() {
   String identifierRef = "Survey_Unit/Survey_Unit/Survey_Unit_ID";
-  String    webViewRef = "Walker_Unit/Walker_Unit/Survey_Unit_ID";
+  String    webViewRef = WALKER_UNIT_TAB_REF_FULL + "/Survey_Unit_ID";
   String identifier    = getFieldValue(identifierRef);
 
   String html = "";
@@ -6066,8 +6072,8 @@ void updateSurveyUnitId() {
   populateWebViewHtml(webViewRef, html);
 }
 
-addOnEvent("Walker_Unit", "create", "updateSurveyUnitId()");
-addOnEvent("Walker_Unit", "fetch",  "updateSurveyUnitId()");
+addOnEvent(WALKER_UNIT_TAB_GROUP_REF, "create", "updateSurveyUnitId()");
+addOnEvent(WALKER_UNIT_TAB_GROUP_REF, "fetch",  "updateSurveyUnitId()");
 
 /*********************** SURVEY UNIT WALKER POPULATION ************************/
 /* Overrides the autogenerated function definition.

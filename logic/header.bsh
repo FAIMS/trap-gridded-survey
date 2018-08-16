@@ -6,3 +6,10 @@ setFileSyncEnabled(false);
 setSyncEnabled    (false);
 
 delOnEvents("Survey_Unit/Walker_Units/Add_New_Walker_Unit", "click");
+
+// Ref string for Walker Unit tabgroup
+final String WALKER_UNIT_TAB_GROUP_REF = "Walker_Unit";
+// Ref string for the tab Walker_Unit
+final String WALKER_UNIT_TAB_REF = "Walker_Unit";
+// Full ref with the backward slash character between the tabgroup and tab
+String WALKER_UNIT_TAB_REF_FULL = WALKER_UNIT_TAB_GROUP_REF + "/" + WALKER_UNIT_TAB_REF;

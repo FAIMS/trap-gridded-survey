@@ -1,2 +1,2 @@
 /***************************** NAVIGATION DRAWER ******************************/
-delOnEvent("Walker_Unit", "show", "addNavigationButtons(\"Walker_Unit\")");
+delOnEvent(WALKER_UNIT_TAB_GROUP_REF, "show", "addNavigationButtons(\"Walker_Unit\")");

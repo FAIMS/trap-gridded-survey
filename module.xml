@@ -411,7 +411,9 @@
             <Saving t="webview" f="nolabel"/>
         </Saving>
     </Saving>
-
+    <!--For the ordering of the hand logic, it is required that header.bsh is first,
+        this is because the file contains imports and variable declarations that
+        be used throughout the rest of the custom logic-->
     <logic><![CDATA[
         <!--@SOURCE: logic/header.bsh-->
         <!--@SOURCE: logic/util.bsh-->

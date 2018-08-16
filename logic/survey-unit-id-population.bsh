@@ -1,7 +1,7 @@
 /************************* SURVEY UNIT ID POPULATION **************************/
 void updateSurveyUnitId() {
   String identifierRef = "Survey_Unit/Survey_Unit/Survey_Unit_ID";
-  String    webViewRef = "Walker_Unit/Walker_Unit/Survey_Unit_ID";
+  String    webViewRef = WALKER_UNIT_TAB_REF_FULL + "/Survey_Unit_ID";
   String identifier    = getFieldValue(identifierRef);
 
   String html = "";
@@ -11,6 +11,6 @@ void updateSurveyUnitId() {
   populateWebViewHtml(webViewRef, html);
 }
 
-addOnEvent("Walker_Unit", "create", "updateSurveyUnitId()");
-addOnEvent("Walker_Unit", "fetch",  "updateSurveyUnitId()");
+addOnEvent(WALKER_UNIT_TAB_GROUP_REF, "create", "updateSurveyUnitId()");
+addOnEvent(WALKER_UNIT_TAB_GROUP_REF, "fetch",  "updateSurveyUnitId()");
 

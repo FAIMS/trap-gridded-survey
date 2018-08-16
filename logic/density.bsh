@@ -32,51 +32,51 @@ addDensityAsCount(String refDest) {
 }
 
 addAncientM2() {
-  String refDest = "Walker_Unit/Walker_Unit/Ancient";
+  String refDest = WALKER_UNIT_TAB_REF_FULL + "/Ancient";
   addDensityAsCount(refDest);
 }
 
 addModernM2() {
-  String refDest = "Walker_Unit/Walker_Unit/Modern";
+  String refDest = WALKER_UNIT_TAB_REF_FULL + "/Modern";
   addDensityAsCount(refDest);
 }
 
 addAcM2() {
-  String refDest = "Walker_Unit/Walker_Unit/A_C";
+  String refDest = WALKER_UNIT_TAB_REF_FULL + "/A_C";
   addDensityAsCount(refDest);
 }
 
 addDaubM2() {
-  String refDest = "Walker_Unit/Walker_Unit/Daub";
+  String refDest = WALKER_UNIT_TAB_REF_FULL + "/Daub";
   addDensityAsCount(refDest);
 }
 
 addHmM2() {
-  String refDest = "Walker_Unit/Walker_Unit/HM";
+  String refDest = WALKER_UNIT_TAB_REF_FULL + "/HM";
   addDensityAsCount(refDest);
 }
 
 addLithicM2() {
-  String refDest = "Walker_Unit/Walker_Unit/Lithic";
+  String refDest = WALKER_UNIT_TAB_REF_FULL + "/Lithic";
   addDensityAsCount(refDest);
 }
 
 addGlassM2() {
-  String refDest = "Walker_Unit/Walker_Unit/Glass";
+  String refDest = WALKER_UNIT_TAB_REF_FULL + "/Glass";
   addDensityAsCount(refDest);
 }
 
 addOtherM2() {
-  String refDest = "Walker_Unit/Walker_Unit/Other";
+  String refDest = WALKER_UNIT_TAB_REF_FULL + "/Other";
   addDensityAsCount(refDest);
 }
 
-addOnEvent("Walker_Unit/Walker_Unit/Add_Ancient_M_2", "click", "addAncientM2()");
-addOnEvent("Walker_Unit/Walker_Unit/Add_Modern_M_2",  "click", "addModernM2()");
-addOnEvent("Walker_Unit/Walker_Unit/Add_A_C_M_2",     "click", "addAcM2()");
-addOnEvent("Walker_Unit/Walker_Unit/Add_Daub_M_2",    "click", "addDaubM2()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Add_Ancient_M_2", "click", "addAncientM2()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Add_Modern_M_2",  "click", "addModernM2()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Add_A_C_M_2",     "click", "addAcM2()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Add_Daub_M_2",    "click", "addDaubM2()");
 
-addOnEvent("Walker_Unit/Walker_Unit/Add_HM_M_2",      "click", "addHmM2()");
-addOnEvent("Walker_Unit/Walker_Unit/Add_Lithic_M_2",  "click", "addLithicM2()");
-addOnEvent("Walker_Unit/Walker_Unit/Add_Glass_M_2",   "click", "addGlassM2()");
-addOnEvent("Walker_Unit/Walker_Unit/Add_Other_M_2",   "click", "addOtherM2()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Add_HM_M_2",      "click", "addHmM2()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Add_Lithic_M_2",  "click", "addLithicM2()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Add_Glass_M_2",   "click", "addGlassM2()");
+addOnEvent(WALKER_UNIT_TAB_REF_FULL + "/Add_Other_M_2",   "click", "addOtherM2()");
