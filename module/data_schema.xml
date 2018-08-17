@@ -357,7 +357,7 @@
   </ArchaeologicalElement>
   <ArchaeologicalElement name="Walker Cell">
     <description></description>
-    <property name="Walker Unit Survey Unit ID" type="measure" isIdentifier="true">
+    <property name="Walker Cell Survey Unit ID" type="measure" isIdentifier="true">
       <description></description>
       <formatString>$2</formatString>
       <appendCharacterString> - </appendCharacterString>

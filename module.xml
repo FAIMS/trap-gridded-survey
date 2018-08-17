@@ -279,7 +279,7 @@
 
     <Walker_Cell>
         Walker Grid
-        <fmt>{{Walker_Unit_Survey_Unit_ID}} - ({{Row_Number}}, {{Walker_Number}})</fmt>
+        <fmt>{{Walker_Cell_Survey_Unit_ID}} - ({{Row_Number}}, {{Walker_Number}})</fmt>
         <Walker_Unit>
             Walker Grid
             <Survey_Unit_ID t="webview" f="nolabel"/>
@@ -399,7 +399,7 @@
             <Next_Survey_Unit t="button"/>
         </Walker_Unit>
         <Vars f="hidden">
-            <Walker_Unit_Survey_Unit_ID i="Survey_Unit/Survey_Unit/Survey_Unit_ID"/>
+            <Walker_Cell_Survey_Unit_ID i="Survey_Unit/Survey_Unit/Survey_Unit_ID"/>
             <Row_Number    b="decimal" f="readonly"/>
             <Walker_Number b="decimal" f="readonly"/>
         </Vars>

@@ -321,7 +321,7 @@
               <Next_Survey_Unit/>
             </Walker_Unit>
             <Vars>
-              <Walker_Unit_Survey_Unit_ID/>
+              <Walker_Cell_Survey_Unit_ID/>
               <Row_Number/>
               <Walker_Number/>
             </Vars>
@@ -1137,8 +1137,8 @@
       </group>
       <group ref="Vars" faims_hidden="true">
         <label>{Vars}</label>
-        <input faims_attribute_name="Walker Unit Survey Unit ID" faims_attribute_type="measure" ref="Walker_Unit_Survey_Unit_ID">
-          <label>{Walker_Unit_Survey_Unit_ID}</label>
+        <input faims_attribute_name="Walker Cell Survey Unit ID" faims_attribute_type="measure" ref="Walker_Cell_Survey_Unit_ID">
+          <label>{Walker_Cell_Survey_Unit_ID}</label>
         </input>
         <input faims_attribute_name="Row Number" faims_attribute_type="measure" ref="Row_Number" faims_read_only="true">
           <label>{Row_Number}</label>

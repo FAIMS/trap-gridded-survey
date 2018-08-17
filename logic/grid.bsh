@@ -890,7 +890,7 @@ List createZeroedAttributeList(
           "Row Number",                 null, null, rowNumber,    cert));
   attribs.add(
       createEntityAttribute(
-          "Walker Unit Survey Unit ID", null, null, surveyUnitId, cert));
+          "Walker Cell Survey Unit ID", null, null, surveyUnitId, cert));
 
   // Set zeroable properties to zero
   for (String ref : getZeroableRefs()) {

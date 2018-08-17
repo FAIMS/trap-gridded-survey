@@ -426,7 +426,7 @@ REF_TO_TYPE.put("Walker_Cell/Walker_Unit/Chronology", "checkbox");
 REF_TO_TYPE.put("Walker_Cell/Walker_Unit/Fragmentation", "radio");
 REF_TO_TYPE.put("Walker_Cell/Walker_Unit/Wear", "radio");
 REF_TO_TYPE.put("Walker_Cell/Walker_Unit/Next_Survey_Unit", "button");
-REF_TO_TYPE.put("Walker_Cell/Vars/Walker_Unit_Survey_Unit_ID", "input");
+REF_TO_TYPE.put("Walker_Cell/Vars/Walker_Cell_Survey_Unit_ID", "input");
 REF_TO_TYPE.put("Walker_Cell/Vars/Row_Number", "input");
 REF_TO_TYPE.put("Walker_Cell/Vars/Walker_Number", "input");
 REF_TO_TYPE.put("Saving/Saving/Saving", "webview");
@@ -492,7 +492,7 @@ DATA_REFS.add("Walker_Cell/Walker_Unit/Notes");
 DATA_REFS.add("Walker_Cell/Walker_Unit/Chronology");
 DATA_REFS.add("Walker_Cell/Walker_Unit/Fragmentation");
 DATA_REFS.add("Walker_Cell/Walker_Unit/Wear");
-DATA_REFS.add("Walker_Cell/Vars/Walker_Unit_Survey_Unit_ID");
+DATA_REFS.add("Walker_Cell/Vars/Walker_Cell_Survey_Unit_ID");
 DATA_REFS.add("Walker_Cell/Vars/Row_Number");
 DATA_REFS.add("Walker_Cell/Vars/Walker_Number");
 
@@ -2580,7 +2580,7 @@ inheritFieldValue("Control/Main/Number_of_Rows", "Survey_Unit/Survey_Unit/Number
 inheritFieldValue("Control/Main/Number_of_Walkers", "Survey_Unit/Survey_Unit/Number_of_Walkers", true);
 inheritFieldValue("Control/Main/Row_Interval", "Survey_Unit/Survey_Unit/Row_Interval_m", true);
 inheritFieldValue("Control/Main/Walker_Interval", "Survey_Unit/Survey_Unit/Walker_Interval_m", true);
-inheritFieldValue("Survey_Unit/Survey_Unit/Survey_Unit_ID", "Walker_Cell/Vars/Walker_Unit_Survey_Unit_ID", true);
+inheritFieldValue("Survey_Unit/Survey_Unit/Survey_Unit_ID", "Walker_Cell/Vars/Walker_Cell_Survey_Unit_ID", true);
 
 /******************************************************************************/
 /*                            NEW TAB REDIRECTION                             */
@@ -5636,7 +5636,7 @@ List createZeroedAttributeList(
           "Row Number",                 null, null, rowNumber,    cert));
   attribs.add(
       createEntityAttribute(
-          "Walker Unit Survey Unit ID", null, null, surveyUnitId, cert));
+          "Walker Cell Survey Unit ID", null, null, surveyUnitId, cert));
 
   // Set zeroable properties to zero
   for (String ref : getZeroableRefs()) {
