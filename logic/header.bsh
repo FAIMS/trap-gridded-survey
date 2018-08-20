@@ -15,3 +15,5 @@ final String WALKER_UNIT_TAB_GROUP_REF = "Walker_Cell";
 final String WALKER_UNIT_TAB_REF = "Walker_Unit";
 // Full ref with the backward slash character between the tabgroup and tab
 String WALKER_UNIT_TAB_REF_FULL = WALKER_UNIT_TAB_GROUP_REF + "/" + WALKER_UNIT_TAB_REF;
+
+final String SEARCH_TAB_REF_FULL = "Control/Search";

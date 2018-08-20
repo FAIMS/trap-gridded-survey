@@ -88,6 +88,9 @@
                 <Col_2>
                   <Select_Date/>
                 </Col_2>
+                <Col_3>
+                  <Select_Sample_Taken/>
+                </Col_3>
               </Colgroup_1>
               <Entity_List/>
             </Search>
@@ -594,6 +597,16 @@
             <label/>
             <select1 ref="Select_Date">
               <label>{Select_Date}</label>
+              <item>
+                <label>Options not loaded</label>
+                <value>Options not loaded</value>
+              </item>
+            </select1>
+          </group>
+          <group ref="Col_3" faims_style="even">
+            <label/>
+            <select1 ref="Select_Sample_Taken">
+              <label>{Select_Sample_Taken}</label>
               <item>
                 <label>Options not loaded</label>
                 <value>Options not loaded</value>
