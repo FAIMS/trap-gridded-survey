@@ -6278,25 +6278,23 @@ void populateSelectDate() {
 									 "from materialisedlatestnondeletedaentvalue " +
 									 "join attributekey using (attributeid) " +
 									 "where attributename = 'Date' ";
+
 	FetchCallback popDate = new FetchCallback() {
 		onFetch(result) {
-				  if (isNull(result))
-					result = new ArrayList();
+			  if (isNull(result)) {
+  				result = new ArrayList();
+        }
+        // Add the All value to the list
+        addAllToTopOfList(result);
 
-				  // Add the option 'All' at the top of the list
-				  List all = new ArrayList();
-				  all.add("");
-				  all.add("{All}");
-
-				  result.add(0, all);
-
-				  // Populate dropdown
-				  populateDropDown(refSearchDate, result, false);
+			  // Populate dropdown
+			  populateDropDown(refSearchDate, result, false);
 			}
     onError(message) {
       Log.d("populateSelectDate callback", message);
     }
 	};
+
   fetchAll(getNonDeletedDateQuery, popDate);
 }
 
@@ -6466,29 +6464,44 @@ void loadingResults(String ref) {
   populateMenu(ref, l);
 }
 
-void setDropdownByVocab(String vocabName, String ref) {
-  fetchAll("select vocabid as key, vocabname as value from vocabulary left join attributekey using (attributeid) where attributename = '" + vocabName + "';", new FetchCallback() {
-    onFetch(result) {
-      if (isNull(result))
-        result = new ArrayList();
+// Populate the dropdown with path `ref` with the values of the vocabulary `vocab`
+void setDropdownByVocab(String vocabName, String ref, boolean hasNull, boolean includeAll) {
+  fetchAll("select vocabid as key, vocabname as value from vocabulary left join "+
+      "attributekey using (attributeid) where attributename = '" + vocabName + "';",
+    new FetchCallback() {
+      onFetch(result) {
+        if (isNull(result)) {
+          result = new ArrayList();
+        }
 
-      List all = new ArrayList();
-      all.add("");
-      all.add("{All}");
-      result.add(0, all);
-      populateDropDown(ref, result, false);
-    }
+        if (includeAll) {
+          addAllToTopOfList(result);
+        }
+
+        populateDropDown(ref, result, hasNull);
+      }
   });
 }
 
+void addAllToTopOfList(List list) {
+  // Add the option 'All' at the top of the list
+  List all = new ArrayList();
+  all.add("");
+  all.add("{All}");
+
+  list.add(0, all);
+}
+
+final String SET_DROPDOWN_FOR_SAMPLE_TAKEN_STATEMENT = "setDropdownByVocab("+
+  "SAMPLE_TAKEN_ATTRIBUTE_NAME, SELECT_SAMPLE_TAKEN_REF_FULL, false, true)";
+
 delOnEvent(SEARCH_TAB_REF_FULL, "show", "search()");
 delOnEvent(SEARCH_TAB_REF_FULL + "/Entity_Types", "click" , "search()");
+
 addOnEvent(SEARCH_TAB_REF_FULL, "show", "initSearchResultList()");
 addOnEvent(SEARCH_TAB_REF_FULL, "show", "populateSelectUser()");
 addOnEvent(SEARCH_TAB_REF_FULL, "show", "populateSelectDate()");
-
-addOnEvent(SEARCH_TAB_REF_FULL, "show", "setDropdownByVocab(SAMPLE_TAKEN_ATTRIBUTE_NAME, SELECT_SAMPLE_TAKEN_REF_FULL)");
-
+addOnEvent(SEARCH_TAB_REF_FULL, "show", SET_DROPDOWN_FOR_SAMPLE_TAKEN_STATEMENT);
 /****************************** WALKER ORDERING *******************************/
 final String REF_WALKER_ENT = "Walker";
 final String REF_WALKERS_WEBVIEW = "Control/Walkers/Walkers";
