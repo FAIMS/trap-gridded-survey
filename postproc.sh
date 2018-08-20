@@ -44,6 +44,16 @@ replacement="
               <\/item>
             <\/select1>
           <\/group>
+          <group ref=\"Col_3\" faims_style=\"even\">
+            <label\/>
+            <select1 ref=\"Select_Sample_Taken\">
+              <label>{Select_Sample_Taken}<\/label>
+              <item>
+                <label>Options not loaded<\/label>
+                <value>Options not loaded<\/value>
+              <\/item>
+            <\/select1>
+          <\/group>
         <\/group>"
 perl -0777 -i.original -pe "s/$string/$replacement/igs" ui_schema.xml
 
@@ -60,6 +70,9 @@ replacement="
                 <Col_2>
                   <Select_Date\/>
                 <\/Col_2>
+                <Col_3>
+                  <Select_Sample_Taken\/>
+                <\/Col_3>
               <\/Colgroup_1>"
 perl -0777 -i.original -pe "s/$string/$replacement/igs" ui_schema.xml
 
@@ -82,6 +95,7 @@ perl -0777 -i.original -pe "s/\\Q$string/$replacement/igs" english.0.properties
 cat << EOF >> english.0.properties
 Select_User=Select User
 Select_Date=Select Date
+Select_Sample_Taken=Select Sample Taken
 EOF
 
 rm english.0.properties.original

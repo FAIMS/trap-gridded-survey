@@ -1,4 +1,7 @@
 /******************************* CUSTOM SEARCH ********************************/
+
+final String SELECT_SAMPLE_TAKEN_REF_FULL = SEARCH_TAB_REF_FULL + "/Select_Sample_Taken";
+final String SAMPLE_TAKEN_ATTRIBUTE_NAME = "Sample Taken";
 void removeWalkerUnitFromEntityTypesVar() {
   int idxToRemove = -1;
 
@@ -24,7 +27,7 @@ void removeWalkerUnitFromEntityTypesList() {
 removeWalkerUnitFromEntityTypesList();
 
 void populateSelectUser(){
-  String refSearchUsers = "Control/Search/Select_User";
+  String refSearchUsers = SEARCH_TAB_REF_FULL + "/Select_User";
   String getNonDeletedUsersQuery = "SELECT userid, fname || ' ' || lname "+
                                    "  FROM user "+
                                    " WHERE userdeleted is null "+
@@ -40,7 +43,7 @@ void populateSelectUser(){
 }
 
 void populateSelectDate() {
-    String refSearchDate = "Control/Search/Select_Date";
+    String refSearchDate = SEARCH_TAB_REF_FULL + "/Select_Date";
     String getNonDeletedDateQuery = "select distinct measure as key, measure as value " +
 									 "from materialisedlatestnondeletedaentvalue " +
 									 "join attributekey using (attributeid) " +
@@ -75,11 +78,13 @@ void search(){
   String refSelectUser  = tabgroup + "/Search/Select_User";
 
   String refSelectDate	= tabgroup + "/Search/Select_Date";
+  String refSelectSampleTaken = SEARCH_TAB_REF_FULL + "/Select_Sample_Taken";
 
   String type = getFieldValue(refEntityTypes);
   String term = getFieldValue(refSearchTerm);
   String user = getFieldValue(refSelectUser);
   String date = getFieldValue(refSelectDate);
+  String sampleTaken = getFieldValue(refSelectSampleTaken);
   String searchQuery = "SELECT uuid, response " +
  					   " FROM latestNonDeletedMaterialisedArchEntFormattedIdentifiers "+
  					   " JOIN materialisedlatestnondeletedaentvalue USING (uuid) "+
@@ -88,7 +93,7 @@ void search(){
  					   " AND ( measure = '{date}' OR '' = '{date}' ) "+
              " AND uuid in (SELECT uuid " +
              "                  FROM materialisedlatestnondeletedaentvalue "+
-             "                 WHERE measure LIKE {term}||'%') "+
+             "                 WHERE measure LIKE {term}||'%' AND vocabid ='{sampleTaken}') "+
              " AND ( aenttypename = {type} OR '' = {type} ) "+
              " AND ( aenttypename != '{walkerUnit}' ) "+
              " AND ( latestNonDeletedMaterialisedArchEntFormattedIdentifiers.userid = {user} "+
@@ -106,6 +111,8 @@ void search(){
   searchQuery = replaceFirst(searchQuery,   "{date}", date);
 
   searchQuery = replaceFirst(searchQuery, "{walkerUnit}", WALKER_UNIT_ENTITY_REF);
+
+  searchQuery = replaceFirst(searchQuery, "{sampleTaken}", sampleTaken);
 
   drop1Q  = " drop table if exists materialisedlatestnondeletedaentvalue";
 
@@ -212,7 +219,7 @@ void search(){
 void initSearchResultList() {
   List l = new ArrayList();
   l.add(new NameValuePair("Tap 'Search' to update this list", ""));
-  populateMenu("Control/Search/Entity_List", l);
+  populateMenu(SEARCH_TAB_REF_FULL + "/Entity_List", l);
 }
 
 void loadingResults(String ref) {
@@ -221,8 +228,30 @@ void loadingResults(String ref) {
   populateMenu(ref, l);
 }
 
-delOnEvent("Control/Search", "show", "search()");
-delOnEvent("Control/Search/Entity_Types", "click" , "search()");
-addOnEvent("Control/Search", "show", "initSearchResultList()");
-addOnEvent("Control/Search", "show", "populateSelectUser()");
-addOnEvent("Control/Search", "show", "populateSelectDate()");
+void setDropdownByVocab(String vocabName, String ref) {
+  List regionList = new ArrayList();
+
+  fetchAll("select vocabname from vocabulary left join attributekey using (attributeid) where attributename = '" + vocabName + "';", new FetchCallback() {
+    onFetch(result) {
+      if (isNull(result))
+        result = new ArrayList();
+
+      Set vocabSet = new LinkedHashSet();
+      //vocabSet.add("All");
+      for (item : result) {
+        String s = guessArch16nValFromKey(item.get(0));
+        vocabSet.add(s);
+      }
+      regionList.addAll(vocabSet);
+      populateDropDown(ref,regionList,true);
+    }
+  });
+}
+
+delOnEvent(SEARCH_TAB_REF_FULL, "show", "search()");
+delOnEvent(SEARCH_TAB_REF_FULL + "/Entity_Types", "click" , "search()");
+addOnEvent(SEARCH_TAB_REF_FULL, "show", "initSearchResultList()");
+addOnEvent(SEARCH_TAB_REF_FULL, "show", "populateSelectUser()");
+addOnEvent(SEARCH_TAB_REF_FULL, "show", "populateSelectDate()");
+
+addOnEvent(SEARCH_TAB_REF_FULL, "show", "setDropdownByVocab(SAMPLE_TAKEN_ATTRIBUTE_NAME, SELECT_SAMPLE_TAKEN_REF_FULL)");
