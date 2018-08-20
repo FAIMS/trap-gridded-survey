@@ -6231,6 +6231,7 @@ boolean validateControlMain() {
 
 final String SELECT_SAMPLE_TAKEN_REF_FULL = SEARCH_TAB_REF_FULL + "/Select_Sample_Taken";
 final String SAMPLE_TAKEN_ATTRIBUTE_NAME = "Sample Taken";
+
 void removeWalkerUnitFromEntityTypesVar() {
   int idxToRemove = -1;
 
@@ -6314,6 +6315,7 @@ void search(){
   String user = getFieldValue(refSelectUser);
   String date = getFieldValue(refSelectDate);
   String sampleTaken = getFieldValue(refSelectSampleTaken);
+
   String searchQuery = "SELECT uuid, response " +
  					   " FROM latestNonDeletedMaterialisedArchEntFormattedIdentifiers "+
  					   " JOIN materialisedlatestnondeletedaentvalue USING (uuid) "+
@@ -6322,7 +6324,10 @@ void search(){
  					   " AND ( measure = '{date}' OR '' = '{date}' ) "+
              " AND uuid in (SELECT uuid " +
              "                  FROM materialisedlatestnondeletedaentvalue "+
-             "                 WHERE measure LIKE {term}||'%' AND vocabid ='{sampleTaken}') "+
+             "                 WHERE vocabid ='{sampleTaken}' OR '' = '{sampleTaken}') "+
+             " AND uuid in (SELECT uuid " +
+             "                  FROM materialisedlatestnondeletedaentvalue "+
+             "                 WHERE measure LIKE {term} || '%') "+
              " AND ( aenttypename = {type} OR '' = {type} ) "+
              " AND ( aenttypename != '{walkerUnit}' ) "+
              " AND ( latestNonDeletedMaterialisedArchEntFormattedIdentifiers.userid = {user} "+
@@ -6330,9 +6335,12 @@ void search(){
              " ORDER BY substr(uuid, 7, 13) DESC, response"+
              " LIMIT ? "+
              "OFFSET ? ";
+
   searchQuery = dbReplaceFirst(searchQuery, "{term}", term);
+
   searchQuery = dbReplaceFirst(searchQuery, "{type}", type);
   searchQuery = dbReplaceFirst(searchQuery, "{type}", type);
+
   searchQuery = replaceFirst(searchQuery,   "{user}", user);
   searchQuery = replaceFirst(searchQuery,   "{user}", user);
 
@@ -6341,6 +6349,7 @@ void search(){
 
   searchQuery = replaceFirst(searchQuery, "{walkerUnit}", WALKER_UNIT_ENTITY_REF);
 
+  searchQuery = replaceFirst(searchQuery, "{sampleTaken}", sampleTaken);
   searchQuery = replaceFirst(searchQuery, "{sampleTaken}", sampleTaken);
 
   drop1Q  = " drop table if exists materialisedlatestnondeletedaentvalue";
@@ -6458,21 +6467,16 @@ void loadingResults(String ref) {
 }
 
 void setDropdownByVocab(String vocabName, String ref) {
-  List regionList = new ArrayList();
-
-  fetchAll("select vocabname from vocabulary left join attributekey using (attributeid) where attributename = '" + vocabName + "';", new FetchCallback() {
+  fetchAll("select vocabid as key, vocabname as value from vocabulary left join attributekey using (attributeid) where attributename = '" + vocabName + "';", new FetchCallback() {
     onFetch(result) {
       if (isNull(result))
         result = new ArrayList();
 
-      Set vocabSet = new LinkedHashSet();
-      //vocabSet.add("All");
-      for (item : result) {
-        String s = guessArch16nValFromKey(item.get(0));
-        vocabSet.add(s);
-      }
-      regionList.addAll(vocabSet);
-      populateDropDown(ref,regionList,true);
+      List all = new ArrayList();
+      all.add("");
+      all.add("{All}");
+      result.add(0, all);
+      populateDropDown(ref, result, false);
     }
   });
 }
@@ -6484,6 +6488,7 @@ addOnEvent(SEARCH_TAB_REF_FULL, "show", "populateSelectUser()");
 addOnEvent(SEARCH_TAB_REF_FULL, "show", "populateSelectDate()");
 
 addOnEvent(SEARCH_TAB_REF_FULL, "show", "setDropdownByVocab(SAMPLE_TAKEN_ATTRIBUTE_NAME, SELECT_SAMPLE_TAKEN_REF_FULL)");
+
 /****************************** WALKER ORDERING *******************************/
 final String REF_WALKER_ENT = "Walker";
 final String REF_WALKERS_WEBVIEW = "Control/Walkers/Walkers";
