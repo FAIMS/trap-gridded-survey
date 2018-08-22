@@ -6464,25 +6464,6 @@ void loadingResults(String ref) {
   populateMenu(ref, l);
 }
 
-// Populate the dropdown with path `ref` with the values of the vocabulary `vocab`
-void setDropdownByVocab(String vocabName, String ref, boolean hasNull, boolean includeAll) {
-  fetchAll("select vocabid as key, vocabname as value from vocabulary left join "+
-      "attributekey using (attributeid) where attributename = '" + vocabName + "';",
-    new FetchCallback() {
-      onFetch(result) {
-        if (isNull(result)) {
-          result = new ArrayList();
-        }
-
-        if (includeAll) {
-          addAllToTopOfList(result);
-        }
-
-        populateDropDown(ref, result, hasNull);
-      }
-  });
-}
-
 void addAllToTopOfList(List list) {
   // Add the option 'All' at the top of the list
   List all = new ArrayList();
@@ -6492,8 +6473,17 @@ void addAllToTopOfList(List list) {
   list.add(0, all);
 }
 
-final String SET_DROPDOWN_FOR_SAMPLE_TAKEN_STATEMENT = "setDropdownByVocab("+
-  "SAMPLE_TAKEN_ATTRIBUTE_NAME, SELECT_SAMPLE_TAKEN_REF_FULL, false, true)";
+void populateSelectSampleTaken(){
+  String ref = SELECT_SAMPLE_TAKEN_REF_FULL; 
+
+  List menuEntries = getMenuEntries(SAMPLE_TAKEN_ATTRIBUTE_NAME);
+  menuEntries = new ArrayList(menuEntries);
+ 
+  addAllToTopOfList(menuEntries);
+
+  populateDropDown(ref, menuEntries, false);
+  Log.d("Here", "");
+}
 
 delOnEvent(SEARCH_TAB_REF_FULL, "show", "search()");
 delOnEvent(SEARCH_TAB_REF_FULL + "/Entity_Types", "click" , "search()");
@@ -6501,7 +6491,7 @@ delOnEvent(SEARCH_TAB_REF_FULL + "/Entity_Types", "click" , "search()");
 addOnEvent(SEARCH_TAB_REF_FULL, "show", "initSearchResultList()");
 addOnEvent(SEARCH_TAB_REF_FULL, "show", "populateSelectUser()");
 addOnEvent(SEARCH_TAB_REF_FULL, "show", "populateSelectDate()");
-addOnEvent(SEARCH_TAB_REF_FULL, "show", SET_DROPDOWN_FOR_SAMPLE_TAKEN_STATEMENT);
+addOnEvent(SEARCH_TAB_REF_FULL, "show", "populateSelectSampleTaken()");
 /****************************** WALKER ORDERING *******************************/
 final String REF_WALKER_ENT = "Walker";
 final String REF_WALKERS_WEBVIEW = "Control/Walkers/Walkers";
