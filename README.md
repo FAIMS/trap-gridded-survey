@@ -41,8 +41,54 @@ If you have any questions about the module, please contact the FAIMS team at **e
 ## Screenshots:
 
 <p align="left">
-  <img src="xxx" width="250"/>
-  <img src="xxx" width="250"/>
-  <img src="xxx" width="250"/>
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-122612.png" width="250"/>
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-122623.png" width="250"/>
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-122632.png" width="250"/>
 </p>
 
+
+<p align="left">
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-122653.png" width="250"/>
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-122727.png" width="250"/>
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-122739.png" width="250"/>
+</p>
+
+
+<p align="left">
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-122803.png" width="250"/>
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-122835.png" width="250"/>
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-122849.png" width="250"/>
+</p>
+
+
+<p align="left">
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-123012.png" width="250"/>
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-123025.png" width="250"/>
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-123106.png" width="250"/>
+</p>
+
+<p align="left">
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-123128.png.png" width="250"/>
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-123138.png.png" width="250"/>
+</p>
+
+# Performance testing:
+
+
+<p align="left">
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190410-131145.png" width="250"/>
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190410-131219.png" width="250"/>
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190410-131232.png" width="250"/>
+</p>
+
+
+<p align="left">
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190410-131237.png" width="250"/>
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190410-131247.png" width="250"/>
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190410-131300.png" width="250"/>
+</p>
+
+<p align="left">
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190410-131311.png" width="250"/>
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190410-131325.png" width="250"/>
+</p>
