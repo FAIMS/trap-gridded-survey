@@ -70,11 +70,6 @@ If you have any questions about the module, please contact the FAIMS team at **e
   <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-123106.png" width="250"/>
 </p>
 
-<p align="left">
-  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-123128.png.png" width="250"/>
-  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-123138.png.png" width="250"/>
-</p>
-
 # Fieldwork screenshots (Perachora 2020):
 
 <p align="left">
