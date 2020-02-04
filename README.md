@@ -11,7 +11,7 @@ Development of this module was funded by the **Macquarie University Strategic In
 Feb 2018
 
 ## Date of deployment in the field:
-Jan 2020
+Jan 2020 (Perachora Peninsula Archaeological Project, Greece)
 
 ## FAIMS Mobile version:
 FAIMS **v2.6** (Android 9+)
