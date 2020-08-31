@@ -32,14 +32,14 @@ The module can be downloaded from this GitHub repository.
 * controlled vocabularies
 
 ## This module can be used with no or minor modification for:
-* intensive field survey
+* intensive surface field survey in a grid - Mediterranean style
 * mapping the exact location of archaeological remains
 * ground-truthing of archaeological remains
 
 ## Contact info:
-For more details about the **The Tundzha Regional Archaeological Project** please visit www.tundzha.org. If you have any questions about the The Tundzha Regional Archaeological Project, contact adela@fedarch.org.
+For more details about the **The Tundzha Regional Archaeological Project** please visit www.tundzha.org. If you have any questions about the The Tundzha Regional Archaeological Project, contact Adela Sobotkova at adela@fedarch.org. If you have any questions about the **The Perachora Peninsula Archaeological Project**, contact Shawn Ross at shawn@fedarch.org.
 
-If you have any questions about the module, please contact the FAIMS team at **enquiries@fedarch.org** and we will get back to you within one business day.
+If you have any questions about the module, please contact the FAIMS team at **enquiries@fedarch.org**.
 
 ## Screenshots:
 
@@ -70,6 +70,7 @@ If you have any questions about the module, please contact the FAIMS team at **e
   <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Screenshot_20190409-123106.png" width="250"/>
 </p>
 
+---
 # Fieldwork screenshots (Perachora 2020):
 
 <p align="left">
@@ -102,9 +103,17 @@ If you have any questions about the module, please contact the FAIMS team at **e
   <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Perachora2020_GridSurvey_15.png" width="250"/>
 </p>
 
+## Fieldshots (Perachora 2020):
 
+<p align="left">
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Perachora_field.jpg" />
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Perachora_field2.jpg" />
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Perachora_field3.jpg" />
+  <img src="https://github.com/FAIMS/trap-gridded-survey/blob/master/screenshots/Perachora_field4.jpg" />
+</p>
 
-# Performance testing:
+---
+# Automated performance testing:
 
 
 <p align="left">
