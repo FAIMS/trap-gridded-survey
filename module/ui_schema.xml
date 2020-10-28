@@ -418,16 +418,16 @@
           <label/>
         </input>
         <input ref="Number_of_Rows" faims_style_class="required">
-          <label>{Starting_Number_of_Rows}</label>
+          <label>{Number_of_Rows}</label>
         </input>
         <input ref="Number_of_Walkers" faims_style_class="required" faims_read_only="true">
           <label>{Number_of_Walkers}</label>
         </input>
         <input ref="Row_Interval" faims_style_class="required">
-          <label>{Row_Interval__m_}</label>
+          <label>{Row_Interval}</label>
         </input>
         <input ref="Walker_Interval" faims_style_class="required">
-          <label>{Walker_Interval__m_}</label>
+          <label>{Walker_Interval}</label>
         </input>
         <select1 ref="Land_Use" faims_style_class="required">
           <label>{Land_Use}</label>
@@ -513,7 +513,7 @@
           <group ref="Col_2" faims_style="even">
             <label/>
             <trigger ref="Delete_Selected_Walker">
-              <label>{Delete_Walker}</label>
+              <label>{Delete_Selected_Walker}</label>
             </trigger>
           </group>
         </group>
@@ -531,16 +531,16 @@
           <group ref="Col_2" faims_style="even">
             <label/>
             <trigger ref="Plus">
-              <label>{Move_Up}</label>
+              <label>{Plus}</label>
             </trigger>
             <trigger ref="Minus">
-              <label>{Move_Down}</label>
+              <label>{Minus}</label>
             </trigger>
           </group>
           <group ref="Col_3" faims_style="even">
             <label/>
             <trigger ref="Toggle_Selection">
-              <label>{_De_select}</label>
+              <label>{Toggle_Selection}</label>
             </trigger>
             <trigger ref="Save">
               <label>{Save}</label>
@@ -567,7 +567,7 @@
           <group ref="Col_1" faims_style="large">
             <label/>
             <trigger ref="Search_Button">
-              <label>{Search}</label>
+              <label>{Search_Button}</label>
             </trigger>
           </group>
         </group>
@@ -667,7 +667,7 @@
           </group>
         </group>
         <trigger ref="Take_From_GPS_1">
-          <label>{Take_From_GPS}</label>
+          <label>{Take_From_GPS_1}</label>
         </trigger>
         <group ref="Colgroup_3" faims_style="orientation">
           <label/>
@@ -777,13 +777,13 @@
           <group ref="Col_1" faims_style="even">
             <label/>
             <input faims_attribute_name="Row Interval m" faims_attribute_type="measure" ref="Row_Interval_m" faims_read_only="true">
-              <label>{Row_Interval__m_}</label>
+              <label>{Row_Interval_m}</label>
             </input>
           </group>
           <group ref="Col_2" faims_style="even">
             <label/>
             <input faims_attribute_name="Walker Interval m" faims_attribute_type="measure" ref="Walker_Interval_m" faims_read_only="true">
-              <label>{Walker_Interval__m_}</label>
+              <label>{Walker_Interval_m}</label>
             </input>
           </group>
         </group>
@@ -870,7 +870,7 @@
       <group ref="Walker_Units" faims_scrollable="false">
         <label>{Walker_Cells}</label>
         <trigger ref="Add_New_Walker_Unit">
-          <label>{View_Walker_Grid}</label>
+          <label>{Add_New_Walker_Unit}</label>
         </trigger>
       </group>
       <group ref="Vars" faims_hidden="true">
@@ -937,7 +937,7 @@
           <group ref="Col_3" faims_style="even">
             <label/>
             <trigger ref="Zero_Row_And_Next_1">
-              <label>{Next_Row}</label>
+              <label>{Zero_Row_And_Next_1}</label>
             </trigger>
           </group>
         </group>
@@ -952,7 +952,7 @@
           <group ref="Col_2" faims_style="even">
             <label/>
             <trigger ref="Load">
-              <label>{Load_Save}</label>
+              <label>{Load}</label>
             </trigger>
           </group>
           <group ref="Col_3" faims_style="even">
@@ -983,7 +983,7 @@
           <group ref="Col_3" faims_style="even">
             <label/>
             <trigger ref="Next_Walker_Unit_1">
-              <label>{Next_Cell}</label>
+              <label>{Next_Walker_Unit_1}</label>
             </trigger>
           </group>
         </group>
@@ -1001,7 +1001,7 @@
           <group ref="Col_2" faims_style="even">
             <label/>
             <trigger ref="Add_Ancient_M_2">
-              <label>{Anc__m_}</label>
+              <label>{Add_Ancient_M_2}</label>
             </trigger>
           </group>
           <group ref="Col_3" faims_style="even">
@@ -1013,7 +1013,7 @@
           <group ref="Col_4" faims_style="even">
             <label/>
             <trigger ref="Add_Modern_M_2">
-              <label>{Mod__m_}</label>
+              <label>{Add_Modern_M_2}</label>
             </trigger>
           </group>
         </group>
@@ -1028,7 +1028,7 @@
           <group ref="Col_2" faims_style="even">
             <label/>
             <trigger ref="Add_A_C_M_2">
-              <label>{A_C_m_}</label>
+              <label>{Add_A_C_M_2}</label>
             </trigger>
           </group>
           <group ref="Col_3" faims_style="even">
@@ -1040,7 +1040,7 @@
           <group ref="Col_4" faims_style="even">
             <label/>
             <trigger ref="Add_HM_M_2">
-              <label>{HM_m_}</label>
+              <label>{Add_HM_M_2}</label>
             </trigger>
           </group>
         </group>
@@ -1055,7 +1055,7 @@
           <group ref="Col_2" faims_style="even">
             <label/>
             <trigger ref="Add_Lithic_M_2">
-              <label>{Lit__m_}</label>
+              <label>{Add_Lithic_M_2}</label>
             </trigger>
           </group>
           <group ref="Col_3" faims_style="even">
@@ -1067,7 +1067,7 @@
           <group ref="Col_4" faims_style="even">
             <label/>
             <trigger ref="Add_Daub_M_2">
-              <label>{Dau__m_}</label>
+              <label>{Add_Daub_M_2}</label>
             </trigger>
           </group>
         </group>
@@ -1082,7 +1082,7 @@
           <group ref="Col_2" faims_style="even">
             <label/>
             <trigger ref="Add_Glass_M_2">
-              <label>{Gla__m_}</label>
+              <label>{Add_Glass_M_2}</label>
             </trigger>
           </group>
           <group ref="Col_3" faims_style="even">
@@ -1094,7 +1094,7 @@
           <group ref="Col_4" faims_style="even">
             <label/>
             <trigger ref="Add_Other_M_2">
-              <label>{Oth__m_}</label>
+              <label>{Add_Other_M_2}</label>
             </trigger>
           </group>
         </group>
@@ -1106,13 +1106,13 @@
           <group ref="Col_1" faims_style="even">
             <label/>
             <trigger ref="Zero_Row_And_Next_2">
-              <label>{Next_Row}</label>
+              <label>{Zero_Row_And_Next_2}</label>
             </trigger>
           </group>
           <group ref="Col_2" faims_style="even">
             <label/>
             <trigger ref="Next_Walker_Unit_2">
-              <label>{Next_Cell}</label>
+              <label>{Next_Walker_Unit_2}</label>
             </trigger>
           </group>
         </group>

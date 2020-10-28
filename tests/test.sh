@@ -3,7 +3,7 @@ shopt -s globstar
 
 # cd into this script's directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd $DIR
+cd "$DIR"
 
 # Add .jar files to `CLASSPATH`
 for path in **/*.jar; do

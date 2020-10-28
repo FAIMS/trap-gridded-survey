@@ -1,7 +1,13 @@
+/*
+ * This file provides mock classes and functions which allow you to run a
+ * module's ui_logic.bsh file without errors. The intent is to allow you, the
+ * developer, to perform unit testing just by running the UI logic on your
+ * desktop, without having to upload your logic to a server first.
+ */
+
 // CLASSES
 public interface FetchCallback {
   void onFetch(Object result);
-  void onError(Object message);
 }
 
 public interface SaveCallback {
@@ -321,9 +327,14 @@ public class android {
   }
 }
 
-Fetch.importFromDatabase("/tmp/db.sqlite");
-
 Map FIELD_VALUES = new HashMap();
+Map WEB_VIEW_VALUES = new HashMap();
+String databaseFilePath = null;
+
+void importFromDatabase(String path) {
+  databaseFilePath = path;
+  Fetch.importFromDatabase(databaseFilePath);
+}
 
 // FUNCTION DEFINITIONS
 Dialog cleanSyncedFiles() { return null; }
@@ -348,21 +359,23 @@ void addActionBarItem(String s, ToggleActionButtonCallback c) { }
 void execute(String s) { eval(s); }
 void fetchAll(String s) { fetchAll(s, null); }
 void fetchAll(String query, FetchCallback callback) {
-  try {
+  if (databaseFilePath == null)
+    result = null;
+  else
     result = Fetch.fetchAll(query);
-    if (callback != null) callback.onFetch(result);
-  } catch (Exception e) {
-    if (callback != null) callback.onError(e + "");
-  }
+
+  if (callback != null)
+    callback.onFetch(result);
 }
 void fetchOne(String s) { fetchOne(s, null); }
 void fetchOne(String query, FetchCallback callback) {
-  try {
+  if (databaseFilePath == null)
+    result = null;
+  else
     result = Fetch.fetchOne(query);
-    if (callback != null) callback.onFetch(result);
-  } catch (Exception e) {
-    if (callback != null) callback.onError(e + "");
-  }
+
+  if (callback != null)
+    callback.onFetch(result);
 }
 void onEvent(String s1, String s2, String s3) { return; }
 void onFocus(String s1, String s2, String s3) { return; }
@@ -376,8 +389,10 @@ void populateHierarchicalPictureGallery(String s1, String s2) { return; }
 void populateList(String s, Collection c) { return; }
 void populatePictureGallery(String s, Collection c) { return; }
 void populateRadioGroup(String s, Collection c) { return; }
-void populateWebViewHtml(String s1, String s2) { return; }
-void populateWebView(String s1, String s2) { return; }
+void populateWebViewHtml(String ref, String val) {
+  WEB_VIEW_VALUES.put(ref, val);
+}
+void populateWebView(String ref, String path) { return; }
 void setFieldValue(String ref, Object val) {
   FIELD_VALUES.put(ref, "" + val);
 }
@@ -386,7 +401,7 @@ void setSyncDelay(float f) { return; }
 void setSyncEnabled(boolean b) { return; }
 void setSyncMaxInterval(float f) { return; }
 void setSyncMinInterval(float f) { return; }
-void showToast(String s) { stdout("showToast: " + s1); }
+void showToast(String s) { stdout("showToast: " + s); }
 void showWarning(String s1, String s2) { stdout("showWarning: " + s1 + " | " + s2); }
 void showDatabaseLayer(String ref, String layerName, boolean isEntity, String queryName, String querySql,GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) { return; }
 void startExternalGPS() { return; }
@@ -444,4 +459,16 @@ void addDatabaseLayerQuery(String ref, String name, String sql) { return; }
 void refreshTabgroupCSS(String ref) { return; }
 void refreshMap(String ref) { return; }
 void fetchArchEnt(String id, FetchCallback callback) { if (callback != null) callback.onFetch(null); }
-boolean isNull(Object o) { return o == null; }
+void showAlert(String title, String message, String okCallback, String cancelCallback) {
+  stdout("showAlert: " + title + " | " + message + " | " + okCallback + " | " + cancelCallback);
+}
+void showSpatialLayer(String ref, String layerName, String filename, String tableName, String idColumn, String labelColumn, GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
+}
+void onMapEvent(String ref, String clickCallback, selectCallback) { }
+List getGeometryHighlights(String ref) { return new ArrayList(); }
+void setMapFocusPoint(String ref, double longitude, double latitude) { }
+void scanCode(String callback) { execute(callback); }
+String getLastScanContents(){ return null; }
+void removeActionBarItem(String name) { return; }
+void setToolsEnabled(String ref, boolean enabled) { return; }
+void onToolEvent(String ref, String type, String callback) { return; }
