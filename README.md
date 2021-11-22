@@ -3,6 +3,9 @@ This module was created for the **The Tundzha Regional Archaeological Project**,
  
 ## Authorship:
 This module was co-developed by Adela Sobotkova at Macquarie University and Petra Hermankova and Christian Nassif-Haynes at the FAIMS Project, Department of Ancient History, Macquarie University & Aarhus University.
+
+## Cite us:
+Nassif-Haynes, Christian, Adela Sobotkova, Petra Heřmánková, Terry H. Bui, and Brian Ballsun-Stanton. 2020. Tundzha Regional Archaeological Project Gridded Survey Module (version aecfee9). Github. https://github.com/FAIMS/trap-gridded-survey/releases/tag/perachora-2020. (Perachora 2020 implementation)
  
 ## Funding:
 Development of this module was funded by the **Macquarie University Strategic Infrastructure -Scheme (MQSIS) 20110091**, aimed to support FAIMS infrastructure development in 2017 and by the **Research Attraction and Acceleration Program (RAAP) NSW Department of Industry 16805/00**, aimed to support innovation and investment in the New South Wales in 2016 and 2017.
